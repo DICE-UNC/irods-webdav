@@ -28,9 +28,10 @@ import java.io.InputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.core.pub.io.IRODSFile;
 
 /**
- *
+ * 
  * @author Mike Conway - DICE
  */
 public class IrodsFileContentService implements FileContentService {
@@ -38,11 +39,11 @@ public class IrodsFileContentService implements FileContentService {
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 
 	@Override
-	public void setFileContent(File file, InputStream in)
+	public void setFileContent(IRODSFile dest, InputStream in)
 			throws FileNotFoundException, IOException {
 		FileOutputStream out = null;
 		try {
-			out = new FileOutputStream(file);
+			out = new FileOutputStream(dest);
 			IOUtils.copy(in, out);
 		} finally {
 			IOUtils.closeQuietly(out);
@@ -59,7 +60,8 @@ public class IrodsFileContentService implements FileContentService {
 		return irodsAccessObjectFactory;
 	}
 
-	public void setIrodsAccessObjectFactory(IRODSAccessObjectFactory irodsAccessObjectFactory) {
+	public void setIrodsAccessObjectFactory(
+			IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 }

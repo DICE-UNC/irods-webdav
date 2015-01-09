@@ -70,7 +70,7 @@ public class FsFileResource extends FsResource implements CopyableResource,
 	 * @param factory
 	 * @param file
 	 */
-	public FsFileResource(String host, FileSystemResourceFactory factory,
+	public FsFileResource(String host, IrodsFileSystemResourceFactory factory,
 			File file, FileContentService contentService) {
 		super(host, factory, file);
 		this.contentService = contentService;

@@ -26,9 +26,13 @@ import io.milton.http.LockTimeout;
 import io.milton.http.LockToken;
 import io.milton.http.Range;
 import io.milton.http.Request;
+import io.milton.http.Request.Method;
 import io.milton.http.XmlWriter;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.http.exceptions.LockedException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.fs.FileContentService;
+import io.milton.http.exceptions.PreConditionFailedException;
 import io.milton.http.fs.FsFileResource;
 import io.milton.http.fs.FsResource;
 import io.milton.resource.CollectionResource;
@@ -43,17 +47,18 @@ import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.webdav.config.WebDavConfig;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +66,7 @@ import org.slf4j.LoggerFactory;
  * Represents a directory in a physical file system.
  * 
  */
-public class FsDirectoryResource extends FsResource implements
+public class FsDirectoryResource extends BaseResource implements
 		MakeCollectionableResource, PutableResource, CopyableResource,
 		DeletableResource, MoveableResource, PropFindableResource,
 		LockingCollectionResource, GetableResource {
@@ -69,11 +74,15 @@ public class FsDirectoryResource extends FsResource implements
 	private static final Logger log = LoggerFactory
 			.getLogger(FsDirectoryResource.class);
 
-	private final FileContentService contentService;
+	private final IrodsFileContentService contentService;
+	private final IRODSFile dir;
+	private final String host;
 
-	public FsDirectoryResource(String host, FileSystemResourceFactory factory,
-			File dir, FileContentService contentService) {
-		super(host, factory, dir);
+	public FsDirectoryResource(String host,
+			IrodsFileSystemResourceFactory factory, IRODSFile dir,
+			IrodsFileContentService contentService) {
+		super(factory, factory.getIrodsAccessObjectFactory(), factory
+				.getWebDavConfig());
 		this.contentService = contentService;
 		if (!dir.exists()) {
 			throw new IllegalArgumentException("Directory does not exist: "
@@ -83,33 +92,50 @@ public class FsDirectoryResource extends FsResource implements
 			throw new IllegalArgumentException("Is not a directory: "
 					+ dir.getAbsolutePath());
 		}
+		this.dir = dir;
+		this.host = host;
 	}
 
 	@Override
 	public CollectionResource createCollection(String name) {
-		File fnew = new File(file, name);
+		IRODSFile fnew;
+		try {
+			fnew = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath(), name);
+		} catch (JargonException e) {
+			log.error("unable to create IRODSFile", e);
+			throw new WebDavRuntimeException("unable to create file", e);
+		}
 		boolean ok = fnew.mkdir();
 		if (!ok) {
-			throw new RuntimeException("Failed to create: "
-					+ fnew.getAbsolutePath());
+			log.error("error creating collection:{}", fnew);
+			throw new WebDavRuntimeException("error creating directory");
 		}
-		return new FsDirectoryResource(host, factory, fnew, contentService);
+		return new FsDirectoryResource(host, getFactory(), fnew, contentService);
 	}
 
 	@Override
 	public Resource child(String name) {
-		File fchild = new File(file, name);
-		return factory.resolveFile(this.host, fchild);
+		IRODSFile fchild;
+		try {
+			fchild = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath(), name);
+		} catch (JargonException e) {
+			log.error("unable to create IRODSFile", e);
+			throw new WebDavRuntimeException("unable to create file", e);
+		}
+		return getFactory().resolveFile(this.host, fchild);
 
 	}
 
 	@Override
 	public List<? extends Resource> getChildren() {
 		ArrayList<FsResource> list = new ArrayList<FsResource>();
-		File[] files = this.file.listFiles();
+		File[] files = this.dir.listFiles();
 		if (files != null) {
 			for (File fchild : files) {
-				FsResource res = factory.resolveFile(this.host, fchild);
+				FsResource res = getFactory().resolveFile(this.host,
+						(IRODSFile) fchild);
 				if (res != null) {
 					list.add(res);
 				} else {
@@ -129,8 +155,9 @@ public class FsDirectoryResource extends FsResource implements
 	 */
 	@Override
 	public String checkRedirect(Request request) {
-		if (factory.getDefaultPage() != null) {
-			return request.getAbsoluteUrl() + "/" + factory.getDefaultPage();
+		if (getFactory().getDefaultPage() != null) {
+			return request.getAbsoluteUrl() + "/"
+					+ getFactory().getDefaultPage();
 		} else {
 			return null;
 		}
@@ -139,41 +166,44 @@ public class FsDirectoryResource extends FsResource implements
 	@Override
 	public Resource createNew(String name, InputStream in, Long length,
 			String contentType) throws IOException {
-		File dest = new File(this.getFile(), name);
-		contentService.setFileContent(dest, in);
-		return factory.resolveFile(this.host, dest);
-
-	}
-
-	@Override
-	protected void doCopy(File dest) {
+		log.info("createNew()");
+		IRODSFile dest;
 		try {
-			FileUtils.copyDirectory(this.getFile(), dest);
-		} catch (IOException ex) {
-			throw new RuntimeException("Failed to copy to:"
-					+ dest.getAbsolutePath(), ex);
+			dest = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath(), name);
+		} catch (JargonException e) {
+			log.error("unable to create IRODSFile", e);
+			throw new WebDavRuntimeException("unable to create new file", e);
 		}
+		contentService.setFileContent(dest, in);
+		return getFactory().resolveFile(this.host, dest);
+
 	}
 
 	@Override
 	public LockToken createAndLock(String name, LockTimeout timeout,
 			LockInfo lockInfo) throws NotAuthorizedException {
-		File dest = new File(this.getFile(), name);
+		IRODSFile dest;
+		try {
+			dest = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath(), name);
+		} catch (JargonException e) {
+			log.error("unable to create IRODSFile", e);
+			throw new WebDavRuntimeException("unable to create new file", e);
+		}
 		createEmptyFile(dest);
-		FsFileResource newRes = new FsFileResource(host, factory, dest,
+		FsFileResource newRes = new FsFileResource(host, getFactory(), dest,
 				contentService);
 		LockResult res = newRes.lock(timeout, lockInfo);
 		return res.getLockToken();
 	}
 
-	private void createEmptyFile(File file) {
-		FileOutputStream fout = null;
+	private void createEmptyFile(IRODSFile file) {
 		try {
-			fout = new FileOutputStream(file);
+			file.createNewFile();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
-			IOUtils.closeQuietly(fout);
+			log.error("unable to create new empty IRODSFile", e);
+			throw new WebDavRuntimeException("unable to create empty file", e);
 		}
 	}
 
@@ -194,7 +224,7 @@ public class FsDirectoryResource extends FsResource implements
 	public void sendContent(OutputStream out, Range range,
 			Map<String, String> params, String contentType) throws IOException,
 			NotAuthorizedException {
-		String subpath = getFile().getCanonicalPath()
+		String subpath = dir.getCanonicalPath()
 				.substring(factory.getRoot().getCanonicalPath().length())
 				.replace('\\', '/');
 		String uri = subpath;
@@ -293,6 +323,7 @@ public class FsDirectoryResource extends FsResource implements
 	/**
 	 * @return the webDavConfig
 	 */
+	@Override
 	public WebDavConfig getWebDavConfig() {
 		return webDavConfig;
 	}
@@ -301,7 +332,101 @@ public class FsDirectoryResource extends FsResource implements
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
+	@Override
 	public void setWebDavConfig(WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
+	}
+
+	@Override
+	public Object authenticate(String arg0, String arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean authorise(Request arg0, Method arg1, Auth arg2) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Date getModifiedDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getRealm() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getUniqueId() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LockToken getCurrentLock() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LockResult lock(LockTimeout arg0, LockInfo arg1)
+			throws NotAuthorizedException, PreConditionFailedException,
+			LockedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LockResult refreshLock(String arg0) throws NotAuthorizedException,
+			PreConditionFailedException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void unlock(String arg0) throws NotAuthorizedException,
+			PreConditionFailedException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Date getCreateDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void moveTo(CollectionResource arg0, String arg1)
+			throws ConflictException, NotAuthorizedException,
+			BadRequestException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void delete() throws NotAuthorizedException, ConflictException,
+			BadRequestException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void copyTo(CollectionResource arg0, String arg1)
+			throws NotAuthorizedException, BadRequestException,
+			ConflictException {
+		// TODO Auto-generated method stub
+
 	}
 }

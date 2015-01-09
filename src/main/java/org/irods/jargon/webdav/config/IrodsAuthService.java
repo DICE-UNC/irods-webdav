@@ -11,6 +11,7 @@ import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
 import org.irods.jargon.webdav.exception.WebDavException;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,9 @@ public class IrodsAuthService {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
+
+	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
+
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsAuthService.class);
 
@@ -133,6 +137,40 @@ public class IrodsAuthService {
 				webDavConfig.getPort(), userName, password, "",
 				webDavConfig.getZone(),
 				webDavConfig.getDefaultStorageResource(), authScheme);
+	}
+
+	/**
+	 * Get the iRODS account to use in actual connections to iRODS
+	 * 
+	 * @param authResponse
+	 * @link AuthResponse} that came from an authentication attempt
+	 * @return {@link IRODSAccount} suitable for providing when interacting with
+	 *         Jargon
+	 */
+	public static IRODSAccount retrieveIrodsAccountFromAuthResponse(
+			final AuthResponse authResponse) {
+		log.info("retrieveIrodsAccountAssociatedWithThread()");
+		if (authResponse == null) {
+			throw new IllegalArgumentException("null authResponse");
+		}
+		return authResponse.getAuthenticatingIRODSAccount();
+
+	}
+
+	/**
+	 * Access the cache that holds the current authentication (in a thread
+	 * local) and return an irodsAccount suitable for connecting to the grid.
+	 * 
+	 * @return {@link IRODSAccount} with the appropriate authentication
+	 *         credential
+	 */
+	public static IRODSAccount retrieveCurrentIrodsAccount() {
+		log.info("retrieveCurrentIrodsAccount()");
+		AuthResponse authResponse = authResponseCache.get();
+		if (authResponse == null) {
+			throw new WebDavRuntimeException("no authResponseCache value");
+		}
+		return retrieveIrodsAccountFromAuthResponse(authResponse);
 	}
 
 	/**
