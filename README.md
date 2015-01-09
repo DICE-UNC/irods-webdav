@@ -4,7 +4,7 @@
 * Git tag: MASTER
 https://github.com/DICE-UNC/irods-webdav
 
-iRODS Rest API based on Jargon 4.0.2, certified against iRODS 3.0+ as well as iRODS Consortium 4.0+ releases.  See included docs folder for comprehensive user documentation and install instructions
+Milton based WebDav interface to iRODS.  This is differentiated from the ModeShape approach by providing a lightweight, no cached implementation that maps web requests directly to iRODS accounts.
 
 See https://github.com/DICE-UNC/irods-webdav/issues for support and known issues
 

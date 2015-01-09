@@ -37,9 +37,8 @@
     
     <bean id="resource.factory" class="org.irods.jargon.webdav.resource.FileSystemResourceFactory">
     	<constructor-arg value="/"/>
-    	<constructor-arg>
-    		<bean class="org.irods.jargon.webdav.resource.NullSecurityManager"/>
-    	</constructor-arg>
+    	<constructor-arg
+			type="io.milton.http.SecurityManager" ref="irodsSecurityManager" />
     	<property name="irodsAccessObjectFactory" ref="irodsAcessObjectFactory"/>
     	<property name="webDavConfig" ref="webDavConfig"/>
     </bean>
