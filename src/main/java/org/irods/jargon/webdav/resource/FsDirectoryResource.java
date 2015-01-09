@@ -53,12 +53,13 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.irods.jargon.webdav.config.WebDavConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Represents a directory in a physical file system.
- *
+ * 
  */
 public class FsDirectoryResource extends FsResource implements
 		MakeCollectionableResource, PutableResource, CopyableResource,
@@ -122,7 +123,7 @@ public class FsDirectoryResource extends FsResource implements
 
 	/**
 	 * Will redirect if a default page has been specified on the factory
-	 *
+	 * 
 	 * @param request
 	 * @return
 	 */
@@ -179,9 +180,9 @@ public class FsDirectoryResource extends FsResource implements
 	/**
 	 * Will generate a listing of the contents of this directory, unless the
 	 * factory's allowDirectoryBrowsing has been set to false.
-	 *
+	 * 
 	 * If so it will just output a message saying that access has been disabled.
-	 *
+	 * 
 	 * @param out
 	 * @param range
 	 * @param params
@@ -287,5 +288,20 @@ public class FsDirectoryResource extends FsResource implements
 		String s = abUrl.substring(0, pos) + "/" + prefix;
 		s += abUrl.substring(pos);
 		return s;
+	}
+
+	/**
+	 * @return the webDavConfig
+	 */
+	public WebDavConfig getWebDavConfig() {
+		return webDavConfig;
+	}
+
+	/**
+	 * @param webDavConfig
+	 *            the webDavConfig to set
+	 */
+	public void setWebDavConfig(WebDavConfig webDavConfig) {
+		this.webDavConfig = webDavConfig;
 	}
 }

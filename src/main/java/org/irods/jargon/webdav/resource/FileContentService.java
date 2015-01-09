@@ -25,11 +25,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Abstraction for storing and retrieving 
- *
- * @author brad
+ * Abstraction for storing and retrieving
+ * 
+ * @author Mike Conway - DICE
  */
 public interface FileContentService {
-	void setFileContent(File file, InputStream in) throws FileNotFoundException, IOException;
+	void setFileContent(File file, InputStream in)
+			throws FileNotFoundException, IOException;
+
 	InputStream getFileContent(File file) throws FileNotFoundException;
 }

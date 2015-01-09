@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.irods.jargon</groupId>
-	<artifactId>jargon-webdav</artifactId>
+	<artifactId>irods-webdav</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>jargon-webav</name>
+	<name>irods-webav</name>
 	<packaging>war</packaging>
-	<description>miltoin based WebDav interface to iRODS	</description>
+	<description>Milton based WebDav interface to iRODS</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jargon.version>4.0.2.1-SNAPSHOT</jargon.version>

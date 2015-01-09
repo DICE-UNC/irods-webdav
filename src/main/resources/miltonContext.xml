@@ -16,12 +16,32 @@
     	 <property name="irodsAccessObjectFactory" ref="irodsAcessObjectFactory"/>
     </bean>
     
+    <bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
+        <property name="host" value="consortium.local"/>
+        <property name="zone" value="fedZone1"/>
+        <property name="port" value="1247"/>
+        <property name="authScheme" value="STANDARD"/>
+        <property name="defaultStorageResource" value="test1-resc"/>
+    </bean>
+    
+    <bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">
+        <property name="irodsAccessObjectFactory" ref="irodsAcessObjectFactory"/>
+    	<property name="webDavConfig" ref="webDavConfig"/>
+    	<property name="irodsAuthService" ref="irodsAuthService"/>
+    </bean>
+    
+    <bean id="irodsAuthService" class="org.irods.jargon.webdav.config.IrodsAuthService">
+        <property name="irodsAccessObjectFactory" ref="irodsAcessObjectFactory"/>
+    	<property name="webDavConfig" ref="webDavConfig"/>
+    </bean>
+    
     <bean id="resource.factory" class="org.irods.jargon.webdav.resource.FileSystemResourceFactory">
     	<constructor-arg value="/"/>
     	<constructor-arg>
     		<bean class="org.irods.jargon.webdav.resource.NullSecurityManager"/>
     	</constructor-arg>
     	<property name="irodsAccessObjectFactory" ref="irodsAcessObjectFactory"/>
+    	<property name="webDavConfig" ref="webDavConfig"/>
     </bean>
 
     <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">

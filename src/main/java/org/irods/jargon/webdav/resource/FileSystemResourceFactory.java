@@ -13,14 +13,15 @@ import io.milton.resource.Resource;
 import java.io.File;
 
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.webdav.config.WebDavConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A resource factory which provides access to files in a file system.
- *
+ * 
  * Using this with milton is equivalent to using the dav servlet in tomcat
- *
+ * 
  */
 public final class FileSystemResourceFactory implements ResourceFactory {
 
@@ -37,21 +38,22 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 	boolean digestAllowed = true;
 	private String ssoPrefix;
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
+	private WebDavConfig webDavConfig;
 
 	/**
 	 * Creates and (optionally) initialises the factory. This looks for a
 	 * properties file FileSystemResourceFactory.properties in the classpath If
 	 * one is found it uses the root and realm properties to initialise
-	 *
+	 * 
 	 * If not found the factory is initialised with the defaults root: user.home
 	 * system property realm: milton-fs-test
-	 *
+	 * 
 	 * These initialised values are not final, and may be changed through the
 	 * setters or init method
-	 *
+	 * 
 	 * To be honest its pretty naf configuring like this, but i don't want to
 	 * force people to use spring or any other particular configuration tool
-	 *
+	 * 
 	 */
 	public FileSystemResourceFactory() {
 		log.debug("setting default configuration...");
@@ -67,7 +69,7 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param root
 	 *            - the root folder of the filesystem to expose. This must
 	 *            include the context path. Eg, if you've deployed to webdav-fs,
@@ -81,7 +83,7 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 	}
 
 	/**
-	 *
+	 * 
 	 * @param root
 	 *            - the root folder of the filesystem to expose
 	 * @param securityManager
@@ -143,7 +145,7 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 	}
 
 	/**
-	 *
+	 * 
 	 * @return - the caching time for files
 	 */
 	public Long maxAgeSeconds(FsResource resource) {
@@ -190,7 +192,7 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 * Whether to generate an index page.
-	 *
+	 * 
 	 * @return
 	 */
 	public boolean isAllowDirectoryBrowsing() {
@@ -204,7 +206,7 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 	/**
 	 * if provided GET requests to a folder will redirect to a page of this name
 	 * within the folder
-	 *
+	 * 
 	 * @return - E.g. index.html
 	 */
 	public String getDefaultPage() {
@@ -284,5 +286,20 @@ public final class FileSystemResourceFactory implements ResourceFactory {
 	public void setIrodsAccessObjectFactory(
 			IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
+	}
+
+	/**
+	 * @return the webDavConfig
+	 */
+	public WebDavConfig getWebDavConfig() {
+		return webDavConfig;
+	}
+
+	/**
+	 * @param webDavConfig
+	 *            the webDavConfig to set
+	 */
+	public void setWebDavConfig(WebDavConfig webDavConfig) {
+		this.webDavConfig = webDavConfig;
 	}
 }
