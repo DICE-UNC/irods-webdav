@@ -1,0 +1,37 @@
+/target
+*.pydevproject
+.project
+.metadata
+.springBeans
+bin/**
+tmp/**
+tmp/**/*
+.pmd
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+testing.properties
+RestVersion.java
+.classpath
+.settings/
+.loadpath
+.DS_Store
+docs/.~lock.iRODSRESTAPIDocumentation.odt#
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# PDT-specific
+.buildpath
+
+#Version file
+src/**/RestVersion.java
+/build
