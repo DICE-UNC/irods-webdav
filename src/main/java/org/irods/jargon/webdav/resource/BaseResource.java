@@ -27,6 +27,7 @@ public abstract class BaseResource {
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
 	private final IrodsFileSystemResourceFactory factory;
+	private IrodsFileContentService contentService;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(BaseResource.class);
@@ -62,9 +63,10 @@ public abstract class BaseResource {
 	 * @param irodsAccessObjectFactory
 	 * @param webDavConfig
 	 */
-	public BaseResource(IrodsFileSystemResourceFactory factory,
-			IRODSAccessObjectFactory irodsAccessObjectFactory,
-			WebDavConfig webDavConfig) {
+	public BaseResource(final IrodsFileSystemResourceFactory factory,
+			final IRODSAccessObjectFactory irodsAccessObjectFactory,
+			final WebDavConfig webDavConfig,
+			final IrodsFileContentService contentService) {
 		super();
 
 		if (irodsAccessObjectFactory == null) {
@@ -78,6 +80,7 @@ public abstract class BaseResource {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 		this.webDavConfig = webDavConfig;
 		this.factory = factory;
+		this.contentService = contentService;
 	}
 
 	/**
@@ -120,6 +123,21 @@ public abstract class BaseResource {
 
 	protected io.milton.http.SecurityManager getSecurityManager() {
 		return factory.getSecurityManager();
+	}
+
+	/**
+	 * @return the contentService
+	 */
+	protected IrodsFileContentService getContentService() {
+		return contentService;
+	}
+
+	/**
+	 * @param contentService
+	 *            the contentService to set
+	 */
+	protected void setContentService(IrodsFileContentService contentService) {
+		this.contentService = contentService;
 	}
 
 }

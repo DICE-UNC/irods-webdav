@@ -30,13 +30,10 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
-import io.milton.http.fs.FileContentService;
-import io.milton.http.fs.FsResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.MoveableResource;
-import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReplaceableResource;
 
 import java.io.File;
@@ -48,32 +45,33 @@ import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.irods.jargon.core.pub.io.IRODSFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  */
-public class FsFileResource extends FsResource implements CopyableResource,
+public class FsFileResource extends BaseResource implements CopyableResource,
 		DeletableResource, GetableResource, MoveableResource,
-		PropFindableResource, ReplaceableResource {
+		ReplaceableResource { // removed PropFindableResource, temporarily
 
 	private static final Logger log = LoggerFactory
 			.getLogger(FsFileResource.class);
 
-	private final FileContentService contentService;
+	private final IRODSFile file;
 
 	/**
-	 *
+	 * 
 	 * @param host
 	 *            - the requested host. E.g. www.mycompany.com
 	 * @param factory
 	 * @param file
 	 */
 	public FsFileResource(String host, IrodsFileSystemResourceFactory factory,
-			File file, FileContentService contentService) {
-		super(host, factory, file);
-		this.contentService = contentService;
+			IRODSFile file, IrodsFileContentService contentService) {
+		super(factory, factory.getIrodsAccessObjectFactory(), factory
+				.getWebDavConfig(), contentService);
 	}
 
 	@Override

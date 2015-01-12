@@ -69,11 +69,11 @@ public class FsDirectoryResource extends BaseResource implements
 	private final IRODSFile dir;
 	private final String host;
 
-	public FsDirectoryResource(String host,
-			IrodsFileSystemResourceFactory factory, IRODSFile dir,
-			IrodsFileContentService contentService) {
+	public FsDirectoryResource(final String host,
+			final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
+			final IrodsFileContentService contentService) {
 		super(factory, factory.getIrodsAccessObjectFactory(), factory
-				.getWebDavConfig());
+				.getWebDavConfig(), contentService);
 		this.contentService = contentService;
 		if (!dir.exists()) {
 			throw new IllegalArgumentException("Directory does not exist: "
