@@ -372,9 +372,13 @@ public class FsDirectoryResource extends BaseResource implements
 			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
 					.getDataTransferOperations(this.retrieveIrodsAccount());
 
+			log.info("doing a move from source:{}", this.dir);
+			dto.move(file, destFile);
+			log.info("move completed");
+
 		} catch (JargonException e) {
-			log.error("unable to create IRODSFile", e);
-			throw new WebDavRuntimeException("unable to create file", e);
+			log.error("error in move operation", e);
+			throw new WebDavRuntimeException("unable to move directory", e);
 		}
 
 	}
@@ -382,15 +386,58 @@ public class FsDirectoryResource extends BaseResource implements
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException,
 			BadRequestException {
-		// TODO Auto-generated method stub
+
+		log.info("delete()");
+		log.info("of collection:{}", dir);
+		IRODSFile file;
+		try {
+			file = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath());
+			file.delete();
+			log.info("delete successful");
+		} catch (JargonException e) {
+			log.error("error in move operation", e);
+			throw new WebDavRuntimeException("unable to move directory", e);
+		}
 
 	}
 
 	@Override
-	public void copyTo(CollectionResource arg0, String arg1)
+	public void copyTo(CollectionResource destinationPath, String newName)
 			throws NotAuthorizedException, BadRequestException,
 			ConflictException {
-		// TODO Auto-generated method stub
+		log.info("copyTo()");
+		if (destinationPath == null) {
+			throw new IllegalArgumentException("null destinationPath");
+		}
+
+		if (newName == null || newName.isEmpty()) {
+			throw new IllegalArgumentException("null or empty newName");
+		}
+
+		log.info("destinationPath:{}", destinationPath);
+		log.info("newName:{}", newName);
+
+		IRODSFile file;
+		IRODSFile destFile;
+		try {
+			file = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath());
+
+			destFile = this.instanceIrodsFileFactory().instanceIRODSFile(
+					dir.getAbsolutePath());
+
+			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
+					.getDataTransferOperations(this.retrieveIrodsAccount());
+
+			log.info("doing a copy from source:{}", this.dir);
+			dto.copy(file, destFile, null, null);
+			log.info("copy completed");
+
+		} catch (JargonException e) {
+			log.error("error in move operation", e);
+			throw new WebDavRuntimeException("unable to move directory", e);
+		}
 
 	}
 
