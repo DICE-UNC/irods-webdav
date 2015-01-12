@@ -112,7 +112,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	 * @see io.milton.http.SecurityManager#getRealm(java.lang.String)
 	 */
 	@Override
-	public String getRealm(String arg0) {
+	public String getRealm(String host) {
 		// right now hard-coded
 		return "irods";
 	}

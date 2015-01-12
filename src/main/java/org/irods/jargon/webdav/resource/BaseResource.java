@@ -118,4 +118,8 @@ public abstract class BaseResource {
 		return factory;
 	}
 
+	protected io.milton.http.SecurityManager getSecurityManager() {
+		return factory.getSecurityManager();
+	}
+
 }
