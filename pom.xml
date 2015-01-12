@@ -14,16 +14,9 @@
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<milton.version>2.4.2.2</milton.version>
-		<spring.version>3.1.0.RELEASE</spring.version>
-		
+		<spring.version>3.2.13.RELEASE</spring.version>
 	</properties>
-
 	<repositories>
-
-		<repository>
-			<id>ettrema-repo</id>
-			<url>http://milton.io/maven/</url>
-		</repository>
 		<repository>
 			<id>ibiblio.repository</id>
 			<name>ibiblio.repository</name>
@@ -32,10 +25,14 @@
 				<enabled>true</enabled>
 			</releases>
 			<snapshots>
-				<enabled>false</enabled>
+				<enabled>true</enabled>
 				<updatePolicy>never</updatePolicy>
 				<checksumPolicy>fail</checksumPolicy>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>ettrema-repo</id>
+			<url>http://milton.io/maven/</url>
 		</repository>
 		<repository>
 			<id>dice.repository snaps</id>
@@ -106,11 +103,11 @@
 			<version>1.6.6</version>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <version>${spring.version}</version>
-            <type>jar</type>
-        </dependency>	
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${spring.version}</version>
+			<type>jar</type>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -131,7 +128,7 @@
 					<stopPort>8089</stopPort>
 				</configuration>
 			</plugin>
-			
+
 		</plugins>
 	</build>
 

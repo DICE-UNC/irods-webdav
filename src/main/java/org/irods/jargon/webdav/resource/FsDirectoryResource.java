@@ -224,8 +224,18 @@ public class FsDirectoryResource extends BaseResource implements
 	public void sendContent(OutputStream out, Range range,
 			Map<String, String> params, String contentType) throws IOException,
 			NotAuthorizedException {
+
+		IRODSFile rootFile;
+		try {
+			rootFile = this.instanceIrodsFileFactory().instanceIRODSFile(
+					this.getFactory().getRoot());
+		} catch (JargonException e) {
+			log.error("error getting root file", e);
+			throw new WebDavRuntimeException("error getting root file", e);
+		}
+
 		String subpath = dir.getCanonicalPath()
-				.substring(factory.getRoot().getCanonicalPath().length())
+				.substring(rootFile.getCanonicalPath().length())
 				.replace('\\', '/');
 		String uri = subpath;
 		// String uri = "/" + factory.getContextPath() + subpath;
