@@ -19,16 +19,21 @@
 
 package org.irods.jargon.webdav.resource;
 
+import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.IOUtils;
+import org.irods.jargon.core.connection.IRODSAccount;
+import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.core.pub.Stream2StreamAO;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.pub.io.IRODSFileFactory;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -38,22 +43,74 @@ public class IrodsFileContentService implements FileContentService {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 
+	private static final Logger log = LoggerFactory
+			.getLogger(IrodsFileContentService.class);
+
+	// TODO: see about unwrapping file not found exceptions and process those
+
 	@Override
-	public void setFileContent(IRODSFile dest, InputStream in)
-			throws FileNotFoundException, IOException {
-		FileOutputStream out = null;
-		try {
-			out = new FileOutputStream(dest);
-			IOUtils.copy(in, out);
-		} finally {
-			IOUtils.closeQuietly(out);
+	public void setFileContent(IRODSFile dest, InputStream in,
+			IRODSAccount irodsAccount) throws FileNotFoundException,
+			IOException {
+
+		log.info("setFileContent()");
+
+		if (dest == null) {
+			throw new IllegalArgumentException("null dest");
 		}
+
+		if (in == null) {
+			throw new IllegalArgumentException("null in");
+		}
+
+		if (irodsAccount == null) {
+			throw new IllegalArgumentException("null irodsAccount");
+		}
+
+		try {
+			Stream2StreamAO stream2Stream = irodsAccessObjectFactory
+					.getStream2StreamAO(irodsAccount);
+			stream2Stream.transferStreamToFileUsingIOStreams(in, (File) dest,
+					dest.length(), irodsAccessObjectFactory
+							.getJargonProperties()
+							.getInputToOutputCopyBufferByteSize());
+
+		} catch (JargonException e) {
+			log.error("error in setting file content", e);
+			throw new WebDavRuntimeException("exception streaming to file", e);
+		}
+
 	}
 
 	@Override
-	public InputStream getFileContent(File file) throws FileNotFoundException {
-		FileInputStream fin = new FileInputStream(file);
-		return fin;
+	public InputStream getFileContent(IRODSFile file, IRODSAccount irodsAccount)
+			throws FileNotFoundException {
+
+		log.info("getFileContent()");
+
+		if (file == null) {
+			throw new IllegalArgumentException("null file");
+		}
+
+		if (irodsAccount == null) {
+			throw new IllegalArgumentException("null irodsAccount");
+		}
+
+		if (!file.exists()) {
+			log.error("did not find file at:{}", file);
+			throw new FileNotFoundException("file not found");
+		}
+
+		try {
+			IRODSFileFactory factory = irodsAccessObjectFactory
+					.getIRODSFileFactory(irodsAccount);
+			return new BufferedInputStream(
+					factory.instanceIRODSFileInputStream(file.getAbsolutePath()));
+		} catch (JargonException e) {
+			log.error("error in setting file content", e);
+			throw new WebDavRuntimeException("exception streaming to file", e);
+		}
+
 	}
 
 	public IRODSAccessObjectFactory getIrodsAccessObjectFactory() {

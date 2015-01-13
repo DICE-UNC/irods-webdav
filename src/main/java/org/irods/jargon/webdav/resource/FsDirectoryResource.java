@@ -138,22 +138,6 @@ public class FsDirectoryResource extends BaseResource implements
 		return list;
 	}
 
-	/**
-	 * Will redirect if a default page has been specified on the factory
-	 * 
-	 * @param request
-	 * @return
-	 */
-	@Override
-	public String checkRedirect(Request request) {
-		if (getFactory().getDefaultPage() != null) {
-			return request.getAbsoluteUrl() + "/"
-					+ getFactory().getDefaultPage();
-		} else {
-			return null;
-		}
-	}
-
 	@Override
 	public Resource createNew(String name, InputStream in, Long length,
 			String contentType) throws IOException {
@@ -403,28 +387,17 @@ public class FsDirectoryResource extends BaseResource implements
 	}
 
 	@Override
-	public void copyTo(CollectionResource destinationPath, String newName)
-			throws NotAuthorizedException, BadRequestException,
-			ConflictException {
-		log.info("copyTo()");
-		if (destinationPath == null) {
-			throw new IllegalArgumentException("null destinationPath");
+	protected void doCopy(IRODSFile destFile) {
+		log.info("doCopy()");
+		if (destFile == null) {
+			throw new IllegalArgumentException("null destFile");
 		}
 
-		if (newName == null || newName.isEmpty()) {
-			throw new IllegalArgumentException("null or empty newName");
-		}
-
-		log.info("destinationPath:{}", destinationPath);
-		log.info("newName:{}", newName);
+		log.info("desFilet:{}", destFile);
 
 		IRODSFile file;
-		IRODSFile destFile;
 		try {
 			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					dir.getAbsolutePath());
-
-			destFile = this.instanceIrodsFileFactory().instanceIRODSFile(
 					dir.getAbsolutePath());
 
 			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
@@ -439,11 +412,6 @@ public class FsDirectoryResource extends BaseResource implements
 			throw new WebDavRuntimeException("unable to move directory", e);
 		}
 
-	}
-
-	@Override
-	public String getRealm() {
-		return getSecurityManager().getRealm("");
 	}
 
 }

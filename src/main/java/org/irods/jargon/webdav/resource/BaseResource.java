@@ -3,10 +3,25 @@
  */
 package org.irods.jargon.webdav.resource;
 
+import io.milton.http.Auth;
+import io.milton.http.Request;
+import io.milton.http.Request.Method;
+import io.milton.http.exceptions.BadRequestException;
+import io.milton.http.exceptions.ConflictException;
+import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.fs.FsDirectoryResource;
+import io.milton.http.http11.auth.DigestResponse;
+import io.milton.resource.CollectionResource;
+import io.milton.resource.CopyableResource;
+import io.milton.resource.DigestResource;
+import io.milton.resource.MoveableResource;
+import io.milton.resource.Resource;
+
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.auth.AuthResponse;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
 import org.irods.jargon.webdav.config.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
@@ -20,7 +35,8 @@ import org.slf4j.LoggerFactory;
  * @author Mike Conway
  * 
  */
-public abstract class BaseResource {
+public abstract class BaseResource implements Resource, MoveableResource,
+		CopyableResource, DigestResource {
 
 	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
 
@@ -138,6 +154,116 @@ public abstract class BaseResource {
 	 */
 	protected void setContentService(IrodsFileContentService contentService) {
 		this.contentService = contentService;
+	}
+
+	protected IRODSFile fileFromCollectionResource(
+			CollectionResource collectionResource, String name) {
+		if (collectionResource == null) {
+			throw new IllegalArgumentException("null collectionResource");
+		}
+
+		if (name == null || name.isEmpty()) {
+			throw new IllegalArgumentException("null or empty name");
+		}
+
+		IRODSFile dest;
+
+		if (collectionResource instanceof FsDirectoryResource) {
+			try {
+				FsDirectoryResource newFsParent = (FsDirectoryResource) collectionResource;
+
+				dest = this.instanceIrodsFileFactory().instanceIRODSFile(
+						newFsParent.getFile(), name);
+				return dest;
+			} catch (JargonException e) {
+				log.error("jargon exception on copy", e);
+				throw new WebDavRuntimeException("exception in copy", e);
+			}
+
+		} else {
+			log.error("unknown destination type for:{}", collectionResource);
+			throw new WebDavRuntimeException(
+					"Destination is an unknown type. Must be a FsDirectoryResource");
+		}
+
+	}
+
+	/**
+	 * Will redirect if a default page has been specified on the factory
+	 * 
+	 * @param request
+	 * @return
+	 */
+	@Override
+	public String checkRedirect(Request request) {
+		if (getFactory().getDefaultPage() != null) {
+			return request.getAbsoluteUrl() + "/"
+					+ getFactory().getDefaultPage();
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public void copyTo(CollectionResource destinationPath, String newName)
+			throws NotAuthorizedException, BadRequestException,
+			ConflictException {
+
+		log.info("copyTo()");
+		if (destinationPath == null) {
+			throw new IllegalArgumentException("null destinationPath");
+		}
+
+		if (newName == null || newName.isEmpty()) {
+			throw new IllegalArgumentException("null or empty newName");
+		}
+
+		IRODSFile dest = this.fileFromCollectionResource(destinationPath,
+				newName);
+		doCopy(dest);
+
+	}
+
+	/**
+	 * Accomplish a copy with the given file
+	 * 
+	 * @param dest
+	 */
+	protected abstract void doCopy(IRODSFile dest);
+
+	@Override
+	public Object authenticate(String user, String password) {
+		return factory.getSecurityManager().authenticate(user, password);
+	}
+
+	@Override
+	public Object authenticate(DigestResponse digestRequest) {
+		return factory.getSecurityManager().authenticate(digestRequest);
+	}
+
+	@Override
+	public boolean isDigestAllowed() {
+		return factory.isDigestAllowed();
+	}
+
+	@Override
+	public boolean authorise(Request request, Method method, Auth auth) {
+		boolean b = factory.getSecurityManager().authorise(request, method,
+				auth, this);
+		if (log.isTraceEnabled()) {
+			log.trace("authorise: result=" + b);
+		}
+		return b;
+	}
+
+	@Override
+	public String getRealm() {
+		String r = factory.getRealm(this.host);
+		if (r == null) {
+			throw new NullPointerException("Got null realm from: "
+					+ factory.getClass() + " for host=" + this.host);
+		}
+		return r;
 	}
 
 }

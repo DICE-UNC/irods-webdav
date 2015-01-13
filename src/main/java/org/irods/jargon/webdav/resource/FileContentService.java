@@ -19,10 +19,12 @@
 
 package org.irods.jargon.webdav.resource;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+
+import org.irods.jargon.core.connection.IRODSAccount;
+import org.irods.jargon.core.pub.io.IRODSFile;
 
 /**
  * Abstraction for storing and retrieving
@@ -30,8 +32,10 @@ import java.io.InputStream;
  * @author Mike Conway - DICE
  */
 public interface FileContentService {
-	void setFileContent(File file, InputStream in)
-			throws FileNotFoundException, IOException;
+	void setFileContent(IRODSFile file, InputStream in,
+			IRODSAccount irodsAccount) throws FileNotFoundException,
+			IOException;
 
-	InputStream getFileContent(File file) throws FileNotFoundException;
+	InputStream getFileContent(IRODSFile file, IRODSAccount irodsAccount)
+			throws FileNotFoundException;
 }

@@ -25,27 +25,29 @@ import io.milton.common.ReadingException;
 import io.milton.common.WritingException;
 import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.http.Request;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.MoveableResource;
 import io.milton.resource.ReplaceableResource;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.Map;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,6 +74,12 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 			IRODSFile file, IrodsFileContentService contentService) {
 		super(factory, factory.getIrodsAccessObjectFactory(), factory
 				.getWebDavConfig(), contentService);
+
+		if (file == null) {
+			throw new IllegalArgumentException("null file");
+		}
+
+		this.file = file;
 	}
 
 	@Override
@@ -81,7 +89,7 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 
 	@Override
 	public String getContentType(String preferredList) {
-		String mime = ContentTypeUtils.findContentTypes(this.file);
+		String mime = ContentTypeUtils.findContentTypes(this.file.getName());
 		String s = ContentTypeUtils.findAcceptableContentType(mime,
 				preferredList);
 		if (log.isTraceEnabled()) {
@@ -92,17 +100,12 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 	}
 
 	@Override
-	public String checkRedirect(Request arg0) {
-		return null;
-	}
-
-	@Override
 	public void sendContent(OutputStream out, Range range,
 			Map<String, String> params, String contentType) throws IOException,
 			NotFoundException {
 		InputStream in = null;
 		try {
-			in = contentService.getFileContent(file);
+			in = this.getContentService().getFileContent(file);
 			if (range != null) {
 				log.debug("sendContent: ranged content: "
 						+ file.getAbsolutePath());
@@ -129,20 +132,7 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 	 */
 	@Override
 	public Long getMaxAgeSeconds(Auth auth) {
-		return factory.maxAgeSeconds(this);
-	}
-
-	/**
-	 * @{@inheritDoc
-	 */
-	@Override
-	protected void doCopy(File dest) {
-		try {
-			FileUtils.copyFile(file, dest);
-		} catch (IOException ex) {
-			throw new RuntimeException("Failed doing copy to: "
-					+ dest.getAbsolutePath(), ex);
-		}
+		return getFactory().getMaxAgeSeconds();
 	}
 
 	@Override
@@ -150,10 +140,87 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 			throws BadRequestException, ConflictException,
 			NotAuthorizedException {
 		try {
-			contentService.setFileContent(file, in);
+			getContentService().setFileContent(file, in);
 		} catch (IOException ex) {
 			throw new BadRequestException("Couldnt write to: "
 					+ file.getAbsolutePath(), ex);
 		}
+	}
+
+	@Override
+	public String getName() {
+		return file.getName();
+	}
+
+	@Override
+	public String getUniqueId() {
+		return file.toString();
+	}
+
+	@Override
+	public void moveTo(CollectionResource destinationPath, String newName)
+			throws ConflictException, NotAuthorizedException,
+			BadRequestException {
+		log.info("moveTo()");
+		if (destinationPath == null) {
+			throw new IllegalArgumentException("null destinationPath");
+		}
+
+		if (newName == null || newName.isEmpty()) {
+			throw new IllegalArgumentException("null or empty newName");
+		}
+
+		log.info("destinationPath:{}", destinationPath);
+		log.info("newName:{}", newName);
+
+		IRODSFile destFile;
+		try {
+
+			destFile = this
+					.fileFromCollectionResource(destinationPath, newName);
+
+			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
+					.getDataTransferOperations(this.retrieveIrodsAccount());
+
+			log.info("doing a move from source:{}", this.file);
+			dto.move(file, destFile);
+			log.info("move completed");
+
+		} catch (JargonException e) {
+			log.error("error in move operation", e);
+			throw new WebDavRuntimeException("unable to move directory", e);
+		}
+	}
+
+	@Override
+	public void delete() throws NotAuthorizedException, ConflictException,
+			BadRequestException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void doCopy(IRODSFile dest) {
+		log.info("dest:{}", dest);
+
+		try {
+
+			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
+					.getDataTransferOperations(this.retrieveIrodsAccount());
+
+			log.info("doing a copy from source:{}", this.file);
+			dto.copy(file, dest, null, null);
+			log.info("copy completed");
+
+		} catch (JargonException e) {
+			log.error("error in move operation", e);
+			throw new WebDavRuntimeException("unable to move directory", e);
+		}
+
+	}
+
+	@Override
+	public Date getModifiedDate() {
+		return new Date(file.lastModified());
 	}
 }
