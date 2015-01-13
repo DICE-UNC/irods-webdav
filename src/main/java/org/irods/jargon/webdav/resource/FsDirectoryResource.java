@@ -27,7 +27,6 @@ import io.milton.http.XmlWriter;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.fs.FsResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
@@ -121,11 +120,11 @@ public class FsDirectoryResource extends BaseResource implements
 
 	@Override
 	public List<? extends Resource> getChildren() {
-		ArrayList<FsResource> list = new ArrayList<FsResource>();
+		ArrayList<BaseResource> list = new ArrayList<BaseResource>();
 		File[] files = this.dir.listFiles();
 		if (files != null) {
 			for (File fchild : files) {
-				FsResource res = getFactory().resolveFile(this.host,
+				BaseResource res = getFactory().resolveFile(this.host,
 						(IRODSFile) fchild);
 				if (res != null) {
 					list.add(res);
@@ -150,7 +149,7 @@ public class FsDirectoryResource extends BaseResource implements
 			log.error("unable to create IRODSFile", e);
 			throw new WebDavRuntimeException("unable to create new file", e);
 		}
-		contentService.setFileContent(dest, in);
+		contentService.setFileContent(dest, in, retrieveIrodsAccount());
 		return getFactory().resolveFile(this.host, dest);
 
 	}

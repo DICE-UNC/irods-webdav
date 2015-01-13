@@ -3,8 +3,6 @@ package org.irods.jargon.webdav.resource;
 import io.milton.common.Path;
 import io.milton.http.LockManager;
 import io.milton.http.ResourceFactory;
-import io.milton.http.fs.FsDirectoryResource;
-import io.milton.http.fs.FsFileResource;
 import io.milton.http.fs.FsResource;
 import io.milton.http.fs.NullSecurityManager;
 import io.milton.resource.Resource;
@@ -111,8 +109,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return resolveFile(host, requested);
 	}
 
-	public FsResource resolveFile(String host, IRODSFile file) {
-		FsResource r;
+	public BaseResource resolveFile(String host, IRODSFile file) {
+		BaseResource r;
 		if (!file.exists()) {
 			log.debug("file not found: " + file.getAbsolutePath());
 			return null;

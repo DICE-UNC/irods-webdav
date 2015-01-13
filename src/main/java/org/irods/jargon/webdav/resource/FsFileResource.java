@@ -105,7 +105,8 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 			NotFoundException {
 		InputStream in = null;
 		try {
-			in = this.getContentService().getFileContent(file);
+			in = this.getContentService().getFileContent(file,
+					retrieveIrodsAccount());
 			if (range != null) {
 				log.debug("sendContent: ranged content: "
 						+ file.getAbsolutePath());
@@ -140,7 +141,8 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 			throws BadRequestException, ConflictException,
 			NotAuthorizedException {
 		try {
-			getContentService().setFileContent(file, in);
+			getContentService().setFileContent(file, in,
+					this.retrieveIrodsAccount());
 		} catch (IOException ex) {
 			throw new BadRequestException("Couldnt write to: "
 					+ file.getAbsolutePath(), ex);

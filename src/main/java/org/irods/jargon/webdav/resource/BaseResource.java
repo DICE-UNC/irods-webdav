@@ -256,14 +256,4 @@ public abstract class BaseResource implements Resource, MoveableResource,
 		return b;
 	}
 
-	@Override
-	public String getRealm() {
-		String r = factory.getRealm(this.host);
-		if (r == null) {
-			throw new NullPointerException("Got null realm from: "
-					+ factory.getClass() + " for host=" + this.host);
-		}
-		return r;
-	}
-
 }
