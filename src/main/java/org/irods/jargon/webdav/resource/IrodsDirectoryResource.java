@@ -101,7 +101,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 			log.error("error creating collection:{}", fnew);
 			throw new WebDavRuntimeException("error creating directory");
 		}
-		return new IrodsDirectoryResource(host, getFactory(), fnew, contentService);
+		return new IrodsDirectoryResource(host, getFactory(), fnew,
+				contentService);
 	}
 
 	@Override
@@ -411,6 +412,13 @@ public class IrodsDirectoryResource extends BaseResource implements
 			throw new WebDavRuntimeException("unable to move directory", e);
 		}
 
+	}
+
+	/**
+	 * @return the dir
+	 */
+	public IRODSFile getDir() {
+		return dir;
 	}
 
 }

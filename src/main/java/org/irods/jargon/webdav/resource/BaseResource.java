@@ -9,7 +9,6 @@ import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.fs.FsDirectoryResource;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
@@ -166,12 +165,12 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 		IRODSFile dest;
 
-		if (collectionResource instanceof FsDirectoryResource) {
+		if (collectionResource instanceof IrodsDirectoryResource) {
 			try {
-				FsDirectoryResource newFsParent = (FsDirectoryResource) collectionResource;
+				IrodsDirectoryResource newFsParent = (IrodsDirectoryResource) collectionResource;
 
 				dest = this.instanceIrodsFileFactory().instanceIRODSFile(
-						newFsParent.getFile(), name);
+						newFsParent.getDir().getAbsolutePath(), name);
 				return dest;
 			} catch (JargonException e) {
 				log.error("jargon exception on copy", e);

@@ -9,6 +9,8 @@ import io.milton.resource.Resource;
 
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.core.pub.IRODSFileSystem;
+import org.irods.jargon.core.pub.IRODSFileSystemSingletonWrapper;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.webdav.config.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
@@ -37,6 +39,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	boolean digestAllowed = true;
 	private String ssoPrefix;
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
+	private IRODSFileSystem irodsFileSystem;
 	private WebDavConfig webDavConfig;
 
 	// private static final ThreadLocal<AuthResponse> authResponseCache = new
@@ -68,6 +71,15 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			io.milton.http.SecurityManager securityManager) {
 		this.root = sRoot;
 		setSecurityManager(securityManager);
+		this.irodsFileSystem = IRODSFileSystemSingletonWrapper.instance();
+		try {
+			this.irodsAccessObjectFactory = irodsFileSystem
+					.getIRODSAccessObjectFactory();
+		} catch (JargonException e) {
+			log.error("error init() irodsAccessObjectFactory", e);
+			throw new WebDavRuntimeException(
+					"cannot create irodsAccessObjectFactory", e);
+		}
 	}
 
 	/**
@@ -82,6 +94,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			io.milton.http.SecurityManager securityManager) {
 		this.root = root;
 		setSecurityManager(securityManager);
+		init(root, securityManager);
 	}
 
 	/**
@@ -100,6 +113,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		this.root = root;
 		setSecurityManager(securityManager);
 		setContextPath(contextPath);
+		init(root, securityManager);
 	}
 
 	@Override

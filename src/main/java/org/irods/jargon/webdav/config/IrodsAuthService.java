@@ -73,8 +73,10 @@ public class IrodsAuthService {
 
 		log.info("authenticating:{}", irodsAccount);
 		try {
-			return irodsAccessObjectFactory
+			AuthResponse response = irodsAccessObjectFactory
 					.authenticateIRODSAccount(irodsAccount);
+			authResponseCache.set(response);
+			return response;
 		} catch (AuthenticationException e) {
 			log.error("auth exception", e);
 			throw e;

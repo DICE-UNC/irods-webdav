@@ -199,6 +199,8 @@ public class IrodsFileResource extends BaseResource implements
 	public void delete() throws NotAuthorizedException, ConflictException,
 			BadRequestException {
 		// TODO Auto-generated method stub
+		
+		here !
 
 	}
 
