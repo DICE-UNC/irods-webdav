@@ -54,12 +54,12 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class FsFileResource extends BaseResource implements CopyableResource,
-		DeletableResource, GetableResource, MoveableResource,
+public class IrodsFileResource extends BaseResource implements
+		CopyableResource, DeletableResource, GetableResource, MoveableResource,
 		ReplaceableResource { // removed PropFindableResource, temporarily
 
 	private static final Logger log = LoggerFactory
-			.getLogger(FsFileResource.class);
+			.getLogger(IrodsFileResource.class);
 
 	private final IRODSFile file;
 
@@ -70,8 +70,9 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 	 * @param factory
 	 * @param file
 	 */
-	public FsFileResource(String host, IrodsFileSystemResourceFactory factory,
-			IRODSFile file, IrodsFileContentService contentService) {
+	public IrodsFileResource(String host,
+			IrodsFileSystemResourceFactory factory, IRODSFile file,
+			IrodsFileContentService contentService) {
 		super(factory, factory.getIrodsAccessObjectFactory(), factory
 				.getWebDavConfig(), contentService);
 
@@ -224,5 +225,12 @@ public class FsFileResource extends BaseResource implements CopyableResource,
 	@Override
 	public Date getModifiedDate() {
 		return new Date(file.lastModified());
+	}
+
+	/**
+	 * @return the file
+	 */
+	public IRODSFile getFile() {
+		return file;
 	}
 }

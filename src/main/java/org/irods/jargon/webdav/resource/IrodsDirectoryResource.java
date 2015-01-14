@@ -57,18 +57,18 @@ import org.slf4j.LoggerFactory;
  * 
  */
 // TODO: left out LockingCollectionResource, for now
-public class FsDirectoryResource extends BaseResource implements
+public class IrodsDirectoryResource extends BaseResource implements
 		CollectionResource, MakeCollectionableResource, PutableResource,
 		CopyableResource, DeletableResource, MoveableResource, GetableResource {
 
 	private static final Logger log = LoggerFactory
-			.getLogger(FsDirectoryResource.class);
+			.getLogger(IrodsDirectoryResource.class);
 
 	private final IrodsFileContentService contentService;
 	private final IRODSFile dir;
 	private final String host;
 
-	public FsDirectoryResource(final String host,
+	public IrodsDirectoryResource(final String host,
 			final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
 			final IrodsFileContentService contentService) {
 		super(factory, factory.getIrodsAccessObjectFactory(), factory
@@ -101,7 +101,7 @@ public class FsDirectoryResource extends BaseResource implements
 			log.error("error creating collection:{}", fnew);
 			throw new WebDavRuntimeException("error creating directory");
 		}
-		return new FsDirectoryResource(host, getFactory(), fnew, contentService);
+		return new IrodsDirectoryResource(host, getFactory(), fnew, contentService);
 	}
 
 	@Override

@@ -7,7 +7,6 @@ import io.milton.http.fs.FsResource;
 import io.milton.http.fs.NullSecurityManager;
 import io.milton.resource.Resource;
 
-import org.irods.jargon.core.connection.auth.AuthResponse;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.io.IRODSFile;
@@ -39,7 +38,9 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	private String ssoPrefix;
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
-	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
+
+	// private static final ThreadLocal<AuthResponse> authResponseCache = new
+	// ThreadLocal<AuthResponse>();
 
 	/**
 	 * Creates and (optionally) initialises the factory. This looks for a
@@ -115,13 +116,13 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			log.debug("file not found: " + file.getAbsolutePath());
 			return null;
 		} else if (file.isDirectory()) {
-			r = new FsDirectoryResource(host, this, file,
+			r = new IrodsDirectoryResource(host, this, file,
 					irodsFileContentService);
 		} else {
-			r = new FsFileResource(host, this, file, irodsFileContentService);
+			r = new IrodsFileResource(host, this, file, irodsFileContentService);
 		}
 		if (r != null) {
-			r.ssoPrefix = ssoPrefix;
+			r.setSsoPrefix(ssoPrefix);
 		}
 		return r;
 	}

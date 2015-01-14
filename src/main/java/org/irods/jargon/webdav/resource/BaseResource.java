@@ -18,7 +18,6 @@ import io.milton.resource.MoveableResource;
 import io.milton.resource.Resource;
 
 import org.irods.jargon.core.connection.IRODSAccount;
-import org.irods.jargon.core.connection.auth.AuthResponse;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.io.IRODSFile;
@@ -38,12 +37,11 @@ import org.slf4j.LoggerFactory;
 public abstract class BaseResource implements Resource, MoveableResource,
 		CopyableResource, DigestResource {
 
-	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
-
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
 	private final IrodsFileSystemResourceFactory factory;
 	private IrodsFileContentService contentService;
+	private String ssoPrefix = null;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(BaseResource.class);
@@ -254,6 +252,37 @@ public abstract class BaseResource implements Resource, MoveableResource,
 			log.trace("authorise: result=" + b);
 		}
 		return b;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see io.milton.resource.Resource#getRealm()
+	 */
+	@Override
+	public String getRealm() {
+		String r = factory.getRealm(this.getWebDavConfig().getHost());
+		if (r == null) {
+			throw new NullPointerException("Got null realm from: "
+					+ factory.getClass() + " for host="
+					+ this.getWebDavConfig().getHost());
+		}
+		return r;
+	}
+
+	/**
+	 * @return the ssoPrefix
+	 */
+	public String getSsoPrefix() {
+		return ssoPrefix;
+	}
+
+	/**
+	 * @param ssoPrefix
+	 *            the ssoPrefix to set
+	 */
+	public void setSsoPrefix(String ssoPrefix) {
+		this.ssoPrefix = ssoPrefix;
 	}
 
 }

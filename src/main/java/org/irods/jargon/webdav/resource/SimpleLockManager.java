@@ -21,17 +21,19 @@ package org.irods.jargon.webdav.resource;
 import io.milton.cache.CacheManager;
 import io.milton.http.Auth;
 import io.milton.http.HttpManager;
-import io.milton.http.LockManager;
 import io.milton.http.LockInfo;
+import io.milton.http.LockManager;
 import io.milton.http.LockResult;
 import io.milton.http.LockTimeout;
 import io.milton.http.LockToken;
 import io.milton.http.Request;
-import io.milton.resource.LockableResource;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.resource.LockableResource;
+
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,8 @@ import org.slf4j.LoggerFactory;
  */
 public class SimpleLockManager implements LockManager {
 
-	private static final Logger log = LoggerFactory.getLogger(SimpleLockManager.class);
+	private static final Logger log = LoggerFactory
+			.getLogger(SimpleLockManager.class);
 
 	private static CurrentLock toCurrentLock(String formattedLock) {
 		if (formattedLock == null) {
@@ -71,7 +74,8 @@ public class SimpleLockManager implements LockManager {
 		long tm = lock.token.getFrom().getTime();
 		String lockedBy = lock.lockedByUser;
 		Long secs = lock.token.timeout.getSeconds();
-		return id + "\n" + token + "\n" + tm + "\n" + lockedBy + "\n" + (secs != null ? secs : "");
+		return id + "\n" + token + "\n" + tm + "\n" + lockedBy + "\n"
+				+ (secs != null ? secs : "");
 	}
 
 	/**
@@ -80,36 +84,44 @@ public class SimpleLockManager implements LockManager {
 	private final Map<String, String> locksByUniqueId;
 	private final Map<String, String> locksByToken;
 
+	@SuppressWarnings("unchecked")
 	public SimpleLockManager(CacheManager cacheManager) {
 		locksByUniqueId = cacheManager.getMap("fuse-locks-byuniqueId");
 		locksByToken = cacheManager.getMap("fuse-locks-bytoken");
 	}
 
 	@Override
-	public LockResult lock(LockTimeout timeout, LockInfo lockInfo, LockableResource r) {
+	public LockResult lock(LockTimeout timeout, LockInfo lockInfo,
+			LockableResource r) {
 		return lock(timeout, lockInfo, r.getUniqueId());
 	}
 
-	public LockResult lock(LockTimeout timeout, LockInfo lockInfo, String uniqueId) {
+	public LockResult lock(LockTimeout timeout, LockInfo lockInfo,
+			String uniqueId) {
 		String token = UUID.randomUUID().toString();
 		return lock(timeout, lockInfo, uniqueId, token);
 	}
 
-	private LockResult lock(LockTimeout timeout, LockInfo lockInfo, LockableResource r, String token) {
+	private LockResult lock(LockTimeout timeout, LockInfo lockInfo,
+			LockableResource r, String token) {
 		return lock(timeout, lockInfo, r.getUniqueId(), token);
 	}
 
-	public synchronized LockResult lock(LockTimeout timeout, LockInfo lockInfo, String uniqueId, String token) {
+	public synchronized LockResult lock(LockTimeout timeout, LockInfo lockInfo,
+			String uniqueId, String token) {
 		LockToken currentLock = currentLock(uniqueId);
 		if (currentLock != null) {
 			return LockResult.failed(LockResult.FailureReason.ALREADY_LOCKED);
 		}
 		LockToken newToken = new LockToken(token, lockInfo, timeout);
-		String lockedByUser = lockInfo.lockedByUser; // Use this by default, but will normally overwrite with current user
+		String lockedByUser = lockInfo.lockedByUser; // Use this by default, but
+														// will normally
+														// overwrite with
+														// current user
 		Request req = HttpManager.request();
 		if (req != null) {
 			Auth auth = req.getAuthorization();
-			if ( auth != null && auth.getUser() != null) {
+			if (auth != null && auth.getUser() != null) {
 				lockedByUser = auth.getUser();
 			}
 		}
@@ -123,15 +135,18 @@ public class SimpleLockManager implements LockManager {
 	}
 
 	@Override
-	public synchronized LockResult refresh(String tokenId, LockableResource resource) {
+	public synchronized LockResult refresh(String tokenId,
+			LockableResource resource) {
 		String sCurLock = locksByToken.get(tokenId);
 		CurrentLock curLock = null;
 		if (sCurLock != null) {
 			curLock = toCurrentLock(sCurLock);
 		}
 
-        // Some clients (yes thats you cadaver) send etags instead of lock tokens in the If header
-		// So if the resource is locked by the current user just do a normal refresh
+		// Some clients (yes thats you cadaver) send etags instead of lock
+		// tokens in the If header
+		// So if the resource is locked by the current user just do a normal
+		// refresh
 		if (curLock == null) {
 			sCurLock = locksByUniqueId.get(resource.getUniqueId());
 			if (sCurLock != null) {
@@ -141,7 +156,9 @@ public class SimpleLockManager implements LockManager {
 
 		if (curLock == null || curLock.token == null) {
 
-			log.warn("attempt to refresh missing token/etaqg: " + tokenId + " on resource: " + resource.getName() + " will create a new lock");
+			log.warn("attempt to refresh missing token/etaqg: " + tokenId
+					+ " on resource: " + resource.getName()
+					+ " will create a new lock");
 			LockTimeout timeout = new LockTimeout(60 * 60l);
 			String lockedByUser = null;
 			Auth auth = HttpManager.request().getAuthorization();
@@ -150,8 +167,11 @@ public class SimpleLockManager implements LockManager {
 			} else {
 				log.warn("No user in context, lock wont be very effective");
 			}
-			LockInfo lockInfo = new LockInfo(LockInfo.LockScope.EXCLUSIVE, LockInfo.LockType.WRITE, lockedByUser, LockInfo.LockDepth.ZERO);
-			return lock(timeout, lockInfo, resource, UUID.randomUUID().toString());
+			LockInfo lockInfo = new LockInfo(LockInfo.LockScope.EXCLUSIVE,
+					LockInfo.LockType.WRITE, lockedByUser,
+					LockInfo.LockDepth.ZERO);
+			return lock(timeout, lockInfo, resource, UUID.randomUUID()
+					.toString());
 		} else {
 			curLock.token.setFrom(new Date());
 			return LockResult.success(curLock.token);
@@ -159,7 +179,8 @@ public class SimpleLockManager implements LockManager {
 	}
 
 	@Override
-	public synchronized void unlock(String tokenId, LockableResource r) throws NotAuthorizedException {
+	public synchronized void unlock(String tokenId, LockableResource r)
+			throws NotAuthorizedException {
 		LockToken lockToken = currentLock(r.getUniqueId());
 		if (lockToken == null) {
 			log.debug("not locked");
@@ -168,7 +189,8 @@ public class SimpleLockManager implements LockManager {
 		if (lockToken.tokenId.equals(tokenId)) {
 			removeLock(lockToken);
 		} else {
-			throw new NotAuthorizedException("Non-matching tokens: " + tokenId + " != " + lockToken.tokenId, r);
+			throw new NotAuthorizedException("Non-matching tokens: " + tokenId
+					+ " != " + lockToken.tokenId, r);
 
 		}
 	}
@@ -209,7 +231,8 @@ public class SimpleLockManager implements LockManager {
 			return null;
 		}
 		if (r.getUniqueId() == null) {
-			log.warn("No uniqueID for resource: " + r.getName() + " :: " + r.getClass());
+			log.warn("No uniqueID for resource: " + r.getName() + " :: "
+					+ r.getClass());
 			return null;
 		}
 		String sLock = locksByUniqueId.get(r.getUniqueId());
@@ -221,7 +244,9 @@ public class SimpleLockManager implements LockManager {
 			return null;
 		}
 		LockToken token = new LockToken();
-		token.info = new LockInfo(LockInfo.LockScope.EXCLUSIVE, LockInfo.LockType.WRITE, lock.lockedByUser, LockInfo.LockDepth.ZERO);
+		token.info = new LockInfo(LockInfo.LockScope.EXCLUSIVE,
+				LockInfo.LockType.WRITE, lock.lockedByUser,
+				LockInfo.LockDepth.ZERO);
 		token.info.lockedByUser = lock.lockedByUser;
 		token.timeout = lock.token.timeout;
 		token.tokenId = lock.token.tokenId;
@@ -252,18 +277,26 @@ public class SimpleLockManager implements LockManager {
 
 		/**
 		 *
-		 * @param uniqueId - unique ID of the resource
-		 * @param tokenId - the lock token
-		 * @param from - the date the lock was from
-		 * @param lockedByUser - who locked it
-		 * @param seconds - seconds to lock the resource for
+		 * @param uniqueId
+		 *            - unique ID of the resource
+		 * @param tokenId
+		 *            - the lock token
+		 * @param from
+		 *            - the date the lock was from
+		 * @param lockedByUser
+		 *            - who locked it
+		 * @param seconds
+		 *            - seconds to lock the resource for
 		 */
-		public CurrentLock(String uniqueId, String tokenId, Date from, String lockedByUser, Long seconds) {
+		public CurrentLock(String uniqueId, String tokenId, Date from,
+				String lockedByUser, Long seconds) {
 			this.id = uniqueId;
 			this.lockedByUser = lockedByUser;
 
 			LockTimeout timeout = new LockTimeout(seconds);
-			LockInfo info = new LockInfo(LockInfo.LockScope.EXCLUSIVE, LockInfo.LockType.WRITE, lockedByUser, LockInfo.LockDepth.ZERO);
+			LockInfo info = new LockInfo(LockInfo.LockScope.EXCLUSIVE,
+					LockInfo.LockType.WRITE, lockedByUser,
+					LockInfo.LockDepth.ZERO);
 			this.token = new LockToken(tokenId, info, timeout);
 			token.setFrom(from);
 		}
