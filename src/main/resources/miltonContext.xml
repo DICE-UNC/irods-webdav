@@ -17,7 +17,7 @@
     </bean>
     
     <bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-        <property name="host" value="consortium.local"/>
+        <property name="host" value="fedzone1.irods.org"/>
         <property name="zone" value="fedZone1"/>
         <property name="port" value="1247"/>
         <property name="authScheme" value="STANDARD"/>

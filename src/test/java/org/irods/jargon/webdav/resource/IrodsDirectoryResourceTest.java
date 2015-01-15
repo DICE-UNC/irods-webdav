@@ -173,7 +173,7 @@ public class IrodsDirectoryResourceTest {
 	public void testGetChildren() throws Exception {
 		String testTargetColl = "testGetChildren";
 
-		int count = 20;
+		int count = 3;
 
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
