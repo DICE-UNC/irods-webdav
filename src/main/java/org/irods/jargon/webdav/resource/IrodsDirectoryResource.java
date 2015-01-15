@@ -21,8 +21,6 @@ package org.irods.jargon.webdav.resource;
 
 import io.milton.http.Auth;
 import io.milton.http.Range;
-import io.milton.http.Request;
-import io.milton.http.Request.Method;
 import io.milton.http.XmlWriter;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -239,9 +237,12 @@ public class IrodsDirectoryResource extends BaseResource implements
 		w.flush();
 	}
 
+	/**
+	 * @{@inheritDoc
+	 */
 	@Override
 	public Long getMaxAgeSeconds(Auth auth) {
-		return null;
+		return getFactory().getMaxAgeSeconds();
 	}
 
 	@Override
@@ -276,16 +277,6 @@ public class IrodsDirectoryResource extends BaseResource implements
 		String s = abUrl.substring(0, pos) + "/" + prefix;
 		s += abUrl.substring(pos);
 		return s;
-	}
-
-	@Override
-	public Object authenticate(String user, String password) {
-		return this.getSecurityManager().authenticate(user, password);
-	}
-
-	@Override
-	public boolean authorise(Request arg0, Method arg1, Auth arg2) {
-		return true; // for now hard code true, iRODS will take care of security
 	}
 
 	@Override
