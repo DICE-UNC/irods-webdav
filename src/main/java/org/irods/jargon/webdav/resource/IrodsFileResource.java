@@ -198,9 +198,10 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException,
 			BadRequestException {
-		// TODO Auto-generated method stub
-		
-		here !
+
+		log.info("delete()");
+		this.file.delete();
+		log.info("deleted");
 
 	}
 

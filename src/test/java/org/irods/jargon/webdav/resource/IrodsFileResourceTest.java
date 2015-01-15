@@ -272,4 +272,138 @@ public class IrodsFileResourceTest {
 		Assert.assertTrue("did not move to target file", expectedFile.exists());
 
 	}
+
+	@Test
+	public void testDelete() throws Exception {
+		// generate a local scratch file
+		String testFileName = "testDelete.pdf";
+		String absPath = scratchFileUtils
+				.createAndReturnAbsoluteScratchPath(IRODS_TEST_SUBDIR_PATH);
+		String localFileName = FileGenerator
+				.generateFileOfFixedLengthGivenName(absPath, testFileName, 2);
+
+		String targetIrodsFile = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testFileName);
+		File localFile = new File(localFileName);
+
+		// now put the file
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+		DataTransferOperations dto = irodsFileSystem
+				.getIRODSAccessObjectFactory().getDataTransferOperations(
+						irodsAccount);
+		IRODSFile destFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
+				.instanceIRODSFile(targetIrodsFile);
+
+		dto.putOperation(localFile, destFile, null, null);
+
+		IrodsSecurityManager manager = Mockito.mock(IrodsSecurityManager.class);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				"/", manager);
+
+		WebDavConfig config = new WebDavConfig();
+		factory.setWebDavConfig(config);
+
+		IrodsFileContentService service = Mockito
+				.mock(IrodsFileContentService.class);
+
+		IrodsFileResource resource = new IrodsFileResource("host", factory,
+				destFile, service);
+
+		resource.delete();
+		Assert.assertFalse("file not deleted", destFile.exists());
+
+	}
+
+	@Test
+	public void testCopyToCol() throws Exception {
+		// generate a local scratch file
+		String testFileName = "testCopyToCol.pdf";
+		String testTargetColl = "testCopyToColTarget";
+		String absPath = scratchFileUtils
+				.createAndReturnAbsoluteScratchPath(IRODS_TEST_SUBDIR_PATH);
+		String localFileName = FileGenerator
+				.generateFileOfFixedLengthGivenName(absPath, testFileName, 2);
+
+		String sourceIrodsFile = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testFileName);
+
+		String targetIrodsColl = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testTargetColl);
+
+		String targetIrodsFile = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testFileName);
+		String targetIrodsFileMoveTo = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testTargetColl + "/" + testFileName);
+		File localFile = new File(localFileName);
+
+		// now put the file
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+		DataTransferOperations dto = irodsFileSystem
+				.getIRODSAccessObjectFactory().getDataTransferOperations(
+						irodsAccount);
+		IRODSFile destFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
+				.instanceIRODSFile(targetIrodsFile);
+
+		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(targetIrodsColl);
+		targetCollection.mkdirs();
+		IRODSFile expectedFile = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(targetIrodsFileMoveTo);
+
+		dto.putOperation(localFile, destFile, null, null);
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				"/", manager);
+
+		factory.setWebDavConfig(config);
+
+		IrodsFileContentService service = Mockito
+				.mock(IrodsFileContentService.class);
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IrodsFileResource resource = new IrodsFileResource("host", factory,
+				destFile, service);
+
+		IrodsDirectoryResource collectionResource = new IrodsDirectoryResource(
+				"host", factory, targetCollection, service);
+
+		resource.copyTo(collectionResource, testFileName);
+
+		Assert.assertTrue("did not copy to target file", expectedFile.exists());
+
+	}
+
 }
