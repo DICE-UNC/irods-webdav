@@ -31,6 +31,7 @@ import io.milton.resource.DeletableResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.resource.MoveableResource;
+import io.milton.resource.PropFindableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
 
@@ -57,7 +58,8 @@ import org.slf4j.LoggerFactory;
 // TODO: left out LockingCollectionResource, for now
 public class IrodsDirectoryResource extends BaseResource implements
 		CollectionResource, MakeCollectionableResource, PutableResource,
-		CopyableResource, DeletableResource, MoveableResource, GetableResource {
+		CopyableResource, DeletableResource, MoveableResource, GetableResource,
+		PropFindableResource {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsDirectoryResource.class);
@@ -86,6 +88,12 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public CollectionResource createCollection(String name) {
+		log.info("createCollection()");
+		if (name == null || name.isEmpty()) {
+			throw new IllegalArgumentException("null or empty name");
+		}
+
+		log.info("name:{}", name);
 		IRODSFile fnew;
 		try {
 			fnew = this.instanceIrodsFileFactory().instanceIRODSFile(
@@ -105,6 +113,12 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public Resource child(String name) {
+		log.info("child()");
+		if (name == null || name.isEmpty()) {
+			throw new IllegalArgumentException("null or empty name");
+		}
+
+		log.info("name:{}", name);
 		IRODSFile fchild;
 		try {
 			fchild = this.instanceIrodsFileFactory().instanceIRODSFile(
@@ -119,12 +133,15 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public List<? extends Resource> getChildren() {
+		log.info("getChildren()");
+		log.info("for dir:{}", dir);
 		ArrayList<BaseResource> list = new ArrayList<BaseResource>();
 		File[] files = this.dir.listFiles();
 		if (files != null) {
 			for (File fchild : files) {
 				BaseResource res = getFactory().resolveFile(this.host,
 						(IRODSFile) fchild);
+				log.info("added as child:{}", res);
 				if (res != null) {
 					list.add(res);
 				} else {
@@ -410,6 +427,11 @@ public class IrodsDirectoryResource extends BaseResource implements
 	 */
 	public IRODSFile getDir() {
 		return dir;
+	}
+
+	@Override
+	public Date getCreateDate() {
+		return null;
 	}
 
 }

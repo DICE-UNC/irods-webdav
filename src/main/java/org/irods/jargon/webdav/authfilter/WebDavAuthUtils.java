@@ -42,10 +42,10 @@ public class WebDavAuthUtils {
 	 * 
 	 * @param basicAuthData
 	 * @param restConfiguration
-	 * @return
+	 * @return {@link UserAndPassword}
 	 * @throws JargonException
 	 */
-	public static IRODSAccount getIRODSAccountFromBasicAuthValues(
+	public static UserAndPassword getAccountFromBasicAuthValues(
 			final String basicAuthData, final WebDavConfig webDavConfig)
 			throws JargonException {
 
@@ -80,8 +80,10 @@ public class WebDavAuthUtils {
 
 		log.info("webDavConfig:{}", webDavConfig);
 
-		return null; // FIXME: derive creds
-
+		UserAndPassword userAndPassword = new UserAndPassword();
+		userAndPassword.setUserId(credentials[0]);
+		userAndPassword.setPassword(credentials[1]);
+		return userAndPassword;
 	}
 
 }

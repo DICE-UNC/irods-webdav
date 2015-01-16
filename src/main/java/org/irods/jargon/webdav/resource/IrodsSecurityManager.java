@@ -13,7 +13,7 @@ import io.milton.resource.Resource;
 import org.irods.jargon.core.connection.auth.AuthResponse;
 import org.irods.jargon.core.exception.AuthenticationException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
-import org.irods.jargon.webdav.config.IrodsAuthService;
+import org.irods.jargon.webdav.authfilter.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.irods.jargon.webdav.exception.WebDavException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;

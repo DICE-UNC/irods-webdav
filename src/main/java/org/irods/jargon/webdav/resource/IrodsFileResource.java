@@ -34,6 +34,7 @@ import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.GetableResource;
 import io.milton.resource.MoveableResource;
+import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReplaceableResource;
 
 import java.io.FileNotFoundException;
@@ -56,7 +57,9 @@ import org.slf4j.LoggerFactory;
  */
 public class IrodsFileResource extends BaseResource implements
 		CopyableResource, DeletableResource, GetableResource, MoveableResource,
-		ReplaceableResource { // removed PropFindableResource, temporarily
+		ReplaceableResource, PropFindableResource { // removed
+													// PropFindableResource,
+													// temporarily
 
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileResource.class);
@@ -235,5 +238,10 @@ public class IrodsFileResource extends BaseResource implements
 	 */
 	public IRODSFile getFile() {
 		return file;
+	}
+
+	@Override
+	public Date getCreateDate() {
+		return null;
 	}
 }

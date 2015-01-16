@@ -12,7 +12,7 @@ import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.IRODSFileSystemSingletonWrapper;
 import org.irods.jargon.core.pub.io.IRODSFile;
-import org.irods.jargon.webdav.config.IrodsAuthService;
+import org.irods.jargon.webdav.authfilter.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
@@ -121,18 +121,25 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		log.debug("getResource: host: " + host + " - url:" + url);
 		url = stripContext(url);
 		IRODSFile requested = resolvePath(root, url);
-		return resolveFile(host, requested);
+		BaseResource resolvedResource = resolveFile(host, requested);
+		log.info("resolved as resource:{}", resolvedResource);
+		return resolvedResource;
 	}
 
 	public BaseResource resolveFile(String host, IRODSFile file) {
+		log.info("resolveFile()");
+		log.info("host:{}", host);
+		log.info("file:{}", file);
 		BaseResource r;
 		if (!file.exists()) {
-			log.debug("file not found: " + file.getAbsolutePath());
+			log.warn("file not found: " + file.getAbsolutePath());
 			return null;
 		} else if (file.isDirectory()) {
+			log.info("file is a dir");
 			r = new IrodsDirectoryResource(host, this, file,
 					irodsFileContentService);
 		} else {
+			log.info("file is a data object");
 			r = new IrodsFileResource(host, this, file, irodsFileContentService);
 		}
 		if (r != null) {
@@ -168,7 +175,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 				f = this.getIrodsAccessObjectFactory()
 						.getIRODSFileFactory(
 								IrodsAuthService.retrieveCurrentIrodsAccount())
-						.instanceIRODSFile(root, s);
+						.instanceIRODSFile(f.getAbsolutePath(), s);
 			}
 			log.info("resolved as:{}", f);
 			return f;

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.irods.jargon.webdav.config;
+package org.irods.jargon.webdav.authfilter;
 
 import org.irods.jargon.core.connection.AuthScheme;
 import org.irods.jargon.core.connection.IRODSAccount;
@@ -9,6 +9,7 @@ import org.irods.jargon.core.connection.auth.AuthResponse;
 import org.irods.jargon.core.exception.AuthenticationException;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.webdav.config.WebDavConfig;
 import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
 import org.irods.jargon.webdav.exception.WebDavException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
@@ -57,6 +58,24 @@ public class IrodsAuthService {
 		if (password == null || password.isEmpty()) {
 			throw new IllegalArgumentException("null or empty password");
 		}
+
+		log.info("look in cache for cached login");
+		AuthResponse cached = authResponseCache.get();
+
+		if (cached != null) {
+			log.info("in thread local cache");
+			if (!cached.getAuthenticatingIRODSAccount().getUserName()
+					.equals(userName)) {
+				log.warn("cache is not same as user name");
+			} else {
+				return cached;
+			}
+		}
+
+		/*
+		 * Did not hit the thread local cache
+		 */
+		log.info("login to irods and cache");
 
 		IRODSAccount irodsAccount;
 		try {

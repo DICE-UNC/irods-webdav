@@ -27,24 +27,26 @@
 		<property name="irodsAuthService" ref="irodsAuthService" />
 	</bean>
 
-	<bean id="irodsAuthService" class="org.irods.jargon.webdav.config.IrodsAuthService">
+	<bean id="irodsAuthService" class="org.irods.jargon.webdav.authfilter.IrodsAuthService">
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 	</bean>
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/" />
+		<constructor-arg value="/test1/home/test1" />
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
+		<property name="contextPath" value="irods-webdav-0.0.1-SNAPSHOT" />
 	</bean>
 
 	<bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
 		<property name="mainResourceFactory" ref="resource.factory" />
 		<property name="enableCompression" value="false" />
 		<property name="buffering" value="never" />
+		<property name="enableCookieAuth" value="false" />
 	</bean>
 
 	<bean id="irodsConnectionManager"
@@ -66,6 +68,6 @@
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="irodsAuthService" ref="irodsAuthService" />
 	</bean>
-	
+
 
 </beans>

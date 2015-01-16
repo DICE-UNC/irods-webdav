@@ -99,10 +99,6 @@ version="2.4">
             <param-name>contextConfigLocation</param-name>    
             <param-value>classpath:miltonContext.xml</param-value>
         </init-param>
-         <init-param>
-        <param-name>authenticationHandlers</param-name>
-        <param-value>io.milton.http.http11.auth.BasicAuthHandler</param-value>
-      </init-param>
     </filter>
     
     <filter-mapping>

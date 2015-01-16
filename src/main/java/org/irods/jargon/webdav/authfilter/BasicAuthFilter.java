@@ -14,11 +14,9 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.connection.auth.AuthResponse;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
-import org.irods.jargon.webdav.config.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,13 +76,13 @@ public class BasicAuthFilter implements Filter {
 
 		AuthResponse authResponse = null;
 		try {
-			IRODSAccount irodsAccount = WebDavAuthUtils
-					.getIRODSAccountFromBasicAuthValues(auth, webDavConfig);
 
-			log.info("irods account for auth:{}", irodsAccount);
+			UserAndPassword userAndPassword = WebDavAuthUtils
+					.getAccountFromBasicAuthValues(auth, webDavConfig);
+			log.info("account for auth:{}", userAndPassword.getUserId());
 
-			authResponse = irodsAccessObjectFactory
-					.authenticateIRODSAccount(irodsAccount);
+			authResponse = irodsAuthService.authenticate(
+					userAndPassword.getUserId(), userAndPassword.getPassword());
 
 			log.info("authResponse:{}", authResponse);
 			log.info("success!");
