@@ -16,6 +16,7 @@ public class WebDavConfig {
 	private int port = 0;
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
+	private String realm = "irods";
 
 	/**
 	 * 
@@ -128,9 +129,29 @@ public class WebDavConfig {
 		if (authScheme != null) {
 			builder.append("authScheme=");
 			builder.append(authScheme);
+			builder.append(", ");
+		}
+		if (realm != null) {
+			builder.append("realm=");
+			builder.append(realm);
 		}
 		builder.append("]");
 		return builder.toString();
+	}
+
+	/**
+	 * @return the realm
+	 */
+	public String getRealm() {
+		return realm;
+	}
+
+	/**
+	 * @param realm
+	 *            the realm to set
+	 */
+	public void setRealm(String realm) {
+		this.realm = realm;
 	}
 
 }

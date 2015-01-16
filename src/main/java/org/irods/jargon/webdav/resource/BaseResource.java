@@ -9,10 +9,8 @@ import io.milton.http.Request.Method;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
-import io.milton.resource.DigestResource;
 import io.milton.resource.MoveableResource;
 import io.milton.resource.Resource;
 
@@ -34,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class BaseResource implements Resource, MoveableResource,
-		CopyableResource, DigestResource {
+		CopyableResource {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
@@ -231,16 +229,6 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	@Override
 	public Object authenticate(String user, String password) {
 		return factory.getSecurityManager().authenticate(user, password);
-	}
-
-	@Override
-	public Object authenticate(DigestResponse digestRequest) {
-		return factory.getSecurityManager().authenticate(digestRequest);
-	}
-
-	@Override
-	public boolean isDigestAllowed() {
-		return factory.isDigestAllowed();
 	}
 
 	@Override
