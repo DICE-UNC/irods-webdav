@@ -132,7 +132,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		log.info("file:{}", file);
 		BaseResource r;
 		if (!file.exists()) {
-			log.warn("file not found: " + file.getAbsolutePath());
+			log.info("file not found, will return shell iRODS file: {}",
+					file.getAbsolutePath());
 			return null;
 		} else if (file.isDirectory()) {
 			log.info("file is a dir");
@@ -155,9 +156,10 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			throw new IllegalArgumentException("null or empty root");
 		}
 
-		if (url == null || url.isEmpty()) {
-			throw new IllegalArgumentException("null or empty url");
-		}
+		/*
+		 * if (url == null || url.isEmpty()) { throw new
+		 * IllegalArgumentException("null or empty url"); }
+		 */
 
 		log.info("root:{}", root);
 		log.info("url:{}", url);

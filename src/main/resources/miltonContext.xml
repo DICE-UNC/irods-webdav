@@ -14,8 +14,8 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="consortium.local" />
-		<property name="zone" value="test1" />
+		<property name="host" value="fedzone1.irods.org" />
+		<property name="zone" value="fedZone1" />
 		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
 		<property name="defaultStorageResource" value="test1-resc" />
@@ -34,12 +34,13 @@
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/test1/home/test1" />
+		<constructor-arg value="/fedZone1/home/test1" />
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="contextPath" value="irods-webdav-0.0.1-SNAPSHOT" />
+		<property name="contentService" ref="irodsFileContentService" />
 	</bean>
 
 	<bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">

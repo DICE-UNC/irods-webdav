@@ -88,11 +88,14 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	public Long getContentLength() {
-		return file.length();
+		log.info("getContentLength()");
+		long length = file.length();
+		return length;
 	}
 
 	@Override
 	public String getContentType(String preferredList) {
+		log.info("getContentType()");
 		String mime = ContentTypeUtils.findContentTypes(this.file.getName());
 		String s = ContentTypeUtils.findAcceptableContentType(mime,
 				preferredList);
@@ -100,6 +103,7 @@ public class IrodsFileResource extends BaseResource implements
 			log.trace("getContentType: preferred: {} mime: {} selected: {}",
 					new Object[] { preferredList, mime, s });
 		}
+		log.info("content type:{}", s);
 		return s;
 	}
 
@@ -107,10 +111,13 @@ public class IrodsFileResource extends BaseResource implements
 	public void sendContent(OutputStream out, Range range,
 			Map<String, String> params, String contentType) throws IOException,
 			NotFoundException {
+		log.info("sendContent()");
 		InputStream in = null;
 		try {
+			log.debug("getting input stream...");
 			in = this.getContentService().getFileContent(file,
 					retrieveIrodsAccount());
+			log.debug("got input stream...");
 			if (range != null) {
 				log.debug("sendContent: ranged content: "
 						+ file.getAbsolutePath());
@@ -144,6 +151,9 @@ public class IrodsFileResource extends BaseResource implements
 	public void replaceContent(InputStream in, Long length)
 			throws BadRequestException, ConflictException,
 			NotAuthorizedException {
+
+		log.info("replaceContent()");
+
 		try {
 			getContentService().setFileContent(file, in,
 					this.retrieveIrodsAccount());
