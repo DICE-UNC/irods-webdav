@@ -66,6 +66,7 @@ public class IrodsFileContentService implements FileContentService {
 			throw new IllegalArgumentException("null irodsAccount");
 		}
 
+		log.info("doing transfer");
 		try {
 			Stream2StreamAO stream2Stream = irodsAccessObjectFactory
 					.getStream2StreamAO(irodsAccount);

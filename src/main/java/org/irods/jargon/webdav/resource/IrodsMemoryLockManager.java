@@ -25,7 +25,6 @@ import io.milton.http.LockResult;
 import io.milton.http.LockTimeout;
 import io.milton.http.LockToken;
 import io.milton.http.exceptions.NotAuthorizedException;
-import io.milton.http.fs.FsResource;
 import io.milton.resource.LockableResource;
 
 import java.util.Date;
@@ -66,9 +65,9 @@ public class IrodsMemoryLockManager implements LockManager {
 
 		LockToken newToken = new LockToken(UUID.randomUUID().toString(),
 				lockInfo, timeout);
-		CurrentLock newLock = new CurrentLock(resource.getFile(), newToken,
-				lockInfo.lockedByUser);
-		locksByFile.put(resource.getFile(), newLock);
+		CurrentLock newLock = new CurrentLock(resource.getIrodsFile(),
+				newToken, lockInfo.lockedByUser);
+		locksByFile.put(resource.getIrodsFile(), newLock);
 		locksByToken.put(newToken.tokenId, newLock);
 		return LockResult.success(newToken);
 	}
@@ -104,7 +103,7 @@ public class IrodsMemoryLockManager implements LockManager {
 	}
 
 	private LockToken currentLock(IrodsFileResource resource) {
-		CurrentLock curLock = locksByFile.get(resource.getFile());
+		CurrentLock curLock = locksByFile.get(resource.getIrodsFile());
 		if (curLock == null)
 			return null;
 		LockToken token = curLock.token;
@@ -129,8 +128,8 @@ public class IrodsMemoryLockManager implements LockManager {
 
 	@Override
 	public LockToken getCurrentToken(LockableResource r) {
-		FsResource resource = (FsResource) r;
-		CurrentLock lock = locksByFile.get(resource.getFile());
+		BaseResource resource = (BaseResource) r;
+		CurrentLock lock = locksByFile.get(resource.getIrodsFile());
 		if (lock == null)
 			return null;
 		LockToken token = new LockToken();

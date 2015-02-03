@@ -14,9 +14,9 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="diamond.ils.unc.edu" />
-		<property name="zone" value="lifelibZone" />
-		<property name="port" value="2247" />
+		<property name="host" value="consortium.local" />
+		<property name="zone" value="test1" />
+		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
 		<property name="defaultStorageResource" value="test1-resc" />
 	</bean>
@@ -31,16 +31,19 @@
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 	</bean>
+	
+	<bean id="lockManager" class="org.irods.jargon.webdav.resource.IrodsMemoryLockManager"></bean>
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/fedZone1/home/test1" />
+		<constructor-arg value="/test1/home/test1" />
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="contextPath" value="irods-webdav-0.0.1-SNAPSHOT" />
 		<property name="contentService" ref="irodsFileContentService" />
+		<property name="lockManager" ref="lockManager" />
 	</bean>
 
 	<bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
