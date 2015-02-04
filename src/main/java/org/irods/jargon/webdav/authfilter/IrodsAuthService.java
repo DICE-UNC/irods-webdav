@@ -49,7 +49,7 @@ public class IrodsAuthService {
 	public AuthResponse authenticate(final String userName,
 			final String password) throws AuthenticationException,
 			WebDavException {
-		log.info("authenticate()");
+		log.debug("authenticate()");
 
 		if (userName == null || userName.isEmpty()) {
 			throw new IllegalArgumentException("null or empty userName");
@@ -59,11 +59,11 @@ public class IrodsAuthService {
 			throw new IllegalArgumentException("null or empty password");
 		}
 
-		log.info("look in cache for cached login");
+		log.debug("look in cache for cached login");
 		AuthResponse cached = authResponseCache.get();
 
 		if (cached != null) {
-			log.info("in thread local cache");
+			log.debug("in thread local cache");
 			if (!cached.getAuthenticatingIRODSAccount().getUserName()
 					.equals(userName)) {
 				log.warn("cache is not same as user name");
@@ -75,7 +75,7 @@ public class IrodsAuthService {
 		/*
 		 * Did not hit the thread local cache
 		 */
-		log.info("login to irods and cache");
+		log.debug("login to irods and cache");
 
 		IRODSAccount irodsAccount;
 		try {
@@ -90,7 +90,7 @@ public class IrodsAuthService {
 					"null irodsAccessObjectFactory");
 		}
 
-		log.info("authenticating:{}", irodsAccount);
+		log.debug("authenticating:{}", irodsAccount);
 		try {
 			AuthResponse response = irodsAccessObjectFactory
 					.authenticateIRODSAccount(irodsAccount);
@@ -120,7 +120,7 @@ public class IrodsAuthService {
 	public IRODSAccount getIrodsAccountFromAuthValues(final String userName,
 			final String password) throws JargonException {
 
-		log.info("getIrodsAccountFromAuthValues");
+		log.debug("getIrodsAccountFromAuthValues");
 
 		if (userName == null || userName.isEmpty()) {
 			throw new IllegalArgumentException("null or empty userName");
@@ -138,15 +138,15 @@ public class IrodsAuthService {
 		AuthScheme authScheme;
 		if (webDavConfig.getAuthScheme() == null
 				|| webDavConfig.getAuthScheme().isEmpty()) {
-			log.info("unspecified authScheme, use STANDARD");
+			log.debug("unspecified authScheme, use STANDARD");
 			authScheme = AuthScheme.STANDARD;
 		} else if (webDavConfig.getAuthScheme().equals(
 				AuthScheme.STANDARD.toString())) {
-			log.info("using standard auth");
+			log.debug("using standard auth");
 			authScheme = AuthScheme.STANDARD;
 		} else if (webDavConfig.getAuthScheme().equals(
 				AuthScheme.PAM.toString())) {
-			log.info("using PAM");
+			log.debug("using PAM");
 			authScheme = AuthScheme.PAM;
 		} else {
 			log.error("cannot support authScheme:{}", webDavConfig);
@@ -170,7 +170,7 @@ public class IrodsAuthService {
 	 */
 	public static IRODSAccount retrieveIrodsAccountFromAuthResponse(
 			final AuthResponse authResponse) {
-		log.info("retrieveIrodsAccountAssociatedWithThread()");
+		log.debug("retrieveIrodsAccountAssociatedWithThread()");
 		if (authResponse == null) {
 			throw new IllegalArgumentException("null authResponse");
 		}
@@ -186,7 +186,7 @@ public class IrodsAuthService {
 	 *         credential
 	 */
 	public static IRODSAccount retrieveCurrentIrodsAccount() {
-		log.info("retrieveCurrentIrodsAccount()");
+		log.debug("retrieveCurrentIrodsAccount()");
 		AuthResponse authResponse = authResponseCache.get();
 		if (authResponse == null) {
 			throw new WebDavRuntimeException("no authResponseCache value");

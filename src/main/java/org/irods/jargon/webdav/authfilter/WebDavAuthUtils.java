@@ -49,7 +49,7 @@ public class WebDavAuthUtils {
 			final String basicAuthData, final WebDavConfig webDavConfig)
 			throws JargonException {
 
-		log.info("getIRODSAccountFromBasicAuthValues");
+		log.debug("getIRODSAccountFromBasicAuthValues");
 
 		if (basicAuthData == null || basicAuthData.isEmpty()) {
 			throw new IllegalArgumentException("null or empty basicAuthData");
@@ -60,25 +60,25 @@ public class WebDavAuthUtils {
 		}
 
 		final int index = basicAuthData.indexOf(' ');
-		log.info("index of end of basic prefix:{}", index);
+		log.debug("index of end of basic prefix:{}", index);
 		String auth = basicAuthData.substring(index);
 
 		String decoded = new String(Base64.decodeBase64(auth));
 
-		log.info("index of end of basic prefix:{}", index);
+		log.debug("index of end of basic prefix:{}", index);
 		if (decoded.isEmpty()) {
 			throw new JargonException("user and password not in credentials");
 
 		}
 		final String[] credentials = decoded.split(":");
 
-		log.info("credentials:{}", credentials);
+		log.debug("credentials:{}", credentials);
 
 		if (credentials.length != 2) {
 			throw new JargonException("user and password not in credentials");
 		}
 
-		log.info("webDavConfig:{}", webDavConfig);
+		log.debug("webDavConfig:{}", webDavConfig);
 
 		UserAndPassword userAndPassword = new UserAndPassword();
 		userAndPassword.setUserId(credentials[0]);

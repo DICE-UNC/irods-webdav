@@ -33,6 +33,7 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.GetableResource;
+import io.milton.resource.LockableResource;
 import io.milton.resource.LockingCollectionResource;
 import io.milton.resource.MakeCollectionableResource;
 import io.milton.resource.MoveableResource;
@@ -64,7 +65,7 @@ import org.slf4j.LoggerFactory;
 public class IrodsDirectoryResource extends BaseResource implements
 		CollectionResource, MakeCollectionableResource, PutableResource,
 		CopyableResource, DeletableResource, MoveableResource, GetableResource,
-		PropFindableResource, LockingCollectionResource {
+		PropFindableResource, LockingCollectionResource, LockableResource {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsDirectoryResource.class);
@@ -357,23 +358,25 @@ public class IrodsDirectoryResource extends BaseResource implements
 		log.info("destinationPath:{}", destinationPath);
 		log.info("newName:{}", newName);
 
-		IRODSFile file;
-		IRODSFile destFile;
+		// IrodsDirectoryResource dirResource = (IrodsDirectoryResource)
+		// destinationPath;
+
+		// IRODSFile file;
+		// IRODSFile destFile;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
 
-			destFile = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
-			file.renameTo(destFile);
+			IRODSFile destFile = this.fileFromCollectionResource(
+					destinationPath, newName);
 
-			/*
-			 * DataTransferOperations dto = this.getIrodsAccessObjectFactory()
-			 * .getDataTransferOperations(this.retrieveIrodsAccount());
-			 * 
-			 * log.info("doing a move from source:{}", this.getIrodsFile());
-			 * dto.move(file, destFile);
-			 */
+			log.info("dest file:{}", destFile);
+			// file.renameTo(destFile);
+
+			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
+					.getDataTransferOperations(this.retrieveIrodsAccount());
+
+			log.info("doing a move from source:{}", this.getIrodsFile());
+			dto.move(this.getIrodsFile(), destFile);
+
 			log.info("move completed");
 
 		} catch (JargonException e) {

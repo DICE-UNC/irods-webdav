@@ -62,10 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 public class IrodsFileResource extends BaseResource implements
 		CopyableResource, DeletableResource, GetableResource, MoveableResource,
-		ReplaceableResource, PropFindableResource, LockableResource { // removed
-	// PropFindableResource,
-	// temporarily
-
+		ReplaceableResource, PropFindableResource, LockableResource {
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileResource.class);
 
@@ -244,6 +241,7 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	public Date getModifiedDate() {
+		log.info("getModifiedDate()");
 		return new Date(this.getIrodsFile().lastModified());
 	}
 
