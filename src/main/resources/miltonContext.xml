@@ -34,12 +34,12 @@
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/fedZone1/home/test1" />
+		<constructor-arg value="/" />
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
-		<property name="contextPath" value="irods-webdav-0.0.1-SNAPSHOT" />
+		<property name="contextPath" value="irods-webdav" />
 		<property name="contentService" ref="irodsFileContentService" />
 	</bean>
 

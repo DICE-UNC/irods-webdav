@@ -1,5 +1,5 @@
 package org.irods.jargon.webdav.utils;
 public final class IrodsWebdavVersion {
  public static String VERSION="0.0.1-SNAPSHOT";
- public static String BUILD_TIME="20150121-1232";
+ public static String BUILD_TIME="20150128-1427";
 }
