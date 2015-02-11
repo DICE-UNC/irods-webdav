@@ -61,7 +61,7 @@ public class BasicAuthFilter implements Filter {
 			final ServletResponse response, final FilterChain chain)
 			throws IOException, ServletException {
 
-		log.info("doFilter()");
+		log.debug("doFilter()");
 
 		final HttpServletRequest httpRequest = (HttpServletRequest) request;
 		final HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -79,13 +79,13 @@ public class BasicAuthFilter implements Filter {
 
 			UserAndPassword userAndPassword = WebDavAuthUtils
 					.getAccountFromBasicAuthValues(auth, webDavConfig);
-			log.info("account for auth:{}", userAndPassword.getUserId());
+			log.debug("account for auth:{}", userAndPassword.getUserId());
 
 			authResponse = irodsAuthService.authenticate(
 					userAndPassword.getUserId(), userAndPassword.getPassword());
 
-			log.info("authResponse:{}", authResponse);
-			log.info("success!");
+			log.debug("authResponse:{}", authResponse);
+			log.debug("success!");
 
 			chain.doFilter(httpRequest, httpResponse);
 			return;

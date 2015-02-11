@@ -24,6 +24,10 @@ import io.milton.common.RangeUtils;
 import io.milton.common.ReadingException;
 import io.milton.common.WritingException;
 import io.milton.http.Auth;
+import io.milton.http.LockInfo;
+import io.milton.http.LockResult;
+import io.milton.http.LockTimeout;
+import io.milton.http.LockToken;
 import io.milton.http.Range;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
@@ -33,6 +37,7 @@ import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
 import io.milton.resource.GetableResource;
+import io.milton.resource.LockableResource;
 import io.milton.resource.MoveableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReplaceableResource;
@@ -57,14 +62,9 @@ import org.slf4j.LoggerFactory;
  */
 public class IrodsFileResource extends BaseResource implements
 		CopyableResource, DeletableResource, GetableResource, MoveableResource,
-		ReplaceableResource, PropFindableResource { // removed
-													// PropFindableResource,
-													// temporarily
-
+		ReplaceableResource, PropFindableResource, LockableResource {
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileResource.class);
-
-	private final IRODSFile file;
 
 	/**
 	 * 
@@ -83,20 +83,21 @@ public class IrodsFileResource extends BaseResource implements
 			throw new IllegalArgumentException("null file");
 		}
 
-		this.file = file;
+		this.setIrodsFile(file);
 	}
 
 	@Override
 	public Long getContentLength() {
 		log.info("getContentLength()");
-		long length = file.length();
+		long length = this.getIrodsFile().length();
 		return length;
 	}
 
 	@Override
 	public String getContentType(String preferredList) {
 		log.info("getContentType()");
-		String mime = ContentTypeUtils.findContentTypes(this.file.getName());
+		String mime = ContentTypeUtils.findContentTypes(this.getIrodsFile()
+				.getName());
 		String s = ContentTypeUtils.findAcceptableContentType(mime,
 				preferredList);
 		if (log.isTraceEnabled()) {
@@ -115,16 +116,16 @@ public class IrodsFileResource extends BaseResource implements
 		InputStream in = null;
 		try {
 			log.debug("getting input stream...");
-			in = this.getContentService().getFileContent(file,
+			in = this.getContentService().getFileContent(this.getIrodsFile(),
 					retrieveIrodsAccount());
 			log.debug("got input stream...");
 			if (range != null) {
 				log.debug("sendContent: ranged content: "
-						+ file.getAbsolutePath());
+						+ this.getIrodsFile().getAbsolutePath());
 				RangeUtils.writeRange(in, range, out);
 			} else {
 				log.debug("sendContent: send whole file "
-						+ file.getAbsolutePath());
+						+ this.getIrodsFile().getAbsolutePath());
 				IOUtils.copy(in, out);
 			}
 			out.flush();
@@ -155,22 +156,22 @@ public class IrodsFileResource extends BaseResource implements
 		log.info("replaceContent()");
 
 		try {
-			getContentService().setFileContent(file, in,
+			getContentService().setFileContent(this.getIrodsFile(), in,
 					this.retrieveIrodsAccount());
 		} catch (IOException ex) {
 			throw new BadRequestException("Couldnt write to: "
-					+ file.getAbsolutePath(), ex);
+					+ this.getIrodsFile().getAbsolutePath(), ex);
 		}
 	}
 
 	@Override
 	public String getName() {
-		return file.getName();
+		return this.getIrodsFile().getName();
 	}
 
 	@Override
 	public String getUniqueId() {
-		return file.toString();
+		return this.getIrodsFile().toString();
 	}
 
 	@Override
@@ -198,8 +199,8 @@ public class IrodsFileResource extends BaseResource implements
 			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
 					.getDataTransferOperations(this.retrieveIrodsAccount());
 
-			log.info("doing a move from source:{}", this.file);
-			dto.move(file, destFile);
+			log.info("doing a move from source:{}", this.getIrodsFile());
+			dto.move(this.getIrodsFile(), destFile);
 			log.info("move completed");
 
 		} catch (JargonException e) {
@@ -213,7 +214,7 @@ public class IrodsFileResource extends BaseResource implements
 			BadRequestException {
 
 		log.info("delete()");
-		this.file.delete();
+		this.getIrodsFile().delete();
 		log.info("deleted");
 
 	}
@@ -227,8 +228,8 @@ public class IrodsFileResource extends BaseResource implements
 			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
 					.getDataTransferOperations(this.retrieveIrodsAccount());
 
-			log.info("doing a copy from source:{}", this.file);
-			dto.copy(file, dest, null, null);
+			log.info("doing a copy from source:{}", this.getIrodsFile());
+			dto.copy(this.getIrodsFile(), dest, null, null);
 			log.info("copy completed");
 
 		} catch (JargonException e) {
@@ -240,18 +241,39 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	public Date getModifiedDate() {
-		return new Date(file.lastModified());
-	}
-
-	/**
-	 * @return the file
-	 */
-	public IRODSFile getFile() {
-		return file;
+		log.info("getModifiedDate()");
+		return new Date(this.getIrodsFile().lastModified());
 	}
 
 	@Override
 	public Date getCreateDate() {
 		return null;
+	}
+
+	@Override
+	public LockResult lock(LockTimeout timeout, LockInfo lockInfo)
+			throws NotAuthorizedException {
+		return getFactory().getLockManager().lock(timeout, lockInfo, this);
+	}
+
+	@Override
+	public LockResult refreshLock(String token) throws NotAuthorizedException {
+		return getFactory().getLockManager().refresh(token, this);
+	}
+
+	@Override
+	public void unlock(String tokenId) throws NotAuthorizedException {
+		getFactory().getLockManager().unlock(tokenId, this);
+	}
+
+	@Override
+	public LockToken getCurrentLock() {
+		if (getFactory().getLockManager() != null) {
+			return getFactory().getLockManager().getCurrentToken(this);
+		} else {
+			log.warn("getCurrentLock called, but no lock manager: file: "
+					+ this.getIrodsFile().getAbsolutePath());
+			return null;
+		}
 	}
 }

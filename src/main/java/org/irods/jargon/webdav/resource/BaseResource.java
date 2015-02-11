@@ -11,6 +11,7 @@ import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
+import io.milton.resource.LockableResource;
 import io.milton.resource.MoveableResource;
 import io.milton.resource.Resource;
 
@@ -32,13 +33,14 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public abstract class BaseResource implements Resource, MoveableResource,
-		CopyableResource {
+		CopyableResource, LockableResource {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
 	private final IrodsFileSystemResourceFactory factory;
 	private IrodsFileContentService contentService;
 	private String ssoPrefix = null;
+	private IRODSFile irodsFile = null;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(BaseResource.class);
@@ -168,7 +170,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 				IrodsDirectoryResource newFsParent = (IrodsDirectoryResource) collectionResource;
 
 				dest = this.instanceIrodsFileFactory().instanceIRODSFile(
-						newFsParent.getDir().getAbsolutePath(), name);
+						newFsParent.getIrodsFile().getAbsolutePath(), name);
 				return dest;
 			} catch (JargonException e) {
 				log.error("jargon exception on copy", e);
@@ -270,6 +272,21 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	 */
 	public void setSsoPrefix(String ssoPrefix) {
 		this.ssoPrefix = ssoPrefix;
+	}
+
+	/**
+	 * @return the irodsFile
+	 */
+	public IRODSFile getIrodsFile() {
+		return irodsFile;
+	}
+
+	/**
+	 * @param irodsFile
+	 *            the irodsFile to set
+	 */
+	public void setIrodsFile(IRODSFile irodsFile) {
+		this.irodsFile = irodsFile;
 	}
 
 }
