@@ -71,12 +71,6 @@ public class IrodsSecurityManager implements SecurityManager {
 		log.info("authenticate()");
 		clearThreadlocals();
 
-		// user name will include domain when coming from ftp. we just strip it
-		// off
-		if (userName.contains("@")) {
-			userName = userName.substring(0, userName.indexOf("@"));
-		}
-
 		try {
 			AuthResponse authResponse = irodsAuthService.authenticate(userName,
 					password);
