@@ -70,7 +70,7 @@ public class WebDavAuthUtils {
 			throw new JargonException("user and password not in credentials");
 
 		}
-		final String[] credentials = decoded.split(":");
+		final String[] credentials = decoded.split(":", 2);
 
 		log.debug("credentials:{}", credentials);
 
