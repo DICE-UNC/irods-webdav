@@ -203,10 +203,11 @@ public class IrodsDirectoryResource extends BaseResource implements
 			throw new WebDavRuntimeException("error getting root file", e);
 		}
 
-		String subpath = this.getIrodsFile().getCanonicalPath()
-				.substring(rootFile.getCanonicalPath().length())
-				.replace('\\', '/');
-		String uri = subpath;
+		String subpath = this.getIrodsFile().getCanonicalPath();
+		if (rootFile.getCanonicalPath().length() > 1)
+			subpath = subpath.substring(rootFile.getCanonicalPath().length());
+		String uri = subpath.replace('\\', '/');
+
 		// String uri = "/" + factory.getContextPath() + subpath;
 		XmlWriter w = new XmlWriter(out);
 		w.open("html");
