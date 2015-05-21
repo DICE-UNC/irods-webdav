@@ -15,6 +15,7 @@
 		<maven.compiler.target>1.7</maven.compiler.target>
 		<milton.version>2.6.5.3</milton.version>
 		<spring.version>3.2.13.RELEASE</spring.version>
+		<milton.level>milton-server-ce</milton.level>
 	</properties>
 	<repositories>
 		<repository>
@@ -22,7 +23,7 @@
 			<name>ibiblio.repository</name>
 			<url>http://mirrors.ibiblio.org/pub/mirrors/maven2</url>
 			<releases>
-				<enabled>true</enabled> 
+				<enabled>true</enabled>
 			</releases>
 			<snapshots>
 				<enabled>true</enabled>
@@ -75,7 +76,7 @@
 		</dependency>
 		<dependency>
 			<groupId>io.milton</groupId>
-			<artifactId>milton-server-ce</artifactId>
+			<artifactId>${milton.level}</artifactId>
 			<version>${milton.version}</version>
 		</dependency>
 		<dependency>
@@ -168,6 +169,7 @@
 				<artifactId>maven-antrun-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>version-file</id>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -197,7 +199,7 @@
 						</configuration>
 					</execution>
 					<execution>
-						<id>0</id>
+						<id>test-props</id>
 						<phase>validate</phase>
 						<configuration>
 							<tasks>
@@ -242,6 +244,25 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+						<execution>
+						<id>milton-copy</id>
+						<phase>validate</phase>
+						<configuration>
+							<tasks if="milton.copy.license">
+								<property name="resource.dir" value="${project.basedir}/src/main/resources" />
+								<delete file="${resource.dir}/milton.license.sig" />
+								<delete file="${resource.dir}/milton.license.properties" />
+									<echo message="copy milton license data to resources" />
+									<copy file="${milton.source.path}/milton.license.sig"
+										tofile="${resource.dir}/milton.license.sig" />
+									<copy file="${milton.source.path}/milton.license.properties"
+										tofile="${resource.dir}/milton.license.properties" />
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -260,7 +281,7 @@
 					<failOnMissingWebXml>true</failOnMissingWebXml>
 				</configuration>
 			</plugin>
-
+			
 		</plugins>
 		<pluginManagement>
 			<plugins>
@@ -289,7 +310,7 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore />
 									</action>
 								</pluginExecution>
 							</pluginExecutions>

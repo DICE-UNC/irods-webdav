@@ -19,7 +19,8 @@ RestVersion.java
 .loadpath
 .DS_Store
 docs/.~lock.iRODSRESTAPIDocumentation.odt#
-
+**/milton.license.properties
+**/milton.license.sig
 # External tool builders
 .externalToolBuilders/
 
