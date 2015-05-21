@@ -11,46 +11,16 @@
 			<id>irodsWebdavCe</id>
 			<properties>
 				<milton.level>milton-server-ce</milton.level>
-				<milton.source.path>null</milton.source.path>
 			</properties>
 		</profile>
 		<profile>
 			<id>irodsWebdavEnterprise</id>
 			<properties>
 				<milton.level>milton-server-ent</milton.level>
-				<milton.source.path>/home/test1/milton</milton.source.path>
+				<milton.source.path>/home/test/milton</milton.source.path>
+				<milton.copy.license>true</milton.copy.license>
 			</properties>
-			<plugin>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<executions>
-					<execution>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<phase>generate-sources</phase>
-						<configuration>
-							<tasks>
-								<property name="resource.dir" value="${project.basedir}/src/main/resources" />
-							</tasks>
-						</configuration>
-					</execution>
-					<execution>
-						<id>0</id>
-						<phase>validate</phase>
-						<configuration>
-							<tasks>
-								<delete file="${resource.dir}/milton.license.sig" />
-								<delete file="${resource.dir}/milton.license.properties" />
-								<copy file="${milton.source.path}/milton.license.sig" tofile="${resource.dir}/milton.license.sig" />
-								<copy file="${resource.dir}/milton.license.properties" tofile="${resource.dir}/milton.license.properties" />
-							</tasks>
-						</configuration>
-						<goals>
-							<goal>run</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+		</profile>
 
 		</profile>
 	</profiles>
