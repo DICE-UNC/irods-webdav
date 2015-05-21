@@ -17,6 +17,17 @@ public class WebDavConfig {
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
 	private String realm = "irods";
+	/**
+	 * Default positioning of webdav on login with a pure URL
+	 */
+	private DefaultStartingLocationEnum defaultStartingLocationEnum = DefaultStartingLocationEnum.USER_HOME;
+
+	/**
+	 * Absolute path to starting location on login with a pure URL, only
+	 * activated if <code>DefaultStatingLocationEnum</code> is set to
+	 * <code>PROVIDED</code>
+	 */
+	private String providedDefaultStartingLocation = "";
 
 	/**
 	 * 
@@ -134,6 +145,16 @@ public class WebDavConfig {
 		if (realm != null) {
 			builder.append("realm=");
 			builder.append(realm);
+			builder.append(", ");
+		}
+		if (defaultStartingLocationEnum != null) {
+			builder.append("defaultStartingLocationEnum=");
+			builder.append(defaultStartingLocationEnum);
+			builder.append(", ");
+		}
+		if (providedDefaultStartingLocation != null) {
+			builder.append("providedDefaultStartingLocation=");
+			builder.append(providedDefaultStartingLocation);
 		}
 		builder.append("]");
 		return builder.toString();
@@ -152,6 +173,38 @@ public class WebDavConfig {
 	 */
 	public void setRealm(String realm) {
 		this.realm = realm;
+	}
+
+	/**
+	 * @return the defaultStartingLocationEnum
+	 */
+	public DefaultStartingLocationEnum getDefaultStartingLocationEnum() {
+		return defaultStartingLocationEnum;
+	}
+
+	/**
+	 * @param defaultStartingLocationEnum
+	 *            the defaultStartingLocationEnum to set
+	 */
+	public void setDefaultStartingLocationEnum(
+			DefaultStartingLocationEnum defaultStartingLocationEnum) {
+		this.defaultStartingLocationEnum = defaultStartingLocationEnum;
+	}
+
+	/**
+	 * @return the providedDefaultStartingLocation
+	 */
+	public String getProvidedDefaultStartingLocation() {
+		return providedDefaultStartingLocation;
+	}
+
+	/**
+	 * @param providedDefaultStartingLocation
+	 *            the providedDefaultStartingLocation to set
+	 */
+	public void setProvidedDefaultStartingLocation(
+			String providedDefaultStartingLocation) {
+		this.providedDefaultStartingLocation = providedDefaultStartingLocation;
 	}
 
 }

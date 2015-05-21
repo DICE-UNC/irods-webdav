@@ -42,9 +42,6 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	private IRODSFileSystem irodsFileSystem;
 	private WebDavConfig webDavConfig;
 
-	// private static final ThreadLocal<AuthResponse> authResponseCache = new
-	// ThreadLocal<AuthResponse>();
-
 	/**
 	 * Creates and (optionally) initialises the factory. This looks for a
 	 * properties file FileSystemResourceFactory.properties in the classpath If

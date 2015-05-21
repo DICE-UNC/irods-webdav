@@ -61,7 +61,6 @@ import org.slf4j.LoggerFactory;
  * Represents a directory in a physical file system.
  * 
  */
-// TODO: left out LockingCollectionResource, for now
 public class IrodsDirectoryResource extends BaseResource implements
 		CollectionResource, MakeCollectionableResource, PutableResource,
 		CopyableResource, DeletableResource, MoveableResource, GetableResource,

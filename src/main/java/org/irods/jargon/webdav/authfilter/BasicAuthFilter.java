@@ -94,8 +94,6 @@ public class BasicAuthFilter implements Filter {
 			log.warn("auth exception", e);
 			sendAuthError(httpResponse);
 			return;
-		} finally {
-			irodsAccessObjectFactory.closeSessionAndEatExceptions();
 		}
 
 	}
@@ -114,7 +112,6 @@ public class BasicAuthFilter implements Filter {
 	 */
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
 
 	}
 

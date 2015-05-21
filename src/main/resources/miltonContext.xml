@@ -19,6 +19,8 @@
 		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
 		<property name="defaultStorageResource" value="test1-resc" />
+		<property name="defaultStartingLocationEnum" value="HOME" />
+		<property name="providedDefaultStartingLocation" value="" />
 	</bean>
 
 	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">
@@ -71,6 +73,10 @@
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="irodsAuthService" ref="irodsAuthService" />
+	</bean>
+	
+	<bean id="connectionClosingFilter" class="org.irods.jargon.webdav.authfilter.ConnectionClosingFilter">
+		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 	</bean>
 
 
