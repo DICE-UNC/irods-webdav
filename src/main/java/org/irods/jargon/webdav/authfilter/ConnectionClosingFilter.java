@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Filter to close iRODS sessions after a request
- * 
+ *
  * @author Mike Conway - DICE
  *
  */
@@ -31,7 +31,7 @@ public class ConnectionClosingFilter implements Filter {
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 
 	/**
-	 * 
+	 *
 	 */
 	public ConnectionClosingFilter() {
 	}
@@ -42,16 +42,17 @@ public class ConnectionClosingFilter implements Filter {
 	}
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response,
-			FilterChain chain) throws IOException, ServletException {
+	public void doFilter(final ServletRequest request,
+			final ServletResponse response, final FilterChain chain)
+			throws IOException, ServletException {
 
 		chain.doFilter(request, response);
 		log.debug("closing iRODS connection after filter processing");
-		this.irodsAccessObjectFactory.closeSessionAndEatExceptions();
+		irodsAccessObjectFactory.closeSessionAndEatExceptions();
 	}
 
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(final FilterConfig config) throws ServletException {
 
 	}
 
@@ -67,7 +68,7 @@ public class ConnectionClosingFilter implements Filter {
 	 *            the irodsAccessObjectFactory to set
 	 */
 	public void setIrodsAccessObjectFactory(
-			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 

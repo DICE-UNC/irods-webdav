@@ -28,7 +28,7 @@ import org.irods.jargon.core.pub.io.IRODSFile;
 
 /**
  * Abstraction for storing and retrieving
- * 
+ *
  * @author Mike Conway - DICE
  */
 public interface FileContentService {

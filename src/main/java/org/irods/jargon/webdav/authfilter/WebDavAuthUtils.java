@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Conway - DICE (www.irods.org)
- * 
+ *
  */
 public class WebDavAuthUtils {
 
@@ -39,7 +39,7 @@ public class WebDavAuthUtils {
 	/**
 	 * Given the raw 'basic' auth header (with the Basic prefix), build an iRODS
 	 * account
-	 * 
+	 *
 	 * @param basicAuthData
 	 * @param restConfiguration
 	 * @return {@link UserAndPassword}
@@ -47,7 +47,7 @@ public class WebDavAuthUtils {
 	 */
 	public static UserAndPassword getAccountFromBasicAuthValues(
 			final String basicAuthData, final WebDavConfig webDavConfig)
-			throws JargonException {
+					throws JargonException {
 
 		log.debug("getIRODSAccountFromBasicAuthValues");
 

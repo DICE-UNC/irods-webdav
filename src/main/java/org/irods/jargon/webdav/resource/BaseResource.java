@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.resource;
 
@@ -28,12 +28,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Base for resources
- * 
+ *
  * @author Mike Conway
- * 
+ *
  */
 public abstract class BaseResource implements Resource, MoveableResource,
-		CopyableResource, LockableResource {
+CopyableResource, LockableResource {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
@@ -47,7 +47,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 	/**
 	 * Get the <code>IRODSAccount</code> for this operation
-	 * 
+	 *
 	 * @return {@link IRODSAccount}
 	 */
 	protected IRODSAccount retrieveIrodsAccount() {
@@ -56,7 +56,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 	/**
 	 * Get the <code>IRODSFileFactory</code> for the current user
-	 * 
+	 *
 	 * @return {@link IRODSFileFactory} that can be used to create file objects
 	 */
 	protected IRODSFileFactory instanceIrodsFileFactory() {
@@ -72,7 +72,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 	/**
 	 * Default constructor
-	 * 
+	 *
 	 * @param irodsAccessObjectFactory
 	 * @param webDavConfig
 	 */
@@ -108,7 +108,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	 *            the irodsAccessObjectFactory to set
 	 */
 	protected void setIrodsAccessObjectFactory(
-			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 
@@ -123,7 +123,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
-	protected void setWebDavConfig(WebDavConfig webDavConfig) {
+	protected void setWebDavConfig(final WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
 	}
 
@@ -149,12 +149,13 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	 * @param contentService
 	 *            the contentService to set
 	 */
-	protected void setContentService(IrodsFileContentService contentService) {
+	protected void setContentService(
+			final IrodsFileContentService contentService) {
 		this.contentService = contentService;
 	}
 
 	protected IRODSFile fileFromCollectionResource(
-			CollectionResource collectionResource, String name) {
+			final CollectionResource collectionResource, final String name) {
 		if (collectionResource == null) {
 			throw new IllegalArgumentException("null collectionResource");
 		}
@@ -169,7 +170,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 			try {
 				IrodsDirectoryResource newFsParent = (IrodsDirectoryResource) collectionResource;
 
-				dest = this.instanceIrodsFileFactory().instanceIRODSFile(
+				dest = instanceIrodsFileFactory().instanceIRODSFile(
 						newFsParent.getIrodsFile().getAbsolutePath(), name);
 				return dest;
 			} catch (JargonException e) {
@@ -187,12 +188,12 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 	/**
 	 * Will redirect if a default page has been specified on the factory
-	 * 
+	 *
 	 * @param request
 	 * @return
 	 */
 	@Override
-	public String checkRedirect(Request request) {
+	public String checkRedirect(final Request request) {
 		if (getFactory().getDefaultPage() != null) {
 			return request.getAbsoluteUrl() + "/"
 					+ getFactory().getDefaultPage();
@@ -202,9 +203,9 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	}
 
 	@Override
-	public void copyTo(CollectionResource destinationPath, String newName)
-			throws NotAuthorizedException, BadRequestException,
-			ConflictException {
+	public void copyTo(final CollectionResource destinationPath,
+			final String newName) throws NotAuthorizedException,
+			BadRequestException, ConflictException {
 
 		log.info("copyTo()");
 		if (destinationPath == null) {
@@ -215,26 +216,26 @@ public abstract class BaseResource implements Resource, MoveableResource,
 			throw new IllegalArgumentException("null or empty newName");
 		}
 
-		IRODSFile dest = this.fileFromCollectionResource(destinationPath,
-				newName);
+		IRODSFile dest = fileFromCollectionResource(destinationPath, newName);
 		doCopy(dest);
 
 	}
 
 	/**
 	 * Accomplish a copy with the given file
-	 * 
+	 *
 	 * @param dest
 	 */
 	protected abstract void doCopy(IRODSFile dest);
 
 	@Override
-	public Object authenticate(String user, String password) {
+	public Object authenticate(final String user, final String password) {
 		return factory.getSecurityManager().authenticate(user, password);
 	}
 
 	@Override
-	public boolean authorise(Request request, Method method, Auth auth) {
+	public boolean authorise(final Request request, final Method method,
+			final Auth auth) {
 		boolean b = factory.getSecurityManager().authorise(request, method,
 				auth, this);
 		if (log.isTraceEnabled()) {
@@ -245,16 +246,16 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#getRealm()
 	 */
 	@Override
 	public String getRealm() {
-		String r = factory.getRealm(this.getWebDavConfig().getHost());
+		String r = factory.getRealm(getWebDavConfig().getHost());
 		if (r == null) {
 			throw new NullPointerException("Got null realm from: "
 					+ factory.getClass() + " for host="
-					+ this.getWebDavConfig().getHost());
+					+ getWebDavConfig().getHost());
 		}
 		return r;
 	}
@@ -270,7 +271,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	 * @param ssoPrefix
 	 *            the ssoPrefix to set
 	 */
-	public void setSsoPrefix(String ssoPrefix) {
+	public void setSsoPrefix(final String ssoPrefix) {
 		this.ssoPrefix = ssoPrefix;
 	}
 
@@ -285,7 +286,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 	 * @param irodsFile
 	 *            the irodsFile to set
 	 */
-	public void setIrodsFile(IRODSFile irodsFile) {
+	public void setIrodsFile(final IRODSFile irodsFile) {
 		this.irodsFile = irodsFile;
 	}
 

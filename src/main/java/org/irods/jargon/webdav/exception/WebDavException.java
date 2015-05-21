@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.exception;
 
@@ -7,16 +7,21 @@ import org.irods.jargon.core.exception.JargonException;
 
 /**
  * Catch-all base checked exception for WebDav processing
- * 
+ *
  * @author Mike Conway - DICE
- * 
+ *
  */
 public class WebDavException extends JargonException {
 
 	/**
+	 *
+	 */
+	private static final long serialVersionUID = 5779246158604949830L;
+
+	/**
 	 * @param message
 	 */
-	public WebDavException(String message) {
+	public WebDavException(final String message) {
 		super(message);
 	}
 
@@ -24,14 +29,14 @@ public class WebDavException extends JargonException {
 	 * @param message
 	 * @param cause
 	 */
-	public WebDavException(String message, Throwable cause) {
+	public WebDavException(final String message, final Throwable cause) {
 		super(message, cause);
 	}
 
 	/**
 	 * @param cause
 	 */
-	public WebDavException(Throwable cause) {
+	public WebDavException(final Throwable cause) {
 		super(cause);
 	}
 
@@ -40,8 +45,8 @@ public class WebDavException extends JargonException {
 	 * @param cause
 	 * @param underlyingIRODSExceptionCode
 	 */
-	public WebDavException(String message, Throwable cause,
-			int underlyingIRODSExceptionCode) {
+	public WebDavException(final String message, final Throwable cause,
+			final int underlyingIRODSExceptionCode) {
 		super(message, cause, underlyingIRODSExceptionCode);
 	}
 
@@ -49,7 +54,8 @@ public class WebDavException extends JargonException {
 	 * @param cause
 	 * @param underlyingIRODSExceptionCode
 	 */
-	public WebDavException(Throwable cause, int underlyingIRODSExceptionCode) {
+	public WebDavException(final Throwable cause,
+			final int underlyingIRODSExceptionCode) {
 		super(cause, underlyingIRODSExceptionCode);
 	}
 
@@ -57,7 +63,8 @@ public class WebDavException extends JargonException {
 	 * @param message
 	 * @param underlyingIRODSExceptionCode
 	 */
-	public WebDavException(String message, int underlyingIRODSExceptionCode) {
+	public WebDavException(final String message,
+			final int underlyingIRODSExceptionCode) {
 		super(message, underlyingIRODSExceptionCode);
 	}
 

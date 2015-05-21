@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.resource;
 
@@ -22,15 +22,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Security manager implementation for iRODS
- * 
+ *
  * <p/>
  * This class provides a method that will extract user and password info from
  * these thread locals, and provision a threadLocal that contains the
  * authResponse data from iRODS, allowing resource servers to derive the valid
  * iRODS account for each operation
- * 
+ *
  * @author Mike Conway - DICE
- * 
+ *
  */
 public class IrodsSecurityManager implements SecurityManager {
 
@@ -43,31 +43,31 @@ public class IrodsSecurityManager implements SecurityManager {
 	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
 
 	/**
-	 * 
+	 *
 	 */
 	public IrodsSecurityManager() {
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * io.milton.http.SecurityManager#authenticate(io.milton.http.http11.auth
 	 * .DigestResponse)
 	 */
 	@Override
-	public Object authenticate(DigestResponse digest) {
+	public Object authenticate(final DigestResponse digest) {
 		throw new WebDavRuntimeException("digest auth is not supported");
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.http.SecurityManager#authenticate(java.lang.String,
 	 * java.lang.String)
 	 */
 	@Override
-	public Object authenticate(String userName, String password) {
+	public Object authenticate(final String userName, final String password) {
 		log.info("authenticate()");
 		clearThreadlocals();
 
@@ -90,30 +90,31 @@ public class IrodsSecurityManager implements SecurityManager {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.http.SecurityManager#authorise(io.milton.http.Request,
 	 * io.milton.http.Request.Method, io.milton.http.Auth,
 	 * io.milton.resource.Resource)
 	 */
 	@Override
-	public boolean authorise(Request arg0, Method arg1, Auth arg2, Resource arg3) {
+	public boolean authorise(final Request arg0, final Method arg1,
+			final Auth arg2, final Resource arg3) {
 		return true;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.http.SecurityManager#getRealm(java.lang.String)
 	 */
 	@Override
-	public String getRealm(String host) {
+	public String getRealm(final String host) {
 		// right now hard-coded
 		return "irods";
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.http.SecurityManager#isDigestAllowed()
 	 */
 	@Override
@@ -133,7 +134,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	 *            the irodsAccessObjectFactory to set
 	 */
 	public void setIrodsAccessObjectFactory(
-			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 
@@ -148,7 +149,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
-	public void setWebDavConfig(WebDavConfig webDavConfig) {
+	public void setWebDavConfig(final WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
 	}
 
@@ -163,7 +164,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	 * @param irodsAuthService
 	 *            the irodsAuthService to set
 	 */
-	public void setIrodsAuthService(IrodsAuthService irodsAuthService) {
+	public void setIrodsAuthService(final IrodsAuthService irodsAuthService) {
 		this.irodsAuthService = irodsAuthService;
 	}
 

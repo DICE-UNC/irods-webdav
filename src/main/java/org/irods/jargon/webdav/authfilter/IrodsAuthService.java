@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
@@ -19,10 +19,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Service to handle iRODS authentication, and conversion of auth tokens to
  * iRODS accounts
- * 
- * 
+ *
+ *
  * @author Mike Conway - DICE
- * 
+ *
  */
 public class IrodsAuthService {
 
@@ -37,7 +37,7 @@ public class IrodsAuthService {
 	/**
 	 * Given a user name and password, authenticate the given user and return
 	 * account info
-	 * 
+	 *
 	 * @param userName
 	 *            <code>String</code> with iRODS user name
 	 * @param password
@@ -109,7 +109,7 @@ public class IrodsAuthService {
 	/**
 	 * Given a user name and password, interpolate with the configuration to
 	 * derive iRODS accounts
-	 * 
+	 *
 	 * @param userName
 	 *            <code>String</code> user name
 	 * @param password
@@ -162,7 +162,7 @@ public class IrodsAuthService {
 
 	/**
 	 * Get the iRODS account to use in actual connections to iRODS
-	 * 
+	 *
 	 * @param authResponse
 	 * @link AuthResponse} that came from an authentication attempt
 	 * @return {@link IRODSAccount} suitable for providing when interacting with
@@ -181,7 +181,7 @@ public class IrodsAuthService {
 	/**
 	 * Access the cache that holds the current authentication (in a thread
 	 * local) and return an irodsAccount suitable for connecting to the grid.
-	 * 
+	 *
 	 * @return {@link IRODSAccount} with the appropriate authentication
 	 *         credential
 	 */
@@ -195,7 +195,7 @@ public class IrodsAuthService {
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public IrodsAuthService() {
 	}
@@ -212,7 +212,7 @@ public class IrodsAuthService {
 	 *            the irodsAccessObjectFactory to set
 	 */
 	public void setIrodsAccessObjectFactory(
-			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 
@@ -227,7 +227,7 @@ public class IrodsAuthService {
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
-	public void setWebDavConfig(WebDavConfig webDavConfig) {
+	public void setWebDavConfig(final WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
 	}
 

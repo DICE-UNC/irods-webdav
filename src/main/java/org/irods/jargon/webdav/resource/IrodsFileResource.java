@@ -53,13 +53,11 @@ import org.apache.commons.io.IOUtils;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
 public class IrodsFileResource extends BaseResource implements
 		CopyableResource, DeletableResource, GetableResource, MoveableResource,
 		ReplaceableResource, PropFindableResource, LockableResource {
@@ -67,15 +65,23 @@ public class IrodsFileResource extends BaseResource implements
 			.getLogger(IrodsFileResource.class);
 
 	/**
-	 * 
+	 * This field may be <code>null</code> and is only available when the milton
+	 * config is set to cache file demographics. In this case, the entry will be
+	 * used to provide file data such as length without necessitating a new
+	 * query
+	 */
+	private final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry;
+
+	/**
+	 *
 	 * @param host
 	 *            - the requested host. E.g. www.mycompany.com
 	 * @param factory
 	 * @param file
 	 */
-	public IrodsFileResource(String host,
-			IrodsFileSystemResourceFactory factory, IRODSFile file,
-			IrodsFileContentService contentService) {
+	public IrodsFileResource(final String host,
+			final IrodsFileSystemResourceFactory factory, final IRODSFile file,
+			final IrodsFileContentService contentService) {
 		super(factory, factory.getIrodsAccessObjectFactory(), factory
 				.getWebDavConfig(), contentService);
 
@@ -83,20 +89,54 @@ public class IrodsFileResource extends BaseResource implements
 			throw new IllegalArgumentException("null file");
 		}
 
-		this.setIrodsFile(file);
+		setIrodsFile(file);
+		collectionAndDataObjectListingEntry = null;
+	}
+
+	/**
+	 * Constructor takes a parameter that will provided cached values for
+	 * collection and data object listing entries
+	 * 
+	 * @param host
+	 * @param factory
+	 * @param file
+	 * @param collectionAndDataObjectListingEntry
+	 * @param contentService
+	 */
+	public IrodsFileResource(
+			final String host,
+			final IrodsFileSystemResourceFactory factory,
+			final IRODSFile file,
+			final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry,
+			final IrodsFileContentService contentService) {
+
+		super(factory, factory.getIrodsAccessObjectFactory(), factory
+				.getWebDavConfig(), contentService);
+
+		if (file == null) {
+			throw new IllegalArgumentException("null file");
+		}
+
+		setIrodsFile(file);
+		this.collectionAndDataObjectListingEntry = collectionAndDataObjectListingEntry;
 	}
 
 	@Override
 	public Long getContentLength() {
 		log.info("getContentLength()");
-		long length = this.getIrodsFile().length();
-		return length;
+
+		if (collectionAndDataObjectListingEntry != null) {
+			log.debug("cached length");
+			return collectionAndDataObjectListingEntry.getDataSize();
+		} else {
+			return getIrodsFile().length();
+		}
 	}
 
 	@Override
-	public String getContentType(String preferredList) {
+	public String getContentType(final String preferredList) {
 		log.info("getContentType()");
-		String mime = ContentTypeUtils.findContentTypes(this.getIrodsFile()
+		String mime = ContentTypeUtils.findContentTypes(getIrodsFile()
 				.getName());
 		String s = ContentTypeUtils.findAcceptableContentType(mime,
 				preferredList);
@@ -109,23 +149,23 @@ public class IrodsFileResource extends BaseResource implements
 	}
 
 	@Override
-	public void sendContent(OutputStream out, Range range,
-			Map<String, String> params, String contentType) throws IOException,
-			NotFoundException {
+	public void sendContent(final OutputStream out, final Range range,
+			final Map<String, String> params, final String contentType)
+			throws IOException, NotFoundException {
 		log.info("sendContent()");
 		InputStream in = null;
 		try {
 			log.debug("getting input stream...");
-			in = this.getContentService().getFileContent(this.getIrodsFile(),
+			in = getContentService().getFileContent(getIrodsFile(),
 					retrieveIrodsAccount());
 			log.debug("got input stream...");
 			if (range != null) {
 				log.debug("sendContent: ranged content: "
-						+ this.getIrodsFile().getAbsolutePath());
+						+ getIrodsFile().getAbsolutePath());
 				RangeUtils.writeRange(in, range, out);
 			} else {
 				log.debug("sendContent: send whole file "
-						+ this.getIrodsFile().getAbsolutePath());
+						+ getIrodsFile().getAbsolutePath());
 				IOUtils.copy(in, out);
 			}
 			out.flush();
@@ -144,40 +184,40 @@ public class IrodsFileResource extends BaseResource implements
 	 * @{@inheritDoc
 	 */
 	@Override
-	public Long getMaxAgeSeconds(Auth auth) {
+	public Long getMaxAgeSeconds(final Auth auth) {
 		return getFactory().getMaxAgeSeconds();
 	}
 
 	@Override
-	public void replaceContent(InputStream in, Long length)
+	public void replaceContent(final InputStream in, final Long length)
 			throws BadRequestException, ConflictException,
 			NotAuthorizedException {
 
 		log.info("replaceContent()");
 
 		try {
-			getContentService().setFileContent(this.getIrodsFile(), in,
-					this.retrieveIrodsAccount());
+			getContentService().setFileContent(getIrodsFile(), in,
+					retrieveIrodsAccount());
 		} catch (IOException ex) {
 			throw new BadRequestException("Couldnt write to: "
-					+ this.getIrodsFile().getAbsolutePath(), ex);
+					+ getIrodsFile().getAbsolutePath(), ex);
 		}
 	}
 
 	@Override
 	public String getName() {
-		return this.getIrodsFile().getName();
+		return getIrodsFile().getName();
 	}
 
 	@Override
 	public String getUniqueId() {
-		return this.getIrodsFile().toString();
+		return getIrodsFile().toString();
 	}
 
 	@Override
-	public void moveTo(CollectionResource destinationPath, String newName)
-			throws ConflictException, NotAuthorizedException,
-			BadRequestException {
+	public void moveTo(final CollectionResource destinationPath,
+			final String newName) throws ConflictException,
+			NotAuthorizedException, BadRequestException {
 		log.info("moveTo()");
 		if (destinationPath == null) {
 			throw new IllegalArgumentException("null destinationPath");
@@ -193,14 +233,13 @@ public class IrodsFileResource extends BaseResource implements
 		IRODSFile destFile;
 		try {
 
-			destFile = this
-					.fileFromCollectionResource(destinationPath, newName);
+			destFile = fileFromCollectionResource(destinationPath, newName);
 
-			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
-					.getDataTransferOperations(this.retrieveIrodsAccount());
+			DataTransferOperations dto = getIrodsAccessObjectFactory()
+					.getDataTransferOperations(retrieveIrodsAccount());
 
-			log.info("doing a move from source:{}", this.getIrodsFile());
-			dto.move(this.getIrodsFile(), destFile);
+			log.info("doing a move from source:{}", getIrodsFile());
+			dto.move(getIrodsFile(), destFile);
 			log.info("move completed");
 
 		} catch (JargonException e) {
@@ -214,22 +253,21 @@ public class IrodsFileResource extends BaseResource implements
 			BadRequestException {
 
 		log.info("delete()");
-		this.getIrodsFile().delete();
+		getIrodsFile().delete();
 		log.info("deleted");
 
 	}
 
 	@Override
-	protected void doCopy(IRODSFile dest) {
+	protected void doCopy(final IRODSFile dest) {
 		log.info("dest:{}", dest);
 
 		try {
+			DataTransferOperations dto = getIrodsAccessObjectFactory()
+					.getDataTransferOperations(retrieveIrodsAccount());
 
-			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
-					.getDataTransferOperations(this.retrieveIrodsAccount());
-
-			log.info("doing a copy from source:{}", this.getIrodsFile());
-			dto.copy(this.getIrodsFile(), dest, null, null);
+			log.info("doing a copy from source:{}", getIrodsFile());
+			dto.copy(getIrodsFile(), dest, null, null);
 			log.info("copy completed");
 
 		} catch (JargonException e) {
@@ -242,7 +280,13 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public Date getModifiedDate() {
 		log.info("getModifiedDate()");
-		return new Date(this.getIrodsFile().lastModified());
+
+		if (collectionAndDataObjectListingEntry != null) {
+			log.debug("cached modified date");
+			return collectionAndDataObjectListingEntry.getModifiedAt();
+		} else {
+			return new Date(getIrodsFile().lastModified());
+		}
 	}
 
 	@Override
@@ -251,18 +295,19 @@ public class IrodsFileResource extends BaseResource implements
 	}
 
 	@Override
-	public LockResult lock(LockTimeout timeout, LockInfo lockInfo)
+	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
 			throws NotAuthorizedException {
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
 	@Override
-	public LockResult refreshLock(String token) throws NotAuthorizedException {
+	public LockResult refreshLock(final String token)
+			throws NotAuthorizedException {
 		return getFactory().getLockManager().refresh(token, this);
 	}
 
 	@Override
-	public void unlock(String tokenId) throws NotAuthorizedException {
+	public void unlock(final String tokenId) throws NotAuthorizedException {
 		getFactory().getLockManager().unlock(tokenId, this);
 	}
 
@@ -272,7 +317,7 @@ public class IrodsFileResource extends BaseResource implements
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {
 			log.warn("getCurrentLock called, but no lock manager: file: "
-					+ this.getIrodsFile().getAbsolutePath());
+					+ getIrodsFile().getAbsolutePath());
 			return null;
 		}
 	}

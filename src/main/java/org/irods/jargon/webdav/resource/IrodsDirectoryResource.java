@@ -51,15 +51,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
 import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Represents a directory in a physical file system.
- * 
+ *
  */
 public class IrodsDirectoryResource extends BaseResource implements
 		CollectionResource, MakeCollectionableResource, PutableResource,
@@ -86,12 +88,12 @@ public class IrodsDirectoryResource extends BaseResource implements
 			throw new IllegalArgumentException("Is not a directory: "
 					+ dir.getAbsolutePath());
 		}
-		this.setIrodsFile(dir);
+		setIrodsFile(dir);
 		this.host = host;
 	}
 
 	@Override
-	public CollectionResource createCollection(String name) {
+	public CollectionResource createCollection(final String name) {
 		log.info("createCollection()");
 		if (name == null || name.isEmpty()) {
 			throw new IllegalArgumentException("null or empty name");
@@ -100,8 +102,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 		log.info("name:{}", name);
 		IRODSFile fnew;
 		try {
-			fnew = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath(), name);
+			fnew = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath(), name);
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
 			throw new WebDavRuntimeException("unable to create file", e);
@@ -116,7 +118,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	}
 
 	@Override
-	public Resource child(String name) {
+	public Resource child(final String name) {
 		log.info("child()");
 		if (name == null || name.isEmpty()) {
 			throw new IllegalArgumentException("null or empty name");
@@ -125,25 +127,80 @@ public class IrodsDirectoryResource extends BaseResource implements
 		log.info("name:{}", name);
 		IRODSFile fchild;
 		try {
-			fchild = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath(), name);
+			fchild = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath(), name);
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
 			throw new WebDavRuntimeException("unable to create file", e);
 		}
-		return getFactory().resolveFile(this.host, fchild);
+		return getFactory().resolveFile(host, fchild);
 
 	}
 
 	@Override
 	public List<? extends Resource> getChildren() {
 		log.info("getChildren()");
-		log.info("for dir:{}", this.getIrodsFile());
+		if (this.getWebDavConfig().isCacheFileDemographics()) {
+			return getChildrenUtilizingCaching();
+		} else {
+			return getChildrenViaFile();
+		}
+	}
+
+	/**
+	 * Method to get children that will cache file information. This can avoid
+	 * additional queries for things like file length
+	 * 
+	 * @return
+	 */
+	private List<? extends Resource> getChildrenUtilizingCaching() {
+		log.info("getChildrenUtilizingCaching()");
+		try {
+			CollectionAndDataObjectListAndSearchAO collectionAndDataObjectListAndSearchAO = this
+					.getIrodsAccessObjectFactory()
+					.getCollectionAndDataObjectListAndSearchAO(
+							this.retrieveIrodsAccount());
+
+			log.info("getting collections");
+			List<CollectionAndDataObjectListingEntry> entries = null;
+			List<BaseResource> resources = new ArrayList<BaseResource>();
+			boolean more = true;
+			int count = 0;
+			while (more) {
+				entries = collectionAndDataObjectListAndSearchAO
+						.listCollectionsUnderPath(getIrodsFile()
+								.getAbsolutePath(), count);
+				
+				for(CollectionAndDataObjectListingEntry entry: entries) {
+					IrodsFileResource fileResource = new IrodsFileResource()
+				}
+				
+				
+				
+				
+			}
+
+		} catch (JargonException e) {
+			log.error("error getting irods access object", e);
+			throw new WebDavRuntimeException(
+					"unable to get irods access object", e);
+		}
+
+	}
+
+	/**
+	 * Method to get children that will not cache file information, may be more
+	 * timely,but necessitates multiple individual queries
+	 * 
+	 * @return
+	 */
+	private List<? extends Resource> getChildrenViaFile() {
+		log.info("for dir:{}", getIrodsFile());
 		ArrayList<BaseResource> list = new ArrayList<BaseResource>();
-		File[] files = this.getIrodsFile().listFiles();
+		File[] files = getIrodsFile().listFiles();
 		if (files != null) {
 			for (File fchild : files) {
-				BaseResource res = getFactory().resolveFile(this.host,
+				BaseResource res = getFactory().resolveFile(host,
 						(IRODSFile) fchild);
 				log.info("added as child:{}", res);
 				if (res != null) {
@@ -158,29 +215,29 @@ public class IrodsDirectoryResource extends BaseResource implements
 	}
 
 	@Override
-	public Resource createNew(String name, InputStream in, Long length,
-			String contentType) throws IOException {
+	public Resource createNew(final String name, final InputStream in,
+			final Long length, final String contentType) throws IOException {
 		log.info("createNew()");
 		IRODSFile dest;
 		try {
-			dest = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath(), name);
+			dest = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath(), name);
 			dest.createNewFile();
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
 			throw new WebDavRuntimeException("unable to create new file", e);
 		}
 		contentService.setFileContent(dest, in, retrieveIrodsAccount());
-		return getFactory().resolveFile(this.host, dest);
+		return getFactory().resolveFile(host, dest);
 
 	}
 
 	/**
 	 * Will generate a listing of the contents of this directory, unless the
 	 * factory's allowDirectoryBrowsing has been set to false.
-	 * 
+	 *
 	 * If so it will just output a message saying that access has been disabled.
-	 * 
+	 *
 	 * @param out
 	 * @param range
 	 * @param params
@@ -189,22 +246,23 @@ public class IrodsDirectoryResource extends BaseResource implements
 	 * @throws NotAuthorizedException
 	 */
 	@Override
-	public void sendContent(OutputStream out, Range range,
-			Map<String, String> params, String contentType) throws IOException,
-			NotAuthorizedException {
+	public void sendContent(final OutputStream out, final Range range,
+			final Map<String, String> params, final String contentType)
+			throws IOException, NotAuthorizedException {
 
 		IRODSFile rootFile;
 		try {
-			rootFile = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getFactory().getRoot());
+			rootFile = instanceIrodsFileFactory().instanceIRODSFile(
+					getFactory().getRoot());
 		} catch (JargonException e) {
 			log.error("error getting root file", e);
 			throw new WebDavRuntimeException("error getting root file", e);
 		}
 
-		String subpath = this.getIrodsFile().getCanonicalPath();
-		if (rootFile.getCanonicalPath().length() > 1)
+		String subpath = getIrodsFile().getCanonicalPath();
+		if (rootFile.getCanonicalPath().length() > 1) {
 			subpath = subpath.substring(rootFile.getCanonicalPath().length());
+		}
 		String uri = subpath.replace('\\', '/');
 
 		// String uri = "/" + factory.getContextPath() + subpath;
@@ -235,7 +293,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 		w.close("head");
 		w.open("body");
-		w.begin("h1").open().writeText(this.getName()).close();
+		w.begin("h1").open().writeText(getName()).close();
 		w.open("table");
 		for (Resource r : getChildren()) {
 			w.open("tr");
@@ -264,12 +322,12 @@ public class IrodsDirectoryResource extends BaseResource implements
 	 * @{@inheritDoc
 	 */
 	@Override
-	public Long getMaxAgeSeconds(Auth auth) {
+	public Long getMaxAgeSeconds(final Auth auth) {
 		return getFactory().getMaxAgeSeconds();
 	}
 
 	@Override
-	public String getContentType(String accepts) {
+	public String getContentType(final String accepts) {
 		return "text/html";
 	}
 
@@ -278,23 +336,23 @@ public class IrodsDirectoryResource extends BaseResource implements
 		return 0L;
 	}
 
-	private String buildHref(String uri, String name) {
+	private String buildHref(final String uri, final String name) {
 		String abUrl = uri;
 
 		if (!abUrl.endsWith("/")) {
 			abUrl += "/";
 		}
-		if (this.getFactory().getSsoPrefix() == null) {
+		if (getFactory().getSsoPrefix() == null) {
 			return abUrl + name;
 		} else {
 			// This is to match up with the prefix set on
 			// SimpleSSOSessionProvider in MyCompanyDavServlet
-			String s = insertSsoPrefix(abUrl, this.getFactory().getSsoPrefix());
+			String s = insertSsoPrefix(abUrl, getFactory().getSsoPrefix());
 			return s += name;
 		}
 	}
 
-	public static String insertSsoPrefix(String abUrl, String prefix) {
+	public static String insertSsoPrefix(final String abUrl, final String prefix) {
 		// need to insert the ssoPrefix immediately after the host and port
 		int pos = abUrl.indexOf("/", 8);
 		String s = abUrl.substring(0, pos) + "/" + prefix;
@@ -306,8 +364,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 	public Date getModifiedDate() {
 		IRODSFile file;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath());
 			return new Date(file.lastModified());
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
@@ -319,8 +377,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 	public String getName() {
 		IRODSFile file;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath());
 			return file.getName();
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
@@ -332,8 +390,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 	public String getUniqueId() {
 		IRODSFile file;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath());
 			return file.toString();
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
@@ -342,9 +400,9 @@ public class IrodsDirectoryResource extends BaseResource implements
 	}
 
 	@Override
-	public void moveTo(CollectionResource destinationPath, String newName)
-			throws ConflictException, NotAuthorizedException,
-			BadRequestException {
+	public void moveTo(final CollectionResource destinationPath,
+			final String newName) throws ConflictException,
+			NotAuthorizedException, BadRequestException {
 
 		log.info("moveTo()");
 		if (destinationPath == null) {
@@ -365,17 +423,17 @@ public class IrodsDirectoryResource extends BaseResource implements
 		// IRODSFile destFile;
 		try {
 
-			IRODSFile destFile = this.fileFromCollectionResource(
-					destinationPath, newName);
+			IRODSFile destFile = fileFromCollectionResource(destinationPath,
+					newName);
 
 			log.info("dest file:{}", destFile);
 			// file.renameTo(destFile);
 
-			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
-					.getDataTransferOperations(this.retrieveIrodsAccount());
+			DataTransferOperations dto = getIrodsAccessObjectFactory()
+					.getDataTransferOperations(retrieveIrodsAccount());
 
-			log.info("doing a move from source:{}", this.getIrodsFile());
-			dto.move(this.getIrodsFile(), destFile);
+			log.info("doing a move from source:{}", getIrodsFile());
+			dto.move(getIrodsFile(), destFile);
 
 			log.info("move completed");
 
@@ -391,11 +449,11 @@ public class IrodsDirectoryResource extends BaseResource implements
 			BadRequestException {
 
 		log.info("delete()");
-		log.info("of collection:{}", this.getIrodsFile());
+		log.info("of collection:{}", getIrodsFile());
 		IRODSFile file;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath());
 			file.delete();
 			log.info("delete successful");
 		} catch (JargonException e) {
@@ -406,7 +464,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	}
 
 	@Override
-	protected void doCopy(IRODSFile destFile) {
+	protected void doCopy(final IRODSFile destFile) {
 		log.info("doCopy()");
 		if (destFile == null) {
 			throw new IllegalArgumentException("null destFile");
@@ -416,13 +474,13 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 		IRODSFile file;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath());
 
-			DataTransferOperations dto = this.getIrodsAccessObjectFactory()
-					.getDataTransferOperations(this.retrieveIrodsAccount());
+			DataTransferOperations dto = getIrodsAccessObjectFactory()
+					.getDataTransferOperations(retrieveIrodsAccount());
 
-			log.info("doing a copy from source:{}", this.getIrodsFile());
+			log.info("doing a copy from source:{}", getIrodsFile());
 			dto.copy(file, destFile, null, null);
 			log.info("copy completed");
 
@@ -439,18 +497,19 @@ public class IrodsDirectoryResource extends BaseResource implements
 	}
 
 	@Override
-	public LockResult lock(LockTimeout timeout, LockInfo lockInfo)
+	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
 			throws NotAuthorizedException {
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
 	@Override
-	public LockResult refreshLock(String token) throws NotAuthorizedException {
+	public LockResult refreshLock(final String token)
+			throws NotAuthorizedException {
 		return getFactory().getLockManager().refresh(token, this);
 	}
 
 	@Override
-	public void unlock(String tokenId) throws NotAuthorizedException {
+	public void unlock(final String tokenId) throws NotAuthorizedException {
 		getFactory().getLockManager().unlock(tokenId, this);
 	}
 
@@ -460,18 +519,19 @@ public class IrodsDirectoryResource extends BaseResource implements
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {
 			log.warn("getCurrentLock called, but no lock manager: file: "
-					+ this.getIrodsFile().getAbsolutePath());
+					+ getIrodsFile().getAbsolutePath());
 			return null;
 		}
 	}
 
 	@Override
-	public LockToken createAndLock(String name, LockTimeout lockTimeout,
-			LockInfo lockInfo) throws NotAuthorizedException {
+	public LockToken createAndLock(final String name,
+			final LockTimeout lockTimeout, final LockInfo lockInfo)
+			throws NotAuthorizedException {
 		IRODSFile file;
 		try {
-			file = this.instanceIrodsFileFactory().instanceIRODSFile(
-					this.getIrodsFile().getAbsolutePath(), name);
+			file = instanceIrodsFileFactory().instanceIRODSFile(
+					getIrodsFile().getAbsolutePath(), name);
 			file.createNewFile();
 
 		} catch (JargonException e) {
@@ -481,8 +541,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 			log.error("error in create file operation", e);
 			throw new WebDavRuntimeException("unable to create file", e);
 		}
-		IrodsFileResource newRes = new IrodsFileResource(host,
-				this.getFactory(), file, contentService);
+		IrodsFileResource newRes = new IrodsFileResource(host, getFactory(),
+				file, contentService);
 		LockResult res = newRes.lock(lockTimeout, lockInfo);
 		return res.getLockToken();
 	}

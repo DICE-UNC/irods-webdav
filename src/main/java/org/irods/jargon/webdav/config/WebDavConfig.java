@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.config;
 
@@ -7,7 +7,7 @@ import org.irods.jargon.core.connection.AuthScheme;
 
 /**
  * @author Mike Conway - DICE Config object wired by Spring
- * 
+ *
  */
 public class WebDavConfig {
 
@@ -17,6 +17,11 @@ public class WebDavConfig {
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
 	private String realm = "irods";
+	/**
+	 * Use an optimization to cache file data (length, etc) preventing requery
+	 * of file data, may cause stale data issues
+	 */
+	private boolean cacheFileDemographics = false;
 	/**
 	 * Default positioning of webdav on login with a pure URL
 	 */
@@ -30,7 +35,7 @@ public class WebDavConfig {
 	private String providedDefaultStartingLocation = "";
 
 	/**
-	 * 
+	 *
 	 */
 	public WebDavConfig() {
 	}
@@ -46,7 +51,7 @@ public class WebDavConfig {
 	 * @param host
 	 *            the host to set
 	 */
-	public void setHost(String host) {
+	public void setHost(final String host) {
 		this.host = host;
 	}
 
@@ -61,7 +66,7 @@ public class WebDavConfig {
 	 * @param zone
 	 *            the zone to set
 	 */
-	public void setZone(String zone) {
+	public void setZone(final String zone) {
 		this.zone = zone;
 	}
 
@@ -76,7 +81,7 @@ public class WebDavConfig {
 	 * @param port
 	 *            the port to set
 	 */
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
@@ -91,7 +96,7 @@ public class WebDavConfig {
 	 * @param defaultStorageResource
 	 *            the defaultStorageResource to set
 	 */
-	public void setDefaultStorageResource(String defaultStorageResource) {
+	public void setDefaultStorageResource(final String defaultStorageResource) {
 		this.defaultStorageResource = defaultStorageResource;
 	}
 
@@ -106,58 +111,25 @@ public class WebDavConfig {
 	 * @param authScheme
 	 *            the authScheme to set
 	 */
-	public void setAuthScheme(String authScheme) {
+	public void setAuthScheme(final String authScheme) {
 		this.authScheme = authScheme;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("WebDavConfig [");
-		if (host != null) {
-			builder.append("host=");
-			builder.append(host);
-			builder.append(", ");
-		}
-		if (zone != null) {
-			builder.append("zone=");
-			builder.append(zone);
-			builder.append(", ");
-		}
-		builder.append("port=");
-		builder.append(port);
-		builder.append(", ");
-		if (defaultStorageResource != null) {
-			builder.append("defaultStorageResource=");
-			builder.append(defaultStorageResource);
-			builder.append(", ");
-		}
-		if (authScheme != null) {
-			builder.append("authScheme=");
-			builder.append(authScheme);
-			builder.append(", ");
-		}
-		if (realm != null) {
-			builder.append("realm=");
-			builder.append(realm);
-			builder.append(", ");
-		}
-		if (defaultStartingLocationEnum != null) {
-			builder.append("defaultStartingLocationEnum=");
-			builder.append(defaultStartingLocationEnum);
-			builder.append(", ");
-		}
-		if (providedDefaultStartingLocation != null) {
-			builder.append("providedDefaultStartingLocation=");
-			builder.append(providedDefaultStartingLocation);
-		}
-		builder.append("]");
-		return builder.toString();
+		return "WebDavConfig [host=" + host + ", zone=" + zone + ", port="
+				+ port + ", defaultStorageResource=" + defaultStorageResource
+				+ ", authScheme=" + authScheme + ", realm=" + realm
+				+ ", cacheFileDemographics=" + cacheFileDemographics
+				+ ", defaultStartingLocationEnum="
+				+ defaultStartingLocationEnum
+				+ ", providedDefaultStartingLocation="
+				+ providedDefaultStartingLocation + "]";
 	}
 
 	/**
@@ -171,7 +143,7 @@ public class WebDavConfig {
 	 * @param realm
 	 *            the realm to set
 	 */
-	public void setRealm(String realm) {
+	public void setRealm(final String realm) {
 		this.realm = realm;
 	}
 
@@ -187,7 +159,7 @@ public class WebDavConfig {
 	 *            the defaultStartingLocationEnum to set
 	 */
 	public void setDefaultStartingLocationEnum(
-			DefaultStartingLocationEnum defaultStartingLocationEnum) {
+			final DefaultStartingLocationEnum defaultStartingLocationEnum) {
 		this.defaultStartingLocationEnum = defaultStartingLocationEnum;
 	}
 
@@ -203,8 +175,23 @@ public class WebDavConfig {
 	 *            the providedDefaultStartingLocation to set
 	 */
 	public void setProvidedDefaultStartingLocation(
-			String providedDefaultStartingLocation) {
+			final String providedDefaultStartingLocation) {
 		this.providedDefaultStartingLocation = providedDefaultStartingLocation;
+	}
+
+	/**
+	 * @return the cacheFileDemographics
+	 */
+	public boolean isCacheFileDemographics() {
+		return cacheFileDemographics;
+	}
+
+	/**
+	 * @param cacheFileDemographics
+	 *            the cacheFileDemographics to set
+	 */
+	public void setCacheFileDemographics(final boolean cacheFileDemographics) {
+		this.cacheFileDemographics = cacheFileDemographics;
 	}
 
 }

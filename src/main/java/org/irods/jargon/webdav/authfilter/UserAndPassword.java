@@ -1,11 +1,11 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
 /**
  * Container for UID and password info
- * 
+ *
  * @author Mike Conway - DICE
  *
  */
@@ -25,7 +25,7 @@ public class UserAndPassword {
 	 * @param userId
 	 *            the userId to set
 	 */
-	public void setUserId(String userId) {
+	public void setUserId(final String userId) {
 		this.userId = userId;
 	}
 
@@ -40,7 +40,7 @@ public class UserAndPassword {
 	 * @param password
 	 *            the password to set
 	 */
-	public void setPassword(String password) {
+	public void setPassword(final String password) {
 		this.password = password;
 	}
 }

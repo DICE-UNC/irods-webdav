@@ -21,6 +21,7 @@
 		<property name="defaultStorageResource" value="test1-resc" />
 		<property name="defaultStartingLocationEnum" value="USER_HOME" />
 		<property name="providedDefaultStartingLocation" value="" />
+		<property name="cacheFileDemographics" value="true" />
 	</bean>
 
 	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">

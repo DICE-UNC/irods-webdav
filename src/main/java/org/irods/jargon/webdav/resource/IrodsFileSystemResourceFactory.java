@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A resource factory which provides access to files in a file system.
- * 
+ *
  * Using this with milton is equivalent to using the dav servlet in tomcat
- * 
+ *
  */
 public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
@@ -46,16 +46,16 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 * Creates and (optionally) initialises the factory. This looks for a
 	 * properties file FileSystemResourceFactory.properties in the classpath If
 	 * one is found it uses the root and realm properties to initialise
-	 * 
+	 *
 	 * If not found the factory is initialised with the defaults root: user.home
 	 * system property realm: milton-fs-test
-	 * 
+	 *
 	 * These initialised values are not final, and may be changed through the
 	 * setters or init method
-	 * 
+	 *
 	 * To be honest its pretty naf configuring like this, but i don't want to
 	 * force people to use spring or any other particular configuration tool
-	 * 
+	 *
 	 */
 	public IrodsFileSystemResourceFactory() {
 		log.debug("setting default configuration...");
@@ -64,13 +64,13 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		init(sRoot, sm);
 	}
 
-	protected void init(String sRoot,
-			io.milton.http.SecurityManager securityManager) {
-		this.root = sRoot;
+	protected void init(final String sRoot,
+			final io.milton.http.SecurityManager securityManager) {
+		root = sRoot;
 		setSecurityManager(securityManager);
-		this.irodsFileSystem = IRODSFileSystemSingletonWrapper.instance();
+		irodsFileSystem = IRODSFileSystemSingletonWrapper.instance();
 		try {
-			this.irodsAccessObjectFactory = irodsFileSystem
+			irodsAccessObjectFactory = irodsFileSystem
 					.getIRODSAccessObjectFactory();
 		} catch (JargonException e) {
 			log.error("error init() irodsAccessObjectFactory", e);
@@ -80,22 +80,22 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param root
 	 *            - the root folder of the filesystem to expose. This must
 	 *            include the context path. Eg, if you've deployed to webdav-fs,
 	 *            root must contain a folder called webdav-fs
 	 * @param securityManager
 	 */
-	public IrodsFileSystemResourceFactory(String root,
-			io.milton.http.SecurityManager securityManager) {
+	public IrodsFileSystemResourceFactory(final String root,
+			final io.milton.http.SecurityManager securityManager) {
 		this.root = root;
 		setSecurityManager(securityManager);
 		init(root, securityManager);
 	}
 
 	/**
-	 * 
+	 *
 	 * @param root
 	 *            - the root folder of the filesystem to expose
 	 * @param securityManager
@@ -105,8 +105,9 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *            http://localhost:8080/webdav-fs, the context path should be
 	 *            webdav-fs
 	 */
-	public IrodsFileSystemResourceFactory(String root,
-			io.milton.http.SecurityManager securityManager, String contextPath) {
+	public IrodsFileSystemResourceFactory(final String root,
+			final io.milton.http.SecurityManager securityManager,
+			final String contextPath) {
 		this.root = root;
 		setSecurityManager(securityManager);
 		setContextPath(contextPath);
@@ -114,7 +115,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	}
 
 	@Override
-	public Resource getResource(String host, String url) {
+	public Resource getResource(final String host, String url) {
 		log.debug("getResource: host: " + host + " - url:" + url);
 		url = stripContext(url);
 		IRODSFile requested = resolvePath(root, url);
@@ -123,7 +124,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return resolvedResource;
 	}
 
-	public BaseResource resolveFile(String host, IRODSFile file) {
+	public BaseResource resolveFile(final String host, final IRODSFile file) {
 		log.info("resolveFile()");
 		log.info("host:{}", host);
 		log.info("file:{}", file);
@@ -146,7 +147,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return r;
 	}
 
-	public IRODSFile resolvePath(String root, String url) {
+	public IRODSFile resolvePath(final String root, final String url) {
 		log.info("resolvePath()");
 
 		if (root == null || root.isEmpty()) {
@@ -164,17 +165,14 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		Path path = Path.path(url);
 
 		try {
-			IRODSFile f = this
-					.getIrodsAccessObjectFactory()
-					.getIRODSFileFactory(
-							IrodsAuthService.retrieveCurrentIrodsAccount())
-					.instanceIRODSFile(root);
+			IRODSFile f = getIrodsAccessObjectFactory().getIRODSFileFactory(
+					IrodsAuthService.retrieveCurrentIrodsAccount())
+							.instanceIRODSFile(root);
 
 			for (String s : path.getParts()) {
-				f = this.getIrodsAccessObjectFactory()
-						.getIRODSFileFactory(
-								IrodsAuthService.retrieveCurrentIrodsAccount())
-						.instanceIRODSFile(f.getAbsolutePath(), s);
+				f = getIrodsAccessObjectFactory().getIRODSFileFactory(
+						IrodsAuthService.retrieveCurrentIrodsAccount())
+								.instanceIRODSFile(f.getAbsolutePath(), s);
 			}
 			log.info("resolved as:{}", f);
 			return f;
@@ -185,26 +183,26 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		}
 	}
 
-	public String getRealm(String host) {
+	public String getRealm(final String host) {
 		String s = securityManager.getRealm(host);
 		if (s == null) {
 			throw new NullPointerException(
 					"Got null realm from securityManager: " + securityManager
-							+ " for host=" + host);
+					+ " for host=" + host);
 		}
 		return s;
 	}
 
 	/**
-	 * 
+	 *
 	 * @return - the caching time for files
 	 */
-	public Long maxAgeSeconds(FsResource resource) {
+	public Long maxAgeSeconds(final FsResource resource) {
 		return maxAgeSeconds;
 	}
 
 	public void setSecurityManager(
-			io.milton.http.SecurityManager securityManager) {
+			final io.milton.http.SecurityManager securityManager) {
 		if (securityManager != null) {
 			log.debug("securityManager: " + securityManager.getClass());
 		} else {
@@ -217,7 +215,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return securityManager;
 	}
 
-	public void setMaxAgeSeconds(Long maxAgeSeconds) {
+	public void setMaxAgeSeconds(final Long maxAgeSeconds) {
 		this.maxAgeSeconds = maxAgeSeconds;
 	}
 
@@ -229,11 +227,11 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return lockManager;
 	}
 
-	public void setLockManager(LockManager lockManager) {
+	public void setLockManager(final LockManager lockManager) {
 		this.lockManager = lockManager;
 	}
 
-	public void setContextPath(String contextPath) {
+	public void setContextPath(final String contextPath) {
 		this.contextPath = contextPath;
 	}
 
@@ -243,33 +241,33 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 * Whether to generate an index page.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean isAllowDirectoryBrowsing() {
 		return allowDirectoryBrowsing;
 	}
 
-	public void setAllowDirectoryBrowsing(boolean allowDirectoryBrowsing) {
+	public void setAllowDirectoryBrowsing(final boolean allowDirectoryBrowsing) {
 		this.allowDirectoryBrowsing = allowDirectoryBrowsing;
 	}
 
 	/**
 	 * if provided GET requests to a folder will redirect to a page of this name
 	 * within the folder
-	 * 
+	 *
 	 * @return - E.g. index.html
 	 */
 	public String getDefaultPage() {
 		return defaultPage;
 	}
 
-	public void setDefaultPage(String defaultPage) {
+	public void setDefaultPage(final String defaultPage) {
 		this.defaultPage = defaultPage;
 	}
 
 	private String stripContext(String url) {
-		if (this.contextPath != null && contextPath.length() > 0) {
+		if (contextPath != null && contextPath.length() > 0) {
 			url = url.replaceFirst('/' + contextPath, "");
 			log.debug("stripped context: " + url);
 			return url;
@@ -287,11 +285,11 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return b;
 	}
 
-	public void setDigestAllowed(boolean digestAllowed) {
+	public void setDigestAllowed(final boolean digestAllowed) {
 		this.digestAllowed = digestAllowed;
 	}
 
-	public void setSsoPrefix(String ssoPrefix) {
+	public void setSsoPrefix(final String ssoPrefix) {
 		this.ssoPrefix = ssoPrefix;
 	}
 
@@ -303,8 +301,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return irodsFileContentService;
 	}
 
-	public void setContentService(IrodsFileContentService contentService) {
-		this.irodsFileContentService = contentService;
+	public void setContentService(final IrodsFileContentService contentService) {
+		irodsFileContentService = contentService;
 	}
 
 	/**
@@ -319,7 +317,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *            the irodsFileContentService to set
 	 */
 	public void setIrodsFileContentService(
-			IrodsFileContentService irodsFileContentService) {
+			final IrodsFileContentService irodsFileContentService) {
 		this.irodsFileContentService = irodsFileContentService;
 	}
 
@@ -335,7 +333,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *            the irodsAccessObjectFactory to set
 	 */
 	public void setIrodsAccessObjectFactory(
-			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 
@@ -350,7 +348,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
-	public void setWebDavConfig(WebDavConfig webDavConfig) {
+	public void setWebDavConfig(final WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
 	}
 
