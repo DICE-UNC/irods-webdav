@@ -279,6 +279,7 @@
 				<configuration>
 					<warSourceDirectory>src/main/webapp</warSourceDirectory>
 					<failOnMissingWebXml>true</failOnMissingWebXml>
+					<warName>irods-webdav</warName>
 				</configuration>
 			</plugin>
 			

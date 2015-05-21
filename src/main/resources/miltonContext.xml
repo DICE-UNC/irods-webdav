@@ -14,12 +14,12 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="consortium.local" />
-		<property name="zone" value="test1" />
+		<property name="host" value="irodsLinux" />
+		<property name="zone" value="tempZone" />
 		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
 		<property name="defaultStorageResource" value="test1-resc" />
-		<property name="defaultStartingLocationEnum" value="HOME" />
+		<property name="defaultStartingLocationEnum" value="USER_HOME" />
 		<property name="providedDefaultStartingLocation" value="" />
 	</bean>
 
@@ -38,7 +38,7 @@
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/test1/home/test1" />
+		<constructor-arg value="/" />
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
