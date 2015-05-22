@@ -241,6 +241,51 @@ public class IrodsDirectoryResourceTest {
 	}
 
 	@Test
+	public void testGetChildrenWithCacheUnderRoot() throws Exception {
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile("/");
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setCacheFileDemographics(true);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				"/", manager);
+
+		factory.setWebDavConfig(config);
+
+		IrodsFileContentService service = Mockito
+				.mock(IrodsFileContentService.class);
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
+				factory, targetCollection, service);
+
+		List<? extends Resource> actual = resource.getChildren();
+		Assert.assertFalse("no children returned", actual.isEmpty());
+
+	}
+
+	@Test
 	public void testGetChildrenWithCache() throws Exception {
 		String testTargetColl = "testGetChildrenWithCache";
 

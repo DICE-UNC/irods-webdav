@@ -217,6 +217,10 @@ public class IrodsDirectoryResource extends BaseResource implements
 						.listCollectionsUnderPath(getIrodsFile()
 								.getAbsolutePath(), count);
 
+				if (entries.isEmpty()) {
+					break;
+				}
+
 				for (CollectionAndDataObjectListingEntry entry : entries) {
 					IRODSFile childFile = this
 							.instanceIrodsFileFactory()
@@ -241,6 +245,10 @@ public class IrodsDirectoryResource extends BaseResource implements
 				entries = collectionAndDataObjectListAndSearchAO
 						.listDataObjectsUnderPath(getIrodsFile()
 								.getAbsolutePath(), count);
+
+				if (entries.isEmpty()) {
+					break;
+				}
 
 				for (CollectionAndDataObjectListingEntry entry : entries) {
 					IRODSFile childFile = this
