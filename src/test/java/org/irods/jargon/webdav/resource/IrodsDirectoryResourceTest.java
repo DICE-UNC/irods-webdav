@@ -170,8 +170,8 @@ public class IrodsDirectoryResourceTest {
 	}
 
 	@Test
-	public void testGetChildren() throws Exception {
-		String testTargetColl = "testGetChildren";
+	public void testGetChildrenViaFile() throws Exception {
+		String testTargetColl = "testGetChildrenViaFile";
 
 		int count = 3;
 
@@ -212,6 +212,78 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
+		config.setCacheFileDemographics(false);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				"/", manager);
+
+		factory.setWebDavConfig(config);
+
+		IrodsFileContentService service = Mockito
+				.mock(IrodsFileContentService.class);
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
+				factory, targetCollection, service);
+
+		List<? extends Resource> actual = resource.getChildren();
+		Assert.assertFalse("no children returned", actual.isEmpty());
+
+	}
+
+	@Test
+	public void testGetChildrenWithCache() throws Exception {
+		String testTargetColl = "testGetChildrenWithCache";
+
+		int count = 3;
+
+		String targetIrodsColl = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testTargetColl);
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(targetIrodsColl);
+
+		targetCollection.mkdirs();
+
+		String myTarget = "";
+		IRODSFile irodsFile;
+		for (int i = 0; i < count; i++) {
+			myTarget = targetIrodsColl + "/f" + (10000 + i) + ".txt";
+			irodsFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
+					.instanceIRODSFile(myTarget);
+			irodsFile.createNewFile();
+		}
+
+		for (int i = 0; i < count; i++) {
+			myTarget = targetIrodsColl + "/c" + (10000 + i);
+			irodsFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
+					.instanceIRODSFile(myTarget);
+			irodsFile.mkdirs();
+		}
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setCacheFileDemographics(true);
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();

@@ -55,6 +55,7 @@ import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
 import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
+import org.irods.jargon.core.utils.MiscIRODSUtils;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,13 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	private final IrodsFileContentService contentService;
 	private final String host;
+	/**
+	 * This field may be <code>null</code> and is only available when the milton
+	 * config is set to cache file demographics. In this case, the entry will be
+	 * used to provide file data such as length without necessitating a new
+	 * query
+	 */
+	private final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry;
 
 	public IrodsDirectoryResource(final String host,
 			final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
@@ -90,6 +98,41 @@ public class IrodsDirectoryResource extends BaseResource implements
 		}
 		setIrodsFile(dir);
 		this.host = host;
+		this.collectionAndDataObjectListingEntry = null;
+	}
+
+	/**
+	 * Constructor that can provide a
+	 * <code>CollectionAndDataObjectListingEntry</code>. This will trigger a
+	 * caching behavior for some file demographics which can result in 'stale'
+	 * data, while limiting queries to the catalog and increasing performance.
+	 * 
+	 * @param host
+	 * @param factory
+	 * @param dir
+	 * @param collectionAndDataObjectListingEntry
+	 * @param contentService
+	 */
+	public IrodsDirectoryResource(
+			final String host,
+			final IrodsFileSystemResourceFactory factory,
+			final IRODSFile dir,
+			final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry,
+			final IrodsFileContentService contentService) {
+		super(factory, factory.getIrodsAccessObjectFactory(), factory
+				.getWebDavConfig(), contentService);
+		this.contentService = contentService;
+		if (!dir.exists()) {
+			throw new IllegalArgumentException("Directory does not exist: "
+					+ dir.getAbsolutePath());
+		}
+		if (!dir.isDirectory()) {
+			throw new IllegalArgumentException("Is not a directory: "
+					+ dir.getAbsolutePath());
+		}
+		setIrodsFile(dir);
+		this.host = host;
+		this.collectionAndDataObjectListingEntry = collectionAndDataObjectListingEntry;
 	}
 
 	@Override
@@ -167,18 +210,55 @@ public class IrodsDirectoryResource extends BaseResource implements
 			boolean more = true;
 			int count = 0;
 			while (more) {
+				log.info("querying child collections starting at:{}", count);
+				log.info("under parent:{}", this.getIrodsFile()
+						.getAbsolutePath());
 				entries = collectionAndDataObjectListAndSearchAO
 						.listCollectionsUnderPath(getIrodsFile()
 								.getAbsolutePath(), count);
-				
-				for(CollectionAndDataObjectListingEntry entry: entries) {
-					IrodsFileResource fileResource = new IrodsFileResource()
+
+				for (CollectionAndDataObjectListingEntry entry : entries) {
+					IRODSFile childFile = this
+							.instanceIrodsFileFactory()
+							.instanceIRODSFile(entry.getFormattedAbsolutePath());
+					IrodsDirectoryResource fileResource = new IrodsDirectoryResource(
+							this.host, this.getFactory(), childFile, entry,
+							this.contentService);
+					resources.add(fileResource);
+					if (entry.isLastResult()) {
+						more = false;
+					}
+					count = entry.getCount();
 				}
-				
-				
-				
-				
+
 			}
+			more = true;
+			count = 0;
+			while (more) {
+				log.info("querying child files starting at:{}", count);
+				log.info("under parent:{}", this.getIrodsFile()
+						.getAbsolutePath());
+				entries = collectionAndDataObjectListAndSearchAO
+						.listDataObjectsUnderPath(getIrodsFile()
+								.getAbsolutePath(), count);
+
+				for (CollectionAndDataObjectListingEntry entry : entries) {
+					IRODSFile childFile = this
+							.instanceIrodsFileFactory()
+							.instanceIRODSFile(entry.getFormattedAbsolutePath());
+					IrodsFileResource fileResource = new IrodsFileResource(
+							this.host, this.getFactory(), childFile, entry,
+							this.contentService);
+					resources.add(fileResource);
+					if (entry.isLastResult()) {
+						more = false;
+					}
+					count = entry.getCount();
+				}
+
+			}
+			log.info("...done");
+			return resources;
 
 		} catch (JargonException e) {
 			log.error("error getting irods access object", e);
@@ -362,40 +442,58 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public Date getModifiedDate() {
-		IRODSFile file;
-		try {
-			file = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath());
-			return new Date(file.lastModified());
-		} catch (JargonException e) {
-			log.error("unable to create IRODSFile", e);
-			throw new WebDavRuntimeException("unable to create file", e);
+
+		if (this.collectionAndDataObjectListingEntry != null) {
+			return this.collectionAndDataObjectListingEntry.getModifiedAt();
+		} else {
+
+			IRODSFile file;
+			try {
+				file = instanceIrodsFileFactory().instanceIRODSFile(
+						getIrodsFile().getAbsolutePath());
+				return new Date(file.lastModified());
+			} catch (JargonException e) {
+				log.error("unable to create IRODSFile", e);
+				throw new WebDavRuntimeException("unable to create file", e);
+			}
 		}
 	}
 
 	@Override
 	public String getName() {
-		IRODSFile file;
-		try {
-			file = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath());
-			return file.getName();
-		} catch (JargonException e) {
-			log.error("unable to create IRODSFile", e);
-			throw new WebDavRuntimeException("unable to create file", e);
+		if (this.collectionAndDataObjectListingEntry != null) {
+			return MiscIRODSUtils
+					.getLastPathComponentForGiveAbsolutePath(collectionAndDataObjectListingEntry
+							.getFormattedAbsolutePath());
+		} else {
+			IRODSFile file;
+			try {
+				file = instanceIrodsFileFactory().instanceIRODSFile(
+						getIrodsFile().getAbsolutePath());
+				return file.getName();
+			} catch (JargonException e) {
+				log.error("unable to create IRODSFile", e);
+				throw new WebDavRuntimeException("unable to create file", e);
+			}
 		}
 	}
 
 	@Override
 	public String getUniqueId() {
-		IRODSFile file;
-		try {
-			file = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath());
-			return file.toString();
-		} catch (JargonException e) {
-			log.error("unable to create IRODSFile", e);
-			throw new WebDavRuntimeException("unable to create file", e);
+		if (this.collectionAndDataObjectListingEntry != null) {
+			return collectionAndDataObjectListingEntry
+					.getFormattedAbsolutePath();
+		} else {
+
+			IRODSFile file;
+			try {
+				file = instanceIrodsFileFactory().instanceIRODSFile(
+						getIrodsFile().getAbsolutePath());
+				return file.toString();
+			} catch (JargonException e) {
+				log.error("unable to create IRODSFile", e);
+				throw new WebDavRuntimeException("unable to create file", e);
+			}
 		}
 	}
 
