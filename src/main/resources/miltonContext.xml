@@ -14,11 +14,11 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="irodsLinux" />
-		<property name="zone" value="tempZone" />
+		<property name="host" value="dfc-test-irods1.edc.renci.org" />
+		<property name="zone" value="dfc1" />
 		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
-		<property name="defaultStorageResource" value="test1-resc" />
+		<property name="defaultStorageResource" value="" />
 		<property name="defaultStartingLocationEnum" value="USER_HOME" />
 		<property name="providedDefaultStartingLocation" value="" />
 		<property name="cacheFileDemographics" value="true" />
