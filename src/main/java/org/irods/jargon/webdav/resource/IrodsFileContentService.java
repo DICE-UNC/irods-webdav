@@ -48,8 +48,8 @@ public class IrodsFileContentService implements FileContentService {
 	// TODO: see about unwrapping file not found exceptions and process those
 
 	@Override
-	public void setFileContent(IRODSFile dest, InputStream in,
-			IRODSAccount irodsAccount) throws FileNotFoundException,
+	public void setFileContent(final IRODSFile dest, final InputStream in,
+			final IRODSAccount irodsAccount) throws FileNotFoundException,
 			IOException {
 
 		log.info("setFileContent()");
@@ -72,8 +72,8 @@ public class IrodsFileContentService implements FileContentService {
 					.getStream2StreamAO(irodsAccount);
 			stream2Stream.transferStreamToFileUsingIOStreams(in, (File) dest,
 					dest.length(), irodsAccessObjectFactory
-							.getJargonProperties()
-							.getInputToOutputCopyBufferByteSize());
+					.getJargonProperties()
+					.getInputToOutputCopyBufferByteSize());
 
 		} catch (JargonException e) {
 			log.error("error in setting file content", e);
@@ -83,8 +83,8 @@ public class IrodsFileContentService implements FileContentService {
 	}
 
 	@Override
-	public InputStream getFileContent(IRODSFile file, IRODSAccount irodsAccount)
-			throws FileNotFoundException {
+	public InputStream getFileContent(final IRODSFile file,
+			final IRODSAccount irodsAccount) throws FileNotFoundException {
 
 		log.info("getFileContent()");
 
@@ -118,7 +118,7 @@ public class IrodsFileContentService implements FileContentService {
 	}
 
 	public void setIrodsAccessObjectFactory(
-			IRODSAccessObjectFactory irodsAccessObjectFactory) {
+			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.config;
 
@@ -7,7 +7,7 @@ import org.irods.jargon.core.connection.AuthScheme;
 
 /**
  * @author Mike Conway - DICE Config object wired by Spring
- * 
+ *
  */
 public class WebDavConfig {
 
@@ -17,9 +17,25 @@ public class WebDavConfig {
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
 	private String realm = "irods";
+	/**
+	 * Use an optimization to cache file data (length, etc) preventing requery
+	 * of file data, may cause stale data issues
+	 */
+	private boolean cacheFileDemographics = false;
+	/**
+	 * Default positioning of webdav on login with a pure URL
+	 */
+	private DefaultStartingLocationEnum defaultStartingLocationEnum = DefaultStartingLocationEnum.USER_HOME;
 
 	/**
-	 * 
+	 * Absolute path to starting location on login with a pure URL, only
+	 * activated if <code>DefaultStatingLocationEnum</code> is set to
+	 * <code>PROVIDED</code>
+	 */
+	private String providedDefaultStartingLocation = "";
+
+	/**
+	 *
 	 */
 	public WebDavConfig() {
 	}
@@ -35,7 +51,7 @@ public class WebDavConfig {
 	 * @param host
 	 *            the host to set
 	 */
-	public void setHost(String host) {
+	public void setHost(final String host) {
 		this.host = host;
 	}
 
@@ -50,7 +66,7 @@ public class WebDavConfig {
 	 * @param zone
 	 *            the zone to set
 	 */
-	public void setZone(String zone) {
+	public void setZone(final String zone) {
 		this.zone = zone;
 	}
 
@@ -65,7 +81,7 @@ public class WebDavConfig {
 	 * @param port
 	 *            the port to set
 	 */
-	public void setPort(int port) {
+	public void setPort(final int port) {
 		this.port = port;
 	}
 
@@ -80,7 +96,7 @@ public class WebDavConfig {
 	 * @param defaultStorageResource
 	 *            the defaultStorageResource to set
 	 */
-	public void setDefaultStorageResource(String defaultStorageResource) {
+	public void setDefaultStorageResource(final String defaultStorageResource) {
 		this.defaultStorageResource = defaultStorageResource;
 	}
 
@@ -95,7 +111,7 @@ public class WebDavConfig {
 	 * @param authScheme
 	 *            the authScheme to set
 	 */
-	public void setAuthScheme(String authScheme) {
+	public void setAuthScheme(final String authScheme) {
 		this.authScheme = authScheme;
 	}
 
@@ -134,6 +150,19 @@ public class WebDavConfig {
 		if (realm != null) {
 			builder.append("realm=");
 			builder.append(realm);
+			builder.append(", ");
+		}
+		builder.append("cacheFileDemographics=");
+		builder.append(cacheFileDemographics);
+		builder.append(", ");
+		if (defaultStartingLocationEnum != null) {
+			builder.append("defaultStartingLocationEnum=");
+			builder.append(defaultStartingLocationEnum);
+			builder.append(", ");
+		}
+		if (providedDefaultStartingLocation != null) {
+			builder.append("providedDefaultStartingLocation=");
+			builder.append(providedDefaultStartingLocation);
 		}
 		builder.append("]");
 		return builder.toString();
@@ -150,8 +179,55 @@ public class WebDavConfig {
 	 * @param realm
 	 *            the realm to set
 	 */
-	public void setRealm(String realm) {
+	public void setRealm(final String realm) {
 		this.realm = realm;
+	}
+
+	/**
+	 * @return the defaultStartingLocationEnum
+	 */
+	public DefaultStartingLocationEnum getDefaultStartingLocationEnum() {
+		return defaultStartingLocationEnum;
+	}
+
+	/**
+	 * @param defaultStartingLocationEnum
+	 *            the defaultStartingLocationEnum to set
+	 */
+	public void setDefaultStartingLocationEnum(
+			final DefaultStartingLocationEnum defaultStartingLocationEnum) {
+		this.defaultStartingLocationEnum = defaultStartingLocationEnum;
+	}
+
+	/**
+	 * @return the providedDefaultStartingLocation
+	 */
+	public String getProvidedDefaultStartingLocation() {
+		return providedDefaultStartingLocation;
+	}
+
+	/**
+	 * @param providedDefaultStartingLocation
+	 *            the providedDefaultStartingLocation to set
+	 */
+	public void setProvidedDefaultStartingLocation(
+			final String providedDefaultStartingLocation) {
+		this.providedDefaultStartingLocation = providedDefaultStartingLocation;
+	}
+
+	/**
+	 * @return the cacheFileDemographics
+	 */
+	public boolean isCacheFileDemographics() {
+		return cacheFileDemographics;
+	}
+
+	/**
+	 * @param cacheFileDemographics
+	 *            the cacheFileDemographics to set
+	 */
+	public void setCacheFileDemographics(final boolean cacheFileDemographics) {
+		this.cacheFileDemographics = cacheFileDemographics;
 	}
 
 }

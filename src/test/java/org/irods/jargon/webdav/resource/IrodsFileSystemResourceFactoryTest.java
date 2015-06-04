@@ -1,32 +1,36 @@
+/**
+ *
+ */
 package org.irods.jargon.webdav.resource;
 
-import io.milton.resource.Resource;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.List;
 import java.util.Properties;
+
+import junit.framework.Assert;
 
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.utils.MiscIRODSUtils;
 import org.irods.jargon.testutils.IRODSTestSetupUtilities;
 import org.irods.jargon.testutils.TestingPropertiesHelper;
 import org.irods.jargon.testutils.filemanip.ScratchFileUtils;
 import org.irods.jargon.webdav.authfilter.IrodsAuthService;
+import org.irods.jargon.webdav.config.DefaultStartingLocationEnum;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 
-public class IrodsDirectoryResourceTest {
+/**
+ * @author Mike Conway - DICE
+ *
+ */
+public class IrodsFileSystemResourceFactoryTest {
 
 	private static Properties testingProperties = new Properties();
 	private static TestingPropertiesHelper testingPropertiesHelper = new TestingPropertiesHelper();
 	private static ScratchFileUtils scratchFileUtils = null;
-	public static final String IRODS_TEST_SUBDIR_PATH = "IrodsDirectoryResourceTest";
+	public static final String IRODS_TEST_SUBDIR_PATH = "IrodsFileSystemResourceFactoryTest";
 	private static IRODSTestSetupUtilities irodsTestSetupUtilities = null;
 	private static IRODSFileSystem irodsFileSystem;
 
@@ -36,11 +40,11 @@ public class IrodsDirectoryResourceTest {
 		testingProperties = testingPropertiesLoader.getTestProperties();
 		scratchFileUtils = new ScratchFileUtils(testingProperties);
 		scratchFileUtils
-				.clearAndReinitializeScratchDirectory(IRODS_TEST_SUBDIR_PATH);
+		.clearAndReinitializeScratchDirectory(IRODS_TEST_SUBDIR_PATH);
 		irodsTestSetupUtilities = new IRODSTestSetupUtilities();
 		irodsTestSetupUtilities.initializeIrodsScratchDirectory();
 		irodsTestSetupUtilities
-				.initializeDirectoryForTest(IRODS_TEST_SUBDIR_PATH);
+		.initializeDirectoryForTest(IRODS_TEST_SUBDIR_PATH);
 		irodsFileSystem = IRODSFileSystem.instance();
 	}
 
@@ -50,26 +54,11 @@ public class IrodsDirectoryResourceTest {
 	}
 
 	@Test
-	public void testCreateCollection() throws Exception {
-		String testTargetColl = "testCreateCollection";
-
-		String rootColl = testingPropertiesHelper
-				.buildIRODSCollectionAbsolutePathFromTestProperties(
-						testingProperties, IRODS_TEST_SUBDIR_PATH);
-
-		String targetIrodsColl = testingPropertiesHelper
-				.buildIRODSCollectionAbsolutePathFromTestProperties(
-						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
+	public void testResolveWhenRoot() throws Exception {
+		String myPath = "/";
 
 		IRODSAccount irodsAccount = testingPropertiesHelper
 				.buildIRODSAccountFromTestProperties(testingProperties);
-
-		IRODSFile rootCollection = irodsFileSystem.getIRODSFileFactory(
-				irodsAccount).instanceIRODSFile(rootColl);
-
-		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
-				irodsAccount).instanceIRODSFile(targetIrodsColl);
 
 		IrodsSecurityManager manager = new IrodsSecurityManager();
 		manager.setIrodsAccessObjectFactory(irodsFileSystem
@@ -79,6 +68,7 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.ROOT);
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();
@@ -92,38 +82,26 @@ public class IrodsDirectoryResourceTest {
 
 		factory.setWebDavConfig(config);
 
-		IrodsFileContentService service = Mockito
-				.mock(IrodsFileContentService.class);
-
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
 
-		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
-				factory, rootCollection, service);
-
-		resource.createCollection(testTargetColl);
-
-		Assert.assertTrue("did not create subcoll", targetCollection.exists());
+		IRODSFile pathFile = factory.resolvePath(myPath);
+		Assert.assertEquals("should have root", myPath,
+				pathFile.getAbsolutePath());
 	}
 
 	@Test
-	public void testGetChild() throws Exception {
-		String testTargetColl = "testGetChild";
-
-		String rootColl = testingPropertiesHelper
-				.buildIRODSCollectionAbsolutePathFromTestProperties(
-						testingProperties, IRODS_TEST_SUBDIR_PATH);
+	public void testResolvePathDirExistsWhenDirGivenConfiguredAsRoot()
+			throws Exception {
+		String testTargetColl = "testResolvePathDirExistsWhenRootGivenConfiguredAsRoot";
 
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
+						+ testTargetColl);
 
 		IRODSAccount irodsAccount = testingPropertiesHelper
 				.buildIRODSAccountFromTestProperties(testingProperties);
-
-		IRODSFile rootCollection = irodsFileSystem.getIRODSFileFactory(
-				irodsAccount).instanceIRODSFile(rootColl);
 
 		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
 				irodsAccount).instanceIRODSFile(targetIrodsColl);
@@ -138,6 +116,7 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.ROOT);
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();
@@ -151,56 +130,70 @@ public class IrodsDirectoryResourceTest {
 
 		factory.setWebDavConfig(config);
 
-		IrodsFileContentService service = Mockito
-				.mock(IrodsFileContentService.class);
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IRODSFile pathFile = factory.resolvePath(targetIrodsColl);
+		Assert.assertEquals("did not find correct path", targetIrodsColl,
+				pathFile.getAbsolutePath());
+	}
+
+	@Test
+	public void testResolveUserHomeDirWhenConfiguredUserRoot() throws Exception {
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.USER_HOME);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				manager);
+
+		factory.setWebDavConfig(config);
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
 
-		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
-				factory, rootCollection, service);
-
-		Resource child = resource.child(testTargetColl);
-
-		Assert.assertEquals("did not find target col", testTargetColl,
-				child.getName());
+		IRODSFile pathFile = factory.resolvePath("/");
+		Assert.assertEquals("should have user home", MiscIRODSUtils
+				.buildIRODSUserHomeForAccountUsingDefaultScheme(irodsAccount),
+				pathFile.getAbsolutePath());
 	}
 
 	@Test
-	public void testGetChildrenViaFile() throws Exception {
-		String testTargetColl = "testGetChildrenViaFile";
+	public void testResolveSubdirUnderUserDirWhenConfiguredUserRoot()
+			throws Exception {
 
-		int count = 3;
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		String testTargetColl = "testResolveSubdirUnderUserDirWhenConfiguredUserRoot";
 
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
-
-		IRODSAccount irodsAccount = testingPropertiesHelper
-				.buildIRODSAccountFromTestProperties(testingProperties);
+						+ testTargetColl);
 
 		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
 				irodsAccount).instanceIRODSFile(targetIrodsColl);
 
 		targetCollection.mkdirs();
 
-		String myTarget = "";
-		IRODSFile irodsFile;
-		for (int i = 0; i < count; i++) {
-			myTarget = targetIrodsColl + "/f" + (10000 + i) + ".txt";
-			irodsFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
-					.instanceIRODSFile(myTarget);
-			irodsFile.createNewFile();
-		}
-
-		for (int i = 0; i < count; i++) {
-			myTarget = targetIrodsColl + "/c" + (10000 + i);
-			irodsFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
-					.instanceIRODSFile(myTarget);
-			irodsFile.mkdirs();
-		}
-
 		IrodsSecurityManager manager = new IrodsSecurityManager();
 		manager.setIrodsAccessObjectFactory(irodsFileSystem
 				.getIRODSAccessObjectFactory());
@@ -209,7 +202,7 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
-		config.setCacheFileDemographics(false);
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.USER_HOME);
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();
@@ -223,100 +216,33 @@ public class IrodsDirectoryResourceTest {
 
 		factory.setWebDavConfig(config);
 
-		IrodsFileContentService service = Mockito
-				.mock(IrodsFileContentService.class);
-
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
 
-		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
-				factory, targetCollection, service);
-
-		List<? extends Resource> actual = resource.getChildren();
-		Assert.assertFalse("no children returned", actual.isEmpty());
-
+		IRODSFile pathFile = factory.resolvePath(targetIrodsColl);
+		Assert.assertEquals("should have dir under user home", targetIrodsColl,
+				pathFile.getAbsolutePath());
 	}
 
 	@Test
-	public void testGetChildrenWithCacheUnderRoot() throws Exception {
+	public void testResolveSubdirUnderUserDirWhenConfiguredUserRootGivingFullPath()
+			throws Exception {
 
 		IRODSAccount irodsAccount = testingPropertiesHelper
 				.buildIRODSAccountFromTestProperties(testingProperties);
 
-		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
-				irodsAccount).instanceIRODSFile("/");
-
-		IrodsSecurityManager manager = new IrodsSecurityManager();
-		manager.setIrodsAccessObjectFactory(irodsFileSystem
-				.getIRODSAccessObjectFactory());
-		WebDavConfig config = new WebDavConfig();
-		config.setAuthScheme("STANDARD");
-		config.setHost(irodsAccount.getHost());
-		config.setPort(irodsAccount.getPort());
-		config.setZone(irodsAccount.getZone());
-		config.setCacheFileDemographics(true);
-		manager.setWebDavConfig(config);
-
-		IrodsAuthService authService = new IrodsAuthService();
-		authService.setIrodsAccessObjectFactory(irodsFileSystem
-				.getIRODSAccessObjectFactory());
-		authService.setWebDavConfig(config);
-		manager.setIrodsAuthService(authService);
-
-		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				manager);
-
-		factory.setWebDavConfig(config);
-
-		IrodsFileContentService service = Mockito
-				.mock(IrodsFileContentService.class);
-
-		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
-				irodsAccount.getPassword());
-
-		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
-				factory, targetCollection, service);
-
-		List<? extends Resource> actual = resource.getChildren();
-		Assert.assertFalse("no children returned", actual.isEmpty());
-
-	}
-
-	@Test
-	public void testGetChildrenWithCache() throws Exception {
-		String testTargetColl = "testGetChildrenWithCache";
-
-		int count = 3;
+		String testTargetColl = "testResolveSubdirUnderUserDirWhenConfiguredUserRootGivingFullPath";
 
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
-
-		IRODSAccount irodsAccount = testingPropertiesHelper
-				.buildIRODSAccountFromTestProperties(testingProperties);
+						+ testTargetColl);
 
 		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
 				irodsAccount).instanceIRODSFile(targetIrodsColl);
 
 		targetCollection.mkdirs();
 
-		String myTarget = "";
-		IRODSFile irodsFile;
-		for (int i = 0; i < count; i++) {
-			myTarget = targetIrodsColl + "/f" + (10000 + i) + ".txt";
-			irodsFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
-					.instanceIRODSFile(myTarget);
-			irodsFile.createNewFile();
-		}
-
-		for (int i = 0; i < count; i++) {
-			myTarget = targetIrodsColl + "/c" + (10000 + i);
-			irodsFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
-					.instanceIRODSFile(myTarget);
-			irodsFile.mkdirs();
-		}
-
 		IrodsSecurityManager manager = new IrodsSecurityManager();
 		manager.setIrodsAccessObjectFactory(irodsFileSystem
 				.getIRODSAccessObjectFactory());
@@ -325,7 +251,7 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
-		config.setCacheFileDemographics(true);
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.USER_HOME);
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();
@@ -339,33 +265,32 @@ public class IrodsDirectoryResourceTest {
 
 		factory.setWebDavConfig(config);
 
-		IrodsFileContentService service = Mockito
-				.mock(IrodsFileContentService.class);
-
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
 
-		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
-				factory, targetCollection, service);
-
-		List<? extends Resource> actual = resource.getChildren();
-		Assert.assertFalse("no children returned", actual.isEmpty());
-
+		IRODSFile pathFile = factory.resolvePath(targetIrodsColl);
+		Assert.assertEquals("should have dir under user home", targetIrodsColl,
+				pathFile.getAbsolutePath());
 	}
 
 	@Test
-	public void testCreateNew() throws Exception {
-		String testFileName = "testCreateNew.txt";
-
-		String rootColl = testingPropertiesHelper
-				.buildIRODSCollectionAbsolutePathFromTestProperties(
-						testingProperties, IRODS_TEST_SUBDIR_PATH);
+	public void testResolveSubdirUnderProvidedDirWhenConfiguredUserRootGivingFullPath()
+			throws Exception {
 
 		IRODSAccount irodsAccount = testingPropertiesHelper
 				.buildIRODSAccountFromTestProperties(testingProperties);
 
-		IRODSFile rootCollection = irodsFileSystem.getIRODSFileFactory(
-				irodsAccount).instanceIRODSFile(rootColl);
+		String testTargetColl = "testResolveSubdirUnderUserDirWhenConfiguredUserRootGivingFullPath";
+
+		String targetIrodsColl = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+						+ testTargetColl);
+
+		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(targetIrodsColl);
+
+		targetCollection.mkdirs();
 
 		IrodsSecurityManager manager = new IrodsSecurityManager();
 		manager.setIrodsAccessObjectFactory(irodsFileSystem
@@ -375,6 +300,9 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.PROVIDED);
+		config.setProvidedDefaultStartingLocation(MiscIRODSUtils
+				.buildIRODSUserHomeForAccountUsingDefaultScheme(irodsAccount));
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();
@@ -388,29 +316,12 @@ public class IrodsDirectoryResourceTest {
 
 		factory.setWebDavConfig(config);
 
-		IrodsFileContentService service = new IrodsFileContentService();
-		service.setIrodsAccessObjectFactory(irodsFileSystem
-				.getIRODSAccessObjectFactory());
-
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
 
-		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
-				factory, rootCollection, service);
-
-		long fileLength = 100L;
-
-		String absPath = scratchFileUtils
-				.createAndReturnAbsoluteScratchPath(IRODS_TEST_SUBDIR_PATH);
-		String localFilePath = org.irods.jargon.testutils.filemanip.FileGenerator
-				.generateFileOfFixedLengthGivenName(absPath, testFileName,
-						fileLength);
-		File localFile = new File(localFilePath);
-		FileInputStream fileInputStream = new FileInputStream(localFile);
-
-		resource.createNew(testFileName, fileInputStream, fileLength,
-				"text/html");
-
+		IRODSFile pathFile = factory.resolvePath(targetIrodsColl);
+		Assert.assertEquals("should have dir under user home", targetIrodsColl,
+				pathFile.getAbsolutePath());
 	}
 
 }

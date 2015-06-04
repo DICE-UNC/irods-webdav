@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
@@ -9,13 +9,13 @@ import javax.xml.namespace.QName;
 
 /**
  * Wrapper for principle
- * 
+ *
  * @author Mike Conway - DICE
  *
  */
 public class IrodsPrincipleId implements PrincipleId {
 
-	public IrodsPrincipleId(String irodsAccountAsString) {
+	public IrodsPrincipleId(final String irodsAccountAsString) {
 		super();
 		this.irodsAccountAsString = irodsAccountAsString;
 	}
@@ -24,7 +24,7 @@ public class IrodsPrincipleId implements PrincipleId {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.principal.Principal.PrincipleId#getIdType()
 	 */
 	@Override
@@ -35,7 +35,7 @@ public class IrodsPrincipleId implements PrincipleId {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.principal.Principal.PrincipleId#getValue()
 	 */
 	@Override
@@ -54,7 +54,7 @@ public class IrodsPrincipleId implements PrincipleId {
 	 * @param irodsAccountAsString
 	 *            the irodsAccountAsString to set
 	 */
-	public void setIrodsAccountAsString(String irodsAccountAsString) {
+	public void setIrodsAccountAsString(final String irodsAccountAsString) {
 		this.irodsAccountAsString = irodsAccountAsString;
 	}
 

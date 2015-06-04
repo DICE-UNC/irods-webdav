@@ -13,13 +13,14 @@ tmp/**/*
 *~.nib
 local.properties
 testing.properties
-RestVersion.java
+
 .classpath
 .settings/
 .loadpath
 .DS_Store
-docs/.~lock.iRODSRESTAPIDocumentation.odt#
 
+**/milton.license.properties
+**/milton.license.sig
 # External tool builders
 .externalToolBuilders/
 
@@ -32,6 +33,5 @@ docs/.~lock.iRODSRESTAPIDocumentation.odt#
 # PDT-specific
 .buildpath
 
-#Version file
-src/**/RestVersion.java
+**/IrodsWebdavVersion.java
 /build

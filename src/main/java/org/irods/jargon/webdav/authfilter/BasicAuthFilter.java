@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Servlet filter implements basic auth
- * 
+ *
  * @author Mike Conway - DICE (www.irods.org)
- * 
+ *
  */
 public class BasicAuthFilter implements Filter {
 
@@ -35,14 +35,14 @@ public class BasicAuthFilter implements Filter {
 	private IrodsAuthService irodsAuthService;
 
 	/**
-	 * 
+	 *
 	 */
 	public BasicAuthFilter() {
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
 	 */
 	@Override
@@ -52,14 +52,14 @@ public class BasicAuthFilter implements Filter {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
 	 * javax.servlet.ServletResponse, javax.servlet.FilterChain)
 	 */
 	@Override
 	public void doFilter(final ServletRequest request,
 			final ServletResponse response, final FilterChain chain)
-			throws IOException, ServletException {
+					throws IOException, ServletException {
 
 		log.debug("doFilter()");
 
@@ -94,8 +94,6 @@ public class BasicAuthFilter implements Filter {
 			log.warn("auth exception", e);
 			sendAuthError(httpResponse);
 			return;
-		} finally {
-			irodsAccessObjectFactory.closeSessionAndEatExceptions();
 		}
 
 	}
@@ -109,12 +107,11 @@ public class BasicAuthFilter implements Filter {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see javax.servlet.Filter#destroy()
 	 */
 	@Override
 	public void destroy() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -145,7 +142,7 @@ public class BasicAuthFilter implements Filter {
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
-	public void setWebDavConfig(WebDavConfig webDavConfig) {
+	public void setWebDavConfig(final WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
 	}
 
@@ -160,7 +157,7 @@ public class BasicAuthFilter implements Filter {
 	 * @param irodsAuthService
 	 *            the irodsAuthService to set
 	 */
-	public void setIrodsAuthService(IrodsAuthService irodsAuthService) {
+	public void setIrodsAuthService(final IrodsAuthService irodsAuthService) {
 		this.irodsAuthService = irodsAuthService;
 	}
 

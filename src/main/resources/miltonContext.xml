@@ -14,11 +14,14 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="consortium.local" />
-		<property name="zone" value="test1" />
+		<property name="host" value="dfc-test-irods1.edc.renci.org" />
+		<property name="zone" value="dfc1" />
 		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
-		<property name="defaultStorageResource" value="test1-resc" />
+		<property name="defaultStorageResource" value="" />
+		<property name="defaultStartingLocationEnum" value="USER_HOME" />
+		<property name="providedDefaultStartingLocation" value="" />
+		<property name="cacheFileDemographics" value="true" />
 	</bean>
 
 	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">
@@ -36,7 +39,6 @@
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/" />
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
@@ -71,6 +73,10 @@
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="irodsAuthService" ref="irodsAuthService" />
+	</bean>
+	
+	<bean id="connectionClosingFilter" class="org.irods.jargon.webdav.authfilter.ConnectionClosingFilter">
+		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 	</bean>
 
 

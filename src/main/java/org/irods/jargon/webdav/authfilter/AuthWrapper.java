@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.irods.jargon.webdav.authfilter;
 
@@ -16,7 +16,7 @@ import org.irods.jargon.core.connection.auth.AuthResponse;
 
 /**
  * Wrapper for auth
- * 
+ *
  * @author Mike Conway - DICE
  *
  */
@@ -26,7 +26,7 @@ public class AuthWrapper implements DiscretePrincipal {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.principal.Principal#getIdenitifer()
 	 */
 	@Override
@@ -37,40 +37,41 @@ public class AuthWrapper implements DiscretePrincipal {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#authenticate(java.lang.String,
 	 * java.lang.String)
 	 */
 	@Override
-	public Object authenticate(String arg0, String arg1) {
+	public Object authenticate(final String arg0, final String arg1) {
 		return null;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#authorise(io.milton.http.Request,
 	 * io.milton.http.Request.Method, io.milton.http.Auth)
 	 */
 	@Override
-	public boolean authorise(Request arg0, Method arg1, Auth arg2) {
+	public boolean authorise(final Request arg0, final Method arg1,
+			final Auth arg2) {
 		return false;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#checkRedirect(io.milton.http.Request)
 	 */
 	@Override
-	public String checkRedirect(Request arg0) throws NotAuthorizedException,
-			BadRequestException {
+	public String checkRedirect(final Request arg0)
+			throws NotAuthorizedException, BadRequestException {
 		return null;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#getModifiedDate()
 	 */
 	@Override
@@ -80,7 +81,7 @@ public class AuthWrapper implements DiscretePrincipal {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#getName()
 	 */
 	@Override
@@ -90,7 +91,7 @@ public class AuthWrapper implements DiscretePrincipal {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#getRealm()
 	 */
 	@Override
@@ -100,7 +101,7 @@ public class AuthWrapper implements DiscretePrincipal {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#getUniqueId()
 	 */
 	@Override
@@ -110,7 +111,7 @@ public class AuthWrapper implements DiscretePrincipal {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.principal.DiscretePrincipal#getPrincipalURL()
 	 */
 	@Override
@@ -129,7 +130,7 @@ public class AuthWrapper implements DiscretePrincipal {
 	 * @param authResponse
 	 *            the authResponse to set
 	 */
-	public void setAuthResponse(AuthResponse authResponse) {
+	public void setAuthResponse(final AuthResponse authResponse) {
 		this.authResponse = authResponse;
 	}
 

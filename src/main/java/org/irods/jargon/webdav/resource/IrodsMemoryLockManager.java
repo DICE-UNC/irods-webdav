@@ -55,8 +55,8 @@ public class IrodsMemoryLockManager implements LockManager {
 	}
 
 	@Override
-	public synchronized LockResult lock(LockTimeout timeout, LockInfo lockInfo,
-			LockableResource r) {
+	public synchronized LockResult lock(final LockTimeout timeout,
+			final LockInfo lockInfo, final LockableResource r) {
 		IrodsFileResource resource = (IrodsFileResource) r;
 		LockToken currentLock = currentLock(resource);
 		if (currentLock != null) {
@@ -73,8 +73,8 @@ public class IrodsMemoryLockManager implements LockManager {
 	}
 
 	@Override
-	public synchronized LockResult refresh(String tokenId,
-			LockableResource resource) {
+	public synchronized LockResult refresh(final String tokenId,
+			final LockableResource resource) {
 		CurrentLock curLock = locksByToken.get(tokenId);
 		if (curLock == null) {
 			log.debug("can't refresh because no lock");
@@ -87,8 +87,8 @@ public class IrodsMemoryLockManager implements LockManager {
 	}
 
 	@Override
-	public synchronized void unlock(String tokenId, LockableResource r)
-			throws NotAuthorizedException {
+	public synchronized void unlock(final String tokenId,
+			final LockableResource r) throws NotAuthorizedException {
 		IrodsFileResource resource = (IrodsFileResource) r;
 		LockToken lockToken = currentLock(resource);
 		if (lockToken == null) {
@@ -102,10 +102,11 @@ public class IrodsMemoryLockManager implements LockManager {
 		}
 	}
 
-	private LockToken currentLock(IrodsFileResource resource) {
+	private LockToken currentLock(final IrodsFileResource resource) {
 		CurrentLock curLock = locksByFile.get(resource.getIrodsFile());
-		if (curLock == null)
+		if (curLock == null) {
 			return null;
+		}
 		LockToken token = curLock.token;
 		if (token.isExpired()) {
 			removeLock(token);
@@ -115,7 +116,7 @@ public class IrodsMemoryLockManager implements LockManager {
 		}
 	}
 
-	private void removeLock(LockToken token) {
+	private void removeLock(final LockToken token) {
 		log.debug("removeLock: " + token.tokenId);
 		CurrentLock currentLock = locksByToken.get(token.tokenId);
 		if (currentLock != null) {
@@ -127,11 +128,12 @@ public class IrodsMemoryLockManager implements LockManager {
 	}
 
 	@Override
-	public LockToken getCurrentToken(LockableResource r) {
+	public LockToken getCurrentToken(final LockableResource r) {
 		BaseResource resource = (BaseResource) r;
 		CurrentLock lock = locksByFile.get(resource.getIrodsFile());
-		if (lock == null)
+		if (lock == null) {
 			return null;
+		}
 		LockToken token = new LockToken();
 		token.info = new LockInfo(LockInfo.LockScope.EXCLUSIVE,
 				LockInfo.LockType.WRITE, lock.lockedByUser,
@@ -148,9 +150,9 @@ public class IrodsMemoryLockManager implements LockManager {
 		final LockToken token;
 		final String lockedByUser;
 
-		public CurrentLock(IRODSFile irodsFile, LockToken token,
-				String lockedByUser) {
-			this.file = irodsFile;
+		public CurrentLock(final IRODSFile irodsFile, final LockToken token,
+				final String lockedByUser) {
+			file = irodsFile;
 			this.token = token;
 			this.lockedByUser = lockedByUser;
 		}
