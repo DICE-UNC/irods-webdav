@@ -86,7 +86,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 *
-	 * 
+	 *
 	 * @param securityManager
 	 * @param contextPath
 	 *            - this is the leading part of URL's to ignore. For example if
@@ -137,7 +137,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 * Find the right base path to use based on the provided configuration
-	 * 
+	 *
 	 * @return
 	 */
 	protected String getBasePathBasedOnConfig() {
@@ -156,8 +156,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 							.retrieveCurrentIrodsAccount());
 		case PROVIDED:
 			return webDavConfig.getProvidedDefaultStartingLocation();
-		case DEFAULT:
-			return "/";
+
 		default:
 			throw new WebDavRuntimeException("unknown configured base path");
 
@@ -165,26 +164,48 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	}
 
-	public IRODSFile resolvePath(final String url) {
+	public IRODSFile resolvePath(final String pathToResolve) {
 		log.info("resolvePath()");
 
-		if (url == null || url.isEmpty()) {
+		if (pathToResolve == null || pathToResolve.isEmpty()) {
 			throw new IllegalArgumentException("null or empty url");
 		}
 
-		log.info("url:{}", url);
-
-		Path path = Path.path(url);
+		log.info("url:{}", pathToResolve);
 
 		try {
 			IRODSFile f = getIrodsAccessObjectFactory().getIRODSFileFactory(
 					IrodsAuthService.retrieveCurrentIrodsAccount())
 					.instanceIRODSFile(this.getBasePathBasedOnConfig());
 
-			for (String s : path.getParts()) {
-				f = getIrodsAccessObjectFactory().getIRODSFileFactory(
-						IrodsAuthService.retrieveCurrentIrodsAccount())
-						.instanceIRODSFile(f.getAbsolutePath(), s);
+			/*
+			 * the path will have any existing prefix trimmed off when requested
+			 * by the client, as the root was set elsewhere, and all paths are
+			 * expected to be under that prefix.
+			 *
+			 * So if my webDavConfig is set to base on user home, the
+			 * pathToResolve may be /zone/home/user/subdir/blah, and I want to
+			 * Just access /subdir/blah
+			 */
+			Path path;
+			String prefix = getBasePathBasedOnConfig();
+			if (pathToResolve.equals(prefix)) {
+				// path is same as prefix, so leave f unchanged
+			} else {
+				if (pathToResolve.startsWith(prefix)) {
+
+					path = Path.path(MiscIRODSUtils
+							.subtractPrefixFromGivenPath(f.getAbsolutePath(),
+									pathToResolve));
+				} else {
+					path = Path.path(pathToResolve);
+				}
+
+				for (String s : path.getParts()) {
+					f = getIrodsAccessObjectFactory().getIRODSFileFactory(
+							IrodsAuthService.retrieveCurrentIrodsAccount())
+							.instanceIRODSFile(f.getAbsolutePath(), s);
+				}
 			}
 			log.info("resolved as:{}", f);
 			return f;
@@ -326,6 +347,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 * @param irodsFileContentService
+	 *            if (webDavConfig.getDefaultStartingLocationEnum() != )
+	 *
 	 *            the irodsFileContentService to set
 	 */
 	public void setIrodsFileContentService(

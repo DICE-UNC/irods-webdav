@@ -10,5 +10,5 @@ package org.irods.jargon.webdav.config;
  *
  */
 public enum DefaultStartingLocationEnum {
-	ROOT, USER_HOME, PROVIDED, DEFAULT
+	ROOT, USER_HOME, PROVIDED
 }
