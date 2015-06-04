@@ -39,7 +39,7 @@
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg value="/" />
+	
 		<constructor-arg type="io.milton.http.SecurityManager"
 			ref="irodsSecurityManager" />
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
