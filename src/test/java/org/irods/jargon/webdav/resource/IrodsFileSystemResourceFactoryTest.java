@@ -175,4 +175,103 @@ public class IrodsFileSystemResourceFactoryTest {
 				pathFile.getAbsolutePath());
 	}
 
+	@Test
+	public void testResolveSubdirUnderUserDirWhenConfiguredUserRoot()
+			throws Exception {
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		String testTargetColl = "testResolveSubdirUnderUserDirWhenConfiguredUserRoot";
+
+		String targetIrodsColl = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testTargetColl);
+
+		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(targetIrodsColl);
+
+		targetCollection.mkdirs();
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.USER_HOME);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				manager);
+
+		factory.setWebDavConfig(config);
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IRODSFile pathFile = factory.resolvePath(testTargetColl);
+		Assert.assertEquals("should have dir under user home", MiscIRODSUtils
+				.buildIRODSUserHomeForAccountUsingDefaultScheme(irodsAccount),
+				pathFile.getAbsolutePath());
+	}
+
+	@Test
+	public void testResolveSubdirUnderUserDirWhenConfiguredUserRootGivingFullPath()
+			throws Exception {
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		String testTargetColl = "testResolveSubdirUnderUserDirWhenConfiguredUserRootGivingFullPath";
+
+		String targetIrodsColl = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
+								+ testTargetColl);
+
+		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(targetIrodsColl);
+
+		targetCollection.mkdirs();
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.USER_HOME);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				manager);
+
+		factory.setWebDavConfig(config);
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IRODSFile pathFile = factory.resolvePath(targetIrodsColl);
+		Assert.assertEquals("should have dir under user home", targetIrodsColl,
+				pathFile.getAbsolutePath());
+	}
+
 }

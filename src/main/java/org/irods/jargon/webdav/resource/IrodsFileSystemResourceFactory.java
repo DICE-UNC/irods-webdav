@@ -172,11 +172,6 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			throw new IllegalArgumentException("null or empty url");
 		}
 
-		/*
-		 * if (url == null || url.isEmpty()) { throw new
-		 * IllegalArgumentException("null or empty url"); }
-		 */
-
 		log.info("url:{}", url);
 
 		Path path = Path.path(url);
