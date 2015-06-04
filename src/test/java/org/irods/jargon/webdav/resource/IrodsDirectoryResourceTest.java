@@ -10,7 +10,6 @@ import java.util.Properties;
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.io.IRODSFile;
-import org.irods.jargon.testutils.AssertionHelper;
 import org.irods.jargon.testutils.IRODSTestSetupUtilities;
 import org.irods.jargon.testutils.TestingPropertiesHelper;
 import org.irods.jargon.testutils.filemanip.ScratchFileUtils;
@@ -29,7 +28,6 @@ public class IrodsDirectoryResourceTest {
 	private static ScratchFileUtils scratchFileUtils = null;
 	public static final String IRODS_TEST_SUBDIR_PATH = "IrodsDirectoryResourceTest";
 	private static IRODSTestSetupUtilities irodsTestSetupUtilities = null;
-	private static AssertionHelper assertionHelper = null;
 	private static IRODSFileSystem irodsFileSystem;
 
 	@BeforeClass
@@ -43,7 +41,6 @@ public class IrodsDirectoryResourceTest {
 		irodsTestSetupUtilities.initializeIrodsScratchDirectory();
 		irodsTestSetupUtilities
 				.initializeDirectoryForTest(IRODS_TEST_SUBDIR_PATH);
-		assertionHelper = new AssertionHelper();
 		irodsFileSystem = IRODSFileSystem.instance();
 	}
 
@@ -91,7 +88,7 @@ public class IrodsDirectoryResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 
@@ -150,7 +147,7 @@ public class IrodsDirectoryResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 
@@ -222,7 +219,7 @@ public class IrodsDirectoryResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 
@@ -267,7 +264,7 @@ public class IrodsDirectoryResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 
@@ -338,7 +335,7 @@ public class IrodsDirectoryResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 
@@ -387,7 +384,7 @@ public class IrodsDirectoryResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 

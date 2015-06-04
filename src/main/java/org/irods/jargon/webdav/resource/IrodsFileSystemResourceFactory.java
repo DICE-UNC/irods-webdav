@@ -12,6 +12,7 @@ import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.IRODSFileSystemSingletonWrapper;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.utils.MiscIRODSUtils;
 import org.irods.jargon.webdav.authfilter.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
@@ -29,7 +30,6 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileSystemResourceFactory.class);
 	private IrodsFileContentService irodsFileContentService;
-	String root;
 	io.milton.http.SecurityManager securityManager;
 	LockManager lockManager;
 	Long maxAgeSeconds;
@@ -53,20 +53,14 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 * These initialised values are not final, and may be changed through the
 	 * setters or init method
 	 *
-	 * To be honest its pretty naf configuring like this, but i don't want to
-	 * force people to use spring or any other particular configuration tool
-	 *
 	 */
 	public IrodsFileSystemResourceFactory() {
 		log.debug("setting default configuration...");
-		String sRoot = "/";
 		io.milton.http.SecurityManager sm = new NullSecurityManager();
-		init(sRoot, sm);
+		init(sm);
 	}
 
-	protected void init(final String sRoot,
-			final io.milton.http.SecurityManager securityManager) {
-		root = sRoot;
+	protected void init(final io.milton.http.SecurityManager securityManager) {
 		setSecurityManager(securityManager);
 		irodsFileSystem = IRODSFileSystemSingletonWrapper.instance();
 		try {
@@ -81,23 +75,18 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 *
-	 * @param root
-	 *            - the root folder of the filesystem to expose. This must
-	 *            include the context path. Eg, if you've deployed to webdav-fs,
-	 *            root must contain a folder called webdav-fs
+	 *
 	 * @param securityManager
 	 */
-	public IrodsFileSystemResourceFactory(final String root,
+	public IrodsFileSystemResourceFactory(
 			final io.milton.http.SecurityManager securityManager) {
-		this.root = root;
 		setSecurityManager(securityManager);
-		init(root, securityManager);
+		init(securityManager);
 	}
 
 	/**
 	 *
-	 * @param root
-	 *            - the root folder of the filesystem to expose
+	 * 
 	 * @param securityManager
 	 * @param contextPath
 	 *            - this is the leading part of URL's to ignore. For example if
@@ -105,20 +94,19 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *            http://localhost:8080/webdav-fs, the context path should be
 	 *            webdav-fs
 	 */
-	public IrodsFileSystemResourceFactory(final String root,
+	public IrodsFileSystemResourceFactory(
 			final io.milton.http.SecurityManager securityManager,
 			final String contextPath) {
-		this.root = root;
 		setSecurityManager(securityManager);
 		setContextPath(contextPath);
-		init(root, securityManager);
+		init(securityManager);
 	}
 
 	@Override
 	public Resource getResource(final String host, String url) {
 		log.debug("getResource: host: " + host + " - url:" + url);
 		url = stripContext(url);
-		IRODSFile requested = resolvePath(root, url);
+		IRODSFile requested = resolvePath(url);
 		BaseResource resolvedResource = resolveFile(host, requested);
 		log.info("resolved as resource:{}", resolvedResource);
 		return resolvedResource;
@@ -147,11 +135,41 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return r;
 	}
 
-	public IRODSFile resolvePath(final String root, final String url) {
+	/**
+	 * Find the right base path to use based on the provided configuration
+	 * 
+	 * @return
+	 */
+	protected String getBasePathBasedOnConfig() {
+		log.info("getBasePathBasedOnConfig()");
+		if (webDavConfig == null) {
+			throw new WebDavRuntimeException("no webDavConfig is present");
+		}
+
+		switch (webDavConfig.getDefaultStartingLocationEnum()) {
+
+		case ROOT:
+			return "/";
+		case USER_HOME:
+			return MiscIRODSUtils
+					.buildIRODSUserHomeForAccountUsingDefaultScheme(IrodsAuthService
+							.retrieveCurrentIrodsAccount());
+		case PROVIDED:
+			return webDavConfig.getProvidedDefaultStartingLocation();
+		case DEFAULT:
+			return "/";
+		default:
+			throw new WebDavRuntimeException("unknown configured base path");
+
+		}
+
+	}
+
+	public IRODSFile resolvePath(final String url) {
 		log.info("resolvePath()");
 
-		if (root == null || root.isEmpty()) {
-			throw new IllegalArgumentException("null or empty root");
+		if (url == null || url.isEmpty()) {
+			throw new IllegalArgumentException("null or empty url");
 		}
 
 		/*
@@ -159,7 +177,6 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		 * IllegalArgumentException("null or empty url"); }
 		 */
 
-		log.info("root:{}", root);
 		log.info("url:{}", url);
 
 		Path path = Path.path(url);
@@ -167,12 +184,12 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		try {
 			IRODSFile f = getIrodsAccessObjectFactory().getIRODSFileFactory(
 					IrodsAuthService.retrieveCurrentIrodsAccount())
-							.instanceIRODSFile(root);
+					.instanceIRODSFile(this.getBasePathBasedOnConfig());
 
 			for (String s : path.getParts()) {
 				f = getIrodsAccessObjectFactory().getIRODSFileFactory(
 						IrodsAuthService.retrieveCurrentIrodsAccount())
-								.instanceIRODSFile(f.getAbsolutePath(), s);
+						.instanceIRODSFile(f.getAbsolutePath(), s);
 			}
 			log.info("resolved as:{}", f);
 			return f;
@@ -188,7 +205,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		if (s == null) {
 			throw new NullPointerException(
 					"Got null realm from securityManager: " + securityManager
-					+ " for host=" + host);
+							+ " for host=" + host);
 		}
 		return s;
 	}
@@ -352,10 +369,4 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		this.webDavConfig = webDavConfig;
 	}
 
-	/**
-	 * @return the root
-	 */
-	public String getRoot() {
-		return root;
-	}
 }

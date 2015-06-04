@@ -117,19 +117,55 @@ public class WebDavConfig {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
 	public String toString() {
-		return "WebDavConfig [host=" + host + ", zone=" + zone + ", port="
-				+ port + ", defaultStorageResource=" + defaultStorageResource
-				+ ", authScheme=" + authScheme + ", realm=" + realm
-				+ ", cacheFileDemographics=" + cacheFileDemographics
-				+ ", defaultStartingLocationEnum="
-				+ defaultStartingLocationEnum
-				+ ", providedDefaultStartingLocation="
-				+ providedDefaultStartingLocation + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("WebDavConfig [");
+		if (host != null) {
+			builder.append("host=");
+			builder.append(host);
+			builder.append(", ");
+		}
+		if (zone != null) {
+			builder.append("zone=");
+			builder.append(zone);
+			builder.append(", ");
+		}
+		builder.append("port=");
+		builder.append(port);
+		builder.append(", ");
+		if (defaultStorageResource != null) {
+			builder.append("defaultStorageResource=");
+			builder.append(defaultStorageResource);
+			builder.append(", ");
+		}
+		if (authScheme != null) {
+			builder.append("authScheme=");
+			builder.append(authScheme);
+			builder.append(", ");
+		}
+		if (realm != null) {
+			builder.append("realm=");
+			builder.append(realm);
+			builder.append(", ");
+		}
+		builder.append("cacheFileDemographics=");
+		builder.append(cacheFileDemographics);
+		builder.append(", ");
+		if (defaultStartingLocationEnum != null) {
+			builder.append("defaultStartingLocationEnum=");
+			builder.append(defaultStartingLocationEnum);
+			builder.append(", ");
+		}
+		if (providedDefaultStartingLocation != null) {
+			builder.append("providedDefaultStartingLocation=");
+			builder.append(providedDefaultStartingLocation);
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 
 	/**

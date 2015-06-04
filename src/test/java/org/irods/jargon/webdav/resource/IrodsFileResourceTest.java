@@ -7,7 +7,6 @@ import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.io.IRODSFile;
-import org.irods.jargon.testutils.AssertionHelper;
 import org.irods.jargon.testutils.IRODSTestSetupUtilities;
 import org.irods.jargon.testutils.TestingPropertiesHelper;
 import org.irods.jargon.testutils.filemanip.FileGenerator;
@@ -27,7 +26,6 @@ public class IrodsFileResourceTest {
 	private static ScratchFileUtils scratchFileUtils = null;
 	public static final String IRODS_TEST_SUBDIR_PATH = "IrodsFileResourceTest";
 	private static IRODSTestSetupUtilities irodsTestSetupUtilities = null;
-	private static AssertionHelper assertionHelper = null;
 	private static IRODSFileSystem irodsFileSystem;
 
 	@BeforeClass
@@ -41,7 +39,6 @@ public class IrodsFileResourceTest {
 		irodsTestSetupUtilities.initializeIrodsScratchDirectory();
 		irodsTestSetupUtilities
 				.initializeDirectoryForTest(IRODS_TEST_SUBDIR_PATH);
-		assertionHelper = new AssertionHelper();
 		irodsFileSystem = IRODSFileSystem.instance();
 	}
 
@@ -80,7 +77,7 @@ public class IrodsFileResourceTest {
 		IrodsSecurityManager manager = Mockito.mock(IrodsSecurityManager.class);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -125,7 +122,7 @@ public class IrodsFileResourceTest {
 		IrodsSecurityManager manager = Mockito.mock(IrodsSecurityManager.class);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -170,7 +167,7 @@ public class IrodsFileResourceTest {
 		IrodsSecurityManager manager = Mockito.mock(IrodsSecurityManager.class);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -195,11 +192,6 @@ public class IrodsFileResourceTest {
 				.createAndReturnAbsoluteScratchPath(IRODS_TEST_SUBDIR_PATH);
 		String localFileName = FileGenerator
 				.generateFileOfFixedLengthGivenName(absPath, testFileName, 2);
-
-		String sourceIrodsFile = testingPropertiesHelper
-				.buildIRODSCollectionAbsolutePathFromTestProperties(
-						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testFileName);
 
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
@@ -251,7 +243,7 @@ public class IrodsFileResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 
@@ -303,7 +295,7 @@ public class IrodsFileResourceTest {
 		IrodsSecurityManager manager = Mockito.mock(IrodsSecurityManager.class);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -328,11 +320,6 @@ public class IrodsFileResourceTest {
 				.createAndReturnAbsoluteScratchPath(IRODS_TEST_SUBDIR_PATH);
 		String localFileName = FileGenerator
 				.generateFileOfFixedLengthGivenName(absPath, testFileName, 2);
-
-		String sourceIrodsFile = testingPropertiesHelper
-				.buildIRODSCollectionAbsolutePathFromTestProperties(
-						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testFileName);
 
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
@@ -384,7 +371,7 @@ public class IrodsFileResourceTest {
 		manager.setIrodsAuthService(authService);
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
-				"/", manager);
+				manager);
 
 		factory.setWebDavConfig(config);
 

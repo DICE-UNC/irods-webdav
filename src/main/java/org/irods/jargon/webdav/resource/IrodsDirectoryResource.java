@@ -338,18 +338,10 @@ public class IrodsDirectoryResource extends BaseResource implements
 			final Map<String, String> params, final String contentType)
 			throws IOException, NotAuthorizedException {
 
-		IRODSFile rootFile;
-		try {
-			rootFile = instanceIrodsFileFactory().instanceIRODSFile(
-					getFactory().getRoot());
-		} catch (JargonException e) {
-			log.error("error getting root file", e);
-			throw new WebDavRuntimeException("error getting root file", e);
-		}
-
 		String subpath = getIrodsFile().getCanonicalPath();
-		if (rootFile.getCanonicalPath().length() > 1) {
-			subpath = subpath.substring(rootFile.getCanonicalPath().length());
+		if (getIrodsFile().getCanonicalPath().length() > 1) {
+			subpath = subpath.substring(getIrodsFile().getCanonicalPath()
+					.length());
 		}
 		String uri = subpath.replace('\\', '/');
 

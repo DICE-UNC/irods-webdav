@@ -14,8 +14,8 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="dfc-test-irods1.edc.renci.org" />
-		<property name="zone" value="dfc1" />
+		<property name="host" value="localhost" />
+		<property name="zone" value="tempZone" />
 		<property name="port" value="1247" />
 		<property name="authScheme" value="STANDARD" />
 		<property name="defaultStorageResource" value="" />
