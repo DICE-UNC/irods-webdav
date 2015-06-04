@@ -10,10 +10,12 @@ import java.util.Properties;
 import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.utils.MiscIRODSUtils;
 import org.irods.jargon.testutils.IRODSTestSetupUtilities;
 import org.irods.jargon.testutils.TestingPropertiesHelper;
 import org.irods.jargon.testutils.filemanip.ScratchFileUtils;
 import org.irods.jargon.webdav.authfilter.IrodsAuthService;
+import org.irods.jargon.webdav.config.DefaultStartingLocationEnum;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -410,6 +412,62 @@ public class IrodsDirectoryResourceTest {
 
 		resource.createNew(testFileName, fileInputStream, fileLength,
 				"text/html");
+
+	}
+
+	@Test
+	public void testCreateCollectionUnderUserHome() throws Exception {
+		String testFileName = "testCreateCollectionUnderUserHome";
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		IRODSFile rootCollection = irodsFileSystem
+				.getIRODSFileFactory(irodsAccount)
+				.instanceIRODSFile(
+						MiscIRODSUtils
+								.buildIRODSUserHomeForAccountUsingDefaultScheme(irodsAccount));
+
+		IRODSFile destFile = irodsFileSystem.getIRODSFileFactory(irodsAccount)
+				.instanceIRODSFile(rootCollection.getAbsolutePath(),
+						testFileName);
+		destFile.deleteWithForceOption();
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setDefaultStartingLocationEnum(DefaultStartingLocationEnum.USER_HOME);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				manager);
+
+		factory.setWebDavConfig(config);
+
+		IrodsFileContentService service = new IrodsFileContentService();
+		service.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
+				factory, rootCollection, service);
+
+		resource.createCollection(testFileName);
+
+		Assert.assertTrue(destFile.exists());
 
 	}
 
