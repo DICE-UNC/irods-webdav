@@ -35,6 +35,12 @@ public class WebDavConfig {
 	private String providedDefaultStartingLocation = "";
 
 	/**
+	 * Use the jargon packing io streams to read ahead and write behind at
+	 * larger buffer sizes for better performance
+	 */
+	private boolean usePackingStreams = false;
+
+	/**
 	 *
 	 */
 	public WebDavConfig() {
@@ -163,7 +169,10 @@ public class WebDavConfig {
 		if (providedDefaultStartingLocation != null) {
 			builder.append("providedDefaultStartingLocation=");
 			builder.append(providedDefaultStartingLocation);
+			builder.append(", ");
 		}
+		builder.append("usePackingStreams=");
+		builder.append(usePackingStreams);
 		builder.append("]");
 		return builder.toString();
 	}
@@ -228,6 +237,21 @@ public class WebDavConfig {
 	 */
 	public void setCacheFileDemographics(final boolean cacheFileDemographics) {
 		this.cacheFileDemographics = cacheFileDemographics;
+	}
+
+	/**
+	 * @return the usePackingStreams
+	 */
+	public boolean isUsePackingStreams() {
+		return usePackingStreams;
+	}
+
+	/**
+	 * @param usePackingStreams
+	 *            the usePackingStreams to set
+	 */
+	public void setUsePackingStreams(boolean usePackingStreams) {
+		this.usePackingStreams = usePackingStreams;
 	}
 
 }

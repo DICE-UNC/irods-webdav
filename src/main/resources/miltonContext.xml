@@ -3,14 +3,10 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-
-	<!-- <bean id="resource.factory" class="io.milton.http.annotated.AnnotationResourceFactory"> 
-		<property name="controllers"> <list> <bean class="com.bandstand.web.BandsController" 
-		/> </list> </property> </bean> -->
-
 	<bean id="irodsFileContentService"
 		class="org.irods.jargon.webdav.resource.IrodsFileContentService">
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
+		<property name="webDavConfig" ref="webDavConfig"/>
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
@@ -22,6 +18,7 @@
 		<property name="defaultStartingLocationEnum" value="USER_HOME" />
 		<property name="providedDefaultStartingLocation" value="" />
 		<property name="cacheFileDemographics" value="true" />
+		<property name="usePackingStreams" value="true" />
 	</bean>
 
 	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">

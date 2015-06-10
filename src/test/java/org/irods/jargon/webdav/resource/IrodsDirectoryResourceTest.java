@@ -356,8 +356,8 @@ public class IrodsDirectoryResourceTest {
 	}
 
 	@Test
-	public void testCreateNew() throws Exception {
-		String testFileName = "testCreateNew.txt";
+	public void testCreateNewNormalStream() throws Exception {
+		String testFileName = "testCreateNewNormalStream.txt";
 
 		String rootColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
@@ -377,6 +377,7 @@ public class IrodsDirectoryResourceTest {
 		config.setHost(irodsAccount.getHost());
 		config.setPort(irodsAccount.getPort());
 		config.setZone(irodsAccount.getZone());
+		config.setUsePackingStreams(false);
 		manager.setWebDavConfig(config);
 
 		IrodsAuthService authService = new IrodsAuthService();
@@ -393,6 +394,69 @@ public class IrodsDirectoryResourceTest {
 		IrodsFileContentService service = new IrodsFileContentService();
 		service.setIrodsAccessObjectFactory(irodsFileSystem
 				.getIRODSAccessObjectFactory());
+		service.setWebDavConfig(config);
+
+		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
+				irodsAccount.getPassword());
+
+		IrodsDirectoryResource resource = new IrodsDirectoryResource("host",
+				factory, rootCollection, service);
+
+		long fileLength = 100L;
+
+		String absPath = scratchFileUtils
+				.createAndReturnAbsoluteScratchPath(IRODS_TEST_SUBDIR_PATH);
+		String localFilePath = org.irods.jargon.testutils.filemanip.FileGenerator
+				.generateFileOfFixedLengthGivenName(absPath, testFileName,
+						fileLength);
+		File localFile = new File(localFilePath);
+		FileInputStream fileInputStream = new FileInputStream(localFile);
+
+		resource.createNew(testFileName, fileInputStream, fileLength,
+				"text/html");
+
+	}
+
+	@Test
+	public void testCreateNewPackingStream() throws Exception {
+		String testFileName = "testCreateNewPackingStream.txt";
+
+		String rootColl = testingPropertiesHelper
+				.buildIRODSCollectionAbsolutePathFromTestProperties(
+						testingProperties, IRODS_TEST_SUBDIR_PATH);
+
+		IRODSAccount irodsAccount = testingPropertiesHelper
+				.buildIRODSAccountFromTestProperties(testingProperties);
+
+		IRODSFile rootCollection = irodsFileSystem.getIRODSFileFactory(
+				irodsAccount).instanceIRODSFile(rootColl);
+
+		IrodsSecurityManager manager = new IrodsSecurityManager();
+		manager.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		WebDavConfig config = new WebDavConfig();
+		config.setAuthScheme("STANDARD");
+		config.setHost(irodsAccount.getHost());
+		config.setPort(irodsAccount.getPort());
+		config.setZone(irodsAccount.getZone());
+		config.setUsePackingStreams(true);
+		manager.setWebDavConfig(config);
+
+		IrodsAuthService authService = new IrodsAuthService();
+		authService.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		authService.setWebDavConfig(config);
+		manager.setIrodsAuthService(authService);
+
+		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
+				manager);
+
+		factory.setWebDavConfig(config);
+
+		IrodsFileContentService service = new IrodsFileContentService();
+		service.setIrodsAccessObjectFactory(irodsFileSystem
+				.getIRODSAccessObjectFactory());
+		service.setWebDavConfig(config);
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());

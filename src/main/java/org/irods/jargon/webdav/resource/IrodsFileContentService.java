@@ -19,7 +19,6 @@
 
 package org.irods.jargon.webdav.resource;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,6 +30,11 @@ import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.Stream2StreamAO;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
+import org.irods.jargon.core.pub.io.IRODSFileInputStream;
+import org.irods.jargon.core.pub.io.IRODSFileOutputStream;
+import org.irods.jargon.core.pub.io.PackingIrodsInputStream;
+import org.irods.jargon.core.pub.io.PackingIrodsOutputStream;
+import org.irods.jargon.webdav.config.WebDavConfig;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,11 +45,10 @@ import org.slf4j.LoggerFactory;
 public class IrodsFileContentService implements FileContentService {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
+	private WebDavConfig webDavConfig;
 
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileContentService.class);
-
-	// TODO: see about unwrapping file not found exceptions and process those
 
 	@Override
 	public void setFileContent(final IRODSFile dest, final InputStream in,
@@ -70,11 +73,24 @@ public class IrodsFileContentService implements FileContentService {
 		try {
 			Stream2StreamAO stream2Stream = irodsAccessObjectFactory
 					.getStream2StreamAO(irodsAccount);
-			stream2Stream.transferStreamToFileUsingIOStreams(in, (File) dest,
-					dest.length(), irodsAccessObjectFactory
-					.getJargonProperties()
-					.getInputToOutputCopyBufferByteSize());
 
+			if (webDavConfig.isUsePackingStreams()) {
+				log.info("use packing stream for transfer");
+				IRODSFileOutputStream outputStream = this
+						.getIrodsAccessObjectFactory()
+						.getIRODSFileFactory(irodsAccount)
+						.instanceIRODSFileOutputStream(dest);
+				PackingIrodsOutputStream ipos = new PackingIrodsOutputStream(
+						outputStream);
+				stream2Stream.streamToStreamCopyUsingStandardIO(in, ipos);
+			} else {
+				log.info("use normal stream for transfer");
+				stream2Stream.transferStreamToFileUsingIOStreams(in,
+						(File) dest, dest.length(), irodsAccessObjectFactory
+								.getJargonProperties()
+								.getInputToOutputCopyBufferByteSize());
+
+			}
 		} catch (JargonException e) {
 			log.error("error in setting file content", e);
 			throw new WebDavRuntimeException("exception streaming to file", e);
@@ -104,8 +120,18 @@ public class IrodsFileContentService implements FileContentService {
 		try {
 			IRODSFileFactory factory = irodsAccessObjectFactory
 					.getIRODSFileFactory(irodsAccount);
-			return new BufferedInputStream(
-					factory.instanceIRODSFileInputStream(file.getAbsolutePath()));
+
+			IRODSFileInputStream inputStream = factory
+					.instanceIRODSFileInputStream(file.getAbsolutePath());
+
+			if (this.webDavConfig.isUsePackingStreams()) {
+				log.info("using packing stream");
+				return new PackingIrodsInputStream(inputStream);
+			} else {
+				log.info("use normal irods stream");
+				return inputStream;
+			}
+
 		} catch (JargonException e) {
 			log.error("error in setting file content", e);
 			throw new WebDavRuntimeException("exception streaming to file", e);
@@ -120,5 +146,20 @@ public class IrodsFileContentService implements FileContentService {
 	public void setIrodsAccessObjectFactory(
 			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
+	}
+
+	/**
+	 * @return the webDavConfig
+	 */
+	public WebDavConfig getWebDavConfig() {
+		return webDavConfig;
+	}
+
+	/**
+	 * @param webDavConfig
+	 *            the webDavConfig to set
+	 */
+	public void setWebDavConfig(WebDavConfig webDavConfig) {
+		this.webDavConfig = webDavConfig;
 	}
 }
