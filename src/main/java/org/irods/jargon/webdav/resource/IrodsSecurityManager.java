@@ -40,7 +40,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsSecurityManager.class);
 
-	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
+	//private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
 
 	/**
 	 *
@@ -69,13 +69,13 @@ public class IrodsSecurityManager implements SecurityManager {
 	@Override
 	public Object authenticate(final String userName, final String password) {
 		log.info("authenticate()");
-		clearThreadlocals();
+		//clearThreadlocals();
 
 		try {
 			AuthResponse authResponse = irodsAuthService.authenticate(userName,
 					password);
-			log.info("storing authResponse in threadlocal as authResponseCache");
-			authResponseCache.set(authResponse);
+			//log.info("storing authResponse in threadlocal as authResponseCache");
+			//authResponseCache.set(authResponse);
 			return authResponse;
 		} catch (AuthenticationException e) {
 			log.info("authentication failed", e);
@@ -168,8 +168,10 @@ public class IrodsSecurityManager implements SecurityManager {
 		this.irodsAuthService = irodsAuthService;
 	}
 
+    /*
 	public static void clearThreadlocals() {
 		authResponseCache.remove();
 	}
+    */
 
 }

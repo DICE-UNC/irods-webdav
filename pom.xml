@@ -10,10 +10,10 @@
 	<description>Milton based WebDav interface to iRODS</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jargon.version>4.0.2.3-RC1</jargon.version>
+		<jargon.version>4.0.2.3-RELEASE</jargon.version>
 		<maven.compiler.source>1.7</maven.compiler.source>
 		<maven.compiler.target>1.7</maven.compiler.target>
-		<milton.version>2.6.5.3</milton.version>
+		<milton.version>2.6.5.6</milton.version>
 		<spring.version>3.2.13.RELEASE</spring.version>
 		<milton.level>milton-server-ce</milton.level>
 	</properties>
@@ -144,6 +144,11 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 			<version>${spring.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-jcs-core</artifactId>
+		    <version>2.0-beta-1</version>
 		</dependency>
 	</dependencies>
 
