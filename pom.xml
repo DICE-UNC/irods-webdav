@@ -263,6 +263,33 @@
 							<goal>run</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>test-webdav-props</id>
+						<phase>validate</phase>
+						<configuration>
+							<tasks>
+								<delete file="${basedir}/src/test/resources/test-irods-webdav.properties" />
+								<touch file="${basedir}/src/test/resources/test-irods-webdav.properties"
+									mkdirs="true" />
+								<echo file="${basedir}/src/test/resources/test-irods-webdav.properties"
+									append="true">
+									irods.host=${jargon.test.irods.host}
+									irods.port=${jargon.test.irods.port}
+									irods.zone=${jargon.test.irods.zone}
+									utilize.packing.streams=true
+									auth.type=STANDARD
+									default.storage.resource=
+									default.starting.location=USER_HOME
+									provided.starting.location.path=  
+									cache.file.demographics=true
+									utilize.packing.streams=true
+								</echo>
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
