@@ -10,11 +10,11 @@
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="dfc-test-irods1.edc.renci.org" />
-		<property name="zone" value="dfc1" />
-		<property name="port" value="1247" />
+		<property name="host" value="tdlc-02.ucsd.edu" />
+		<property name="zone" value="TDLC" />
+		<property name="port" value="6688" />
 		<property name="authScheme" value="STANDARD" />
-		<property name="defaultStorageResource" value="" />
+		<property name="defaultStorageResource" value="tdlc-ux-ucsd2" />
 		<property name="defaultStartingLocationEnum" value="USER_HOME" />
 		<property name="providedDefaultStartingLocation" value="" />
 		<property name="cacheFileDemographics" value="true" />
