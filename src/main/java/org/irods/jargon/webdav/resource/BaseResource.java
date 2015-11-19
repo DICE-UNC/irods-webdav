@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class BaseResource implements Resource, MoveableResource,
-CopyableResource, LockableResource {
+		CopyableResource, LockableResource {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
@@ -156,6 +156,9 @@ CopyableResource, LockableResource {
 
 	protected IRODSFile fileFromCollectionResource(
 			final CollectionResource collectionResource, final String name) {
+
+		log.info("fileFromCollectionResource()");
+
 		if (collectionResource == null) {
 			throw new IllegalArgumentException("null collectionResource");
 		}
@@ -167,6 +170,7 @@ CopyableResource, LockableResource {
 		IRODSFile dest;
 
 		if (collectionResource instanceof IrodsDirectoryResource) {
+			log.info("is a directory resource");
 			try {
 				IrodsDirectoryResource newFsParent = (IrodsDirectoryResource) collectionResource;
 
@@ -246,7 +250,7 @@ CopyableResource, LockableResource {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.resource.Resource#getRealm()
 	 */
 	@Override

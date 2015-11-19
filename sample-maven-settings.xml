@@ -12,6 +12,11 @@
 			<properties>
 				<milton.level>milton-server-ce</milton.level>
 			</properties>
+			<dependency>
+				<groupId>io.milton</groupId>
+				<artifactId>milton-server-ce</artifactId>
+				<version>${milton.version}</version>
+			</dependency>
 		</profile>
 		<profile>
 			<id>irodsWebdavEnterprise</id>
@@ -20,6 +25,12 @@
 				<milton.source.path>/home/test/milton</milton.source.path>
 				<milton.copy.license>true</milton.copy.license>
 			</properties>
+			<dependency>
+				<groupId>io.milton</groupId>
+				<artifactId>milton-server-ent</artifactId>
+				<version>${milton.version}</version>
+			</dependency>
+
 		</profile>
 
 	</profiles>

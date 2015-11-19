@@ -185,6 +185,7 @@ public class IrodsFileResource extends BaseResource implements
 	 */
 	@Override
 	public Long getMaxAgeSeconds(final Auth auth) {
+		log.info("getMaxAgeSeconds()");
 		return getFactory().getMaxAgeSeconds();
 	}
 
@@ -260,6 +261,7 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	protected void doCopy(final IRODSFile dest) {
+		log.info("doCopy()");
 		log.info("dest:{}", dest);
 
 		try {
@@ -297,22 +299,26 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
 			throws NotAuthorizedException {
+		log.info("lock()");
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
 	@Override
 	public LockResult refreshLock(final String token)
 			throws NotAuthorizedException {
+		log.info("refreshLock()");
 		return getFactory().getLockManager().refresh(token, this);
 	}
 
 	@Override
 	public void unlock(final String tokenId) throws NotAuthorizedException {
+		log.info("unlock");
 		getFactory().getLockManager().unlock(tokenId, this);
 	}
 
 	@Override
 	public LockToken getCurrentLock() {
+		log.info("getCurrentLock()");
 		if (getFactory().getLockManager() != null) {
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {

@@ -626,16 +626,15 @@ public class IrodsDirectoryResource extends BaseResource implements
 	public LockToken createAndLock(final String name,
 			final LockTimeout lockTimeout, final LockInfo lockInfo)
 			throws NotAuthorizedException {
+		log.info("createAndLock()");
+		log.info("name:{}", name);
 		IRODSFile file;
 		try {
 			file = instanceIrodsFileFactory().instanceIRODSFile(
 					getIrodsFile().getAbsolutePath(), name);
-			file.createNewFile();
-
+			// file.createNewFile();
+			log.info("new file created");
 		} catch (JargonException e) {
-			log.error("error in create file operation", e);
-			throw new WebDavRuntimeException("unable to create file", e);
-		} catch (IOException e) {
 			log.error("error in create file operation", e);
 			throw new WebDavRuntimeException("unable to create file", e);
 		}
