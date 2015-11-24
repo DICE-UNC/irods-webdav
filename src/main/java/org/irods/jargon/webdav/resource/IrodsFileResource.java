@@ -54,6 +54,7 @@ import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
+import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -300,6 +301,11 @@ public class IrodsFileResource extends BaseResource implements
 	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
 			throws NotAuthorizedException {
 		log.info("lock()");
+		if (getFactory().getLockManager() == null) {
+			log.error("unable to get lock manager from factory");
+			throw new ConfigurationRuntimeException(
+					"a lock manager was not configured");
+		}
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
@@ -319,6 +325,11 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public LockToken getCurrentLock() {
 		log.info("getCurrentLock()");
+		if (getFactory().getLockManager() == null) {
+			log.error("unable to get lock manager from factory");
+			throw new ConfigurationRuntimeException(
+					"a lock manager was not configured");
+		}
 		if (getFactory().getLockManager() != null) {
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {

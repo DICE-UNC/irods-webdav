@@ -135,6 +135,42 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return r;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("IrodsFileSystemResourceFactory [irodsFileContentService=");
+		builder.append(irodsFileContentService);
+		builder.append(", securityManager=");
+		builder.append(securityManager);
+		builder.append(", lockManager=");
+		builder.append(lockManager);
+		builder.append(", maxAgeSeconds=");
+		builder.append(maxAgeSeconds);
+		builder.append(", contextPath=");
+		builder.append(contextPath);
+		builder.append(", allowDirectoryBrowsing=");
+		builder.append(allowDirectoryBrowsing);
+		builder.append(", defaultPage=");
+		builder.append(defaultPage);
+		builder.append(", digestAllowed=");
+		builder.append(digestAllowed);
+		builder.append(", ssoPrefix=");
+		builder.append(ssoPrefix);
+		builder.append(", irodsAccessObjectFactory=");
+		builder.append(irodsAccessObjectFactory);
+		builder.append(", irodsFileSystem=");
+		builder.append(irodsFileSystem);
+		builder.append(", webDavConfig=");
+		builder.append(webDavConfig);
+		builder.append("]");
+		return builder.toString();
+	}
+
 	/**
 	 * Find the right base path to use based on the provided configuration
 	 * 

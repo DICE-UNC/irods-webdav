@@ -22,6 +22,7 @@ import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
 import org.irods.jargon.webdav.authfilter.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
+import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,15 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 		if (webDavConfig == null) {
 			throw new IllegalArgumentException("null webDavConfig");
+		}
+
+		if (factory == null) {
+			throw new IllegalArgumentException("null factory");
+		}
+
+		if (factory.getLockManager() == null) {
+			throw new ConfigurationRuntimeException(
+					"no lock manager configured!");
 		}
 
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;

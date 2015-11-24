@@ -33,7 +33,13 @@
 		<property name="webDavConfig" ref="webDavConfig" />
 	</bean>
 	
-	<bean id="lockManager" class="org.irods.jargon.webdav.resource.IrodsMemoryLockManager"></bean>
+	<!-- 	<bean id="lockManager" class="org.irods.jargon.webdav.resource.IrodsMemoryLockManager"></bean>
+	 -->
+	
+	<bean id="lockManager" class="io.milton.http.fs.SimpleLockManager">
+		<constructor-arg type="io.milton.cache.CacheManager"
+			ref="cacheManager" />
+	</bean>
 
 	<bean id="resource.factory"
 		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
@@ -45,12 +51,22 @@
 		<property name="contentService" ref="irodsFileContentService" />
 		<property name="lockManager" ref="lockManager" />
 	</bean>
+	
+	<bean id="cacheManager" class="io.milton.cache.LocalCacheManager"/>
 
-	<bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
+<!-- <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
 		<property name="mainResourceFactory" ref="resource.factory" />
 		<property name="enableCompression" value="false" />
 		<property name="buffering" value="never" />
 		<property name="enableCookieAuth" value="false" />
+	</bean> -->
+
+	<bean id="milton.http.manager" class="io.milton.ent.config.HttpManagerBuilderEnt">
+		<property name="mainResourceFactory" ref="resource.factory" />
+		<property name="enableCompression" value="false" />
+		<property name="buffering" value="never" />
+		<property name="enableCookieAuth" value="false" />
+		<property name="lockManager" ref="lockManager" />
 	</bean>
 
 	<bean id="irodsConnectionManager"
