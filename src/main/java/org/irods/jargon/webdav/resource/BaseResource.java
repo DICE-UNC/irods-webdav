@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class BaseResource implements Resource, MoveableResource,
-		CopyableResource, LockableResource {
+CopyableResource, LockableResource {
 
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
@@ -260,7 +260,7 @@ public abstract class BaseResource implements Resource, MoveableResource,
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see io.milton.resource.Resource#getRealm()
 	 */
 	@Override

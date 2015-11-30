@@ -42,7 +42,7 @@ public class BasicAuthFilter implements Filter {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
 	 */
 	@Override
@@ -52,14 +52,14 @@ public class BasicAuthFilter implements Filter {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
 	 * javax.servlet.ServletResponse, javax.servlet.FilterChain)
 	 */
 	@Override
 	public void doFilter(final ServletRequest request,
 			final ServletResponse response, final FilterChain chain)
-					throws IOException, ServletException {
+			throws IOException, ServletException {
 
 		log.debug("doFilter()");
 
@@ -107,7 +107,7 @@ public class BasicAuthFilter implements Filter {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see javax.servlet.Filter#destroy()
 	 */
 	@Override

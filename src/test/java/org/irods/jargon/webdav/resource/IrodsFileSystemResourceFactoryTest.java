@@ -43,11 +43,11 @@ public class IrodsFileSystemResourceFactoryTest {
 		testingProperties = testingPropertiesLoader.getTestProperties();
 		scratchFileUtils = new ScratchFileUtils(testingProperties);
 		scratchFileUtils
-				.clearAndReinitializeScratchDirectory(IRODS_TEST_SUBDIR_PATH);
+		.clearAndReinitializeScratchDirectory(IRODS_TEST_SUBDIR_PATH);
 		irodsTestSetupUtilities = new IRODSTestSetupUtilities();
 		irodsTestSetupUtilities.initializeIrodsScratchDirectory();
 		irodsTestSetupUtilities
-				.initializeDirectoryForTest(IRODS_TEST_SUBDIR_PATH);
+		.initializeDirectoryForTest(IRODS_TEST_SUBDIR_PATH);
 		irodsFileSystem = IRODSFileSystem.instance();
 	}
 
@@ -103,7 +103,7 @@ public class IrodsFileSystemResourceFactoryTest {
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
+						+ testTargetColl);
 
 		IRODSAccount irodsAccount = testingPropertiesHelper
 				.buildIRODSAccountFromTestProperties(testingProperties);
@@ -196,7 +196,7 @@ public class IrodsFileSystemResourceFactoryTest {
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
+						+ testTargetColl);
 
 		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
 				irodsAccount).instanceIRODSFile(targetIrodsColl);
@@ -247,7 +247,7 @@ public class IrodsFileSystemResourceFactoryTest {
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
+						+ testTargetColl);
 
 		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
 				irodsAccount).instanceIRODSFile(targetIrodsColl);
@@ -298,7 +298,7 @@ public class IrodsFileSystemResourceFactoryTest {
 		String targetIrodsColl = testingPropertiesHelper
 				.buildIRODSCollectionAbsolutePathFromTestProperties(
 						testingProperties, IRODS_TEST_SUBDIR_PATH + '/'
-								+ testTargetColl);
+						+ testTargetColl);
 
 		IRODSFile targetCollection = irodsFileSystem.getIRODSFileFactory(
 				irodsAccount).instanceIRODSFile(targetIrodsColl);

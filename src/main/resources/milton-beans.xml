@@ -20,6 +20,8 @@
 		<property name="providedDefaultStartingLocation" value="${provided.starting.location.path}" />
 		<property name="cacheFileDemographics" value="${cache.file.demographics}" />
 		<property name="usePackingStreams" value="${utilize.packing.streams}" />
+		<property name="maxUploadInGb" value="${max.upload.in.gb}"/>
+		<property name="maxDownloadInGb" value="${max.download.in.gb}"/>
 	</bean>
 
 	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">

@@ -47,7 +47,7 @@ public class WebDavAuthUtils {
 	 */
 	public static UserAndPassword getAccountFromBasicAuthValues(
 			final String basicAuthData, final WebDavConfig webDavConfig)
-					throws JargonException {
+			throws JargonException {
 
 		log.debug("getIRODSAccountFromBasicAuthValues");
 

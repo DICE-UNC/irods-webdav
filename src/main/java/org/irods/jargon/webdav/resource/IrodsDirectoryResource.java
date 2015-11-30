@@ -65,9 +65,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class IrodsDirectoryResource extends BaseResource implements
-		CollectionResource, MakeCollectionableResource, PutableResource,
-		CopyableResource, DeletableResource, MoveableResource, GetableResource,
-		PropFindableResource, LockingCollectionResource, LockableResource {
+CollectionResource, MakeCollectionableResource, PutableResource,
+CopyableResource, DeletableResource, MoveableResource, GetableResource,
+PropFindableResource, LockingCollectionResource, LockableResource {
 
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsDirectoryResource.class);
@@ -98,7 +98,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 		}
 		setIrodsFile(dir);
 		this.host = host;
-		this.collectionAndDataObjectListingEntry = null;
+		collectionAndDataObjectListingEntry = null;
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	 * <code>CollectionAndDataObjectListingEntry</code>. This will trigger a
 	 * caching behavior for some file demographics which can result in 'stale'
 	 * data, while limiting queries to the catalog and increasing performance.
-	 * 
+	 *
 	 * @param host
 	 * @param factory
 	 * @param dir
@@ -183,7 +183,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	@Override
 	public List<? extends Resource> getChildren() {
 		log.info("getChildren()");
-		if (this.getWebDavConfig().isCacheFileDemographics()) {
+		if (getWebDavConfig().isCacheFileDemographics()) {
 			return getChildrenUtilizingCaching();
 		} else {
 			return getChildrenViaFile();
@@ -193,16 +193,15 @@ public class IrodsDirectoryResource extends BaseResource implements
 	/**
 	 * Method to get children that will cache file information. This can avoid
 	 * additional queries for things like file length
-	 * 
+	 *
 	 * @return
 	 */
 	private List<? extends Resource> getChildrenUtilizingCaching() {
 		log.info("getChildrenUtilizingCaching()");
 		try {
-			CollectionAndDataObjectListAndSearchAO collectionAndDataObjectListAndSearchAO = this
-					.getIrodsAccessObjectFactory()
+			CollectionAndDataObjectListAndSearchAO collectionAndDataObjectListAndSearchAO = getIrodsAccessObjectFactory()
 					.getCollectionAndDataObjectListAndSearchAO(
-							this.retrieveIrodsAccount());
+							retrieveIrodsAccount());
 
 			log.info("getting collections");
 			List<CollectionAndDataObjectListingEntry> entries = null;
@@ -211,8 +210,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 			int count = 0;
 			while (more) {
 				log.info("querying child collections starting at:{}", count);
-				log.info("under parent:{}", this.getIrodsFile()
-						.getAbsolutePath());
+				log.info("under parent:{}", getIrodsFile().getAbsolutePath());
 				entries = collectionAndDataObjectListAndSearchAO
 						.listCollectionsUnderPath(getIrodsFile()
 								.getAbsolutePath(), count);
@@ -222,12 +220,11 @@ public class IrodsDirectoryResource extends BaseResource implements
 				}
 
 				for (CollectionAndDataObjectListingEntry entry : entries) {
-					IRODSFile childFile = this
-							.instanceIrodsFileFactory()
+					IRODSFile childFile = instanceIrodsFileFactory()
 							.instanceIRODSFile(entry.getFormattedAbsolutePath());
 					IrodsDirectoryResource fileResource = new IrodsDirectoryResource(
-							this.host, this.getFactory(), childFile, entry,
-							this.contentService);
+							host, getFactory(), childFile, entry,
+							contentService);
 					resources.add(fileResource);
 					if (entry.isLastResult()) {
 						more = false;
@@ -240,8 +237,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 			count = 0;
 			while (more) {
 				log.info("querying child files starting at:{}", count);
-				log.info("under parent:{}", this.getIrodsFile()
-						.getAbsolutePath());
+				log.info("under parent:{}", getIrodsFile().getAbsolutePath());
 				entries = collectionAndDataObjectListAndSearchAO
 						.listDataObjectsUnderPath(getIrodsFile()
 								.getAbsolutePath(), count);
@@ -251,12 +247,11 @@ public class IrodsDirectoryResource extends BaseResource implements
 				}
 
 				for (CollectionAndDataObjectListingEntry entry : entries) {
-					IRODSFile childFile = this
-							.instanceIrodsFileFactory()
+					IRODSFile childFile = instanceIrodsFileFactory()
 							.instanceIRODSFile(entry.getFormattedAbsolutePath());
 					IrodsFileResource fileResource = new IrodsFileResource(
-							this.host, this.getFactory(), childFile, entry,
-							this.contentService);
+							host, getFactory(), childFile, entry,
+							contentService);
 					resources.add(fileResource);
 					if (entry.isLastResult()) {
 						more = false;
@@ -279,7 +274,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	/**
 	 * Method to get children that will not cache file information, may be more
 	 * timely,but necessitates multiple individual queries
-	 * 
+	 *
 	 * @return
 	 */
 	private List<? extends Resource> getChildrenViaFile() {
@@ -336,7 +331,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	@Override
 	public void sendContent(final OutputStream out, final Range range,
 			final Map<String, String> params, final String contentType)
-			throws IOException, NotAuthorizedException {
+					throws IOException, NotAuthorizedException {
 
 		String subpath = getIrodsFile().getCanonicalPath();
 		if (getIrodsFile().getCanonicalPath().length() > 1) {
@@ -381,11 +376,11 @@ public class IrodsDirectoryResource extends BaseResource implements
 			w.open("td");
 			String path = buildHref(uri, r.getName());
 			w.begin("a").writeAtt("href", path).open().writeText(r.getName())
-					.close();
+			.close();
 
 			w.begin("a").writeAtt("href", "#")
-					.writeAtt("onclick", "editDocument('" + path + "')").open()
-					.writeText("(edit with office)").close();
+			.writeAtt("onclick", "editDocument('" + path + "')").open()
+			.writeText("(edit with office)").close();
 
 			w.close("td");
 
@@ -443,8 +438,8 @@ public class IrodsDirectoryResource extends BaseResource implements
 	@Override
 	public Date getModifiedDate() {
 
-		if (this.collectionAndDataObjectListingEntry != null) {
-			return this.collectionAndDataObjectListingEntry.getModifiedAt();
+		if (collectionAndDataObjectListingEntry != null) {
+			return collectionAndDataObjectListingEntry.getModifiedAt();
 		} else {
 
 			IRODSFile file;
@@ -461,7 +456,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public String getName() {
-		if (this.collectionAndDataObjectListingEntry != null) {
+		if (collectionAndDataObjectListingEntry != null) {
 			return MiscIRODSUtils
 					.getLastPathComponentForGiveAbsolutePath(collectionAndDataObjectListingEntry
 							.getFormattedAbsolutePath());
@@ -480,7 +475,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public String getUniqueId() {
-		if (this.collectionAndDataObjectListingEntry != null) {
+		if (collectionAndDataObjectListingEntry != null) {
 			return collectionAndDataObjectListingEntry
 					.getFormattedAbsolutePath();
 		} else {
@@ -544,7 +539,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException,
-			BadRequestException {
+	BadRequestException {
 
 		log.info("delete()");
 		log.info("of collection:{}", getIrodsFile());
@@ -625,7 +620,7 @@ public class IrodsDirectoryResource extends BaseResource implements
 	@Override
 	public LockToken createAndLock(final String name,
 			final LockTimeout lockTimeout, final LockInfo lockInfo)
-			throws NotAuthorizedException {
+					throws NotAuthorizedException {
 		log.info("createAndLock()");
 		log.info("name:{}", name);
 		IRODSFile file;

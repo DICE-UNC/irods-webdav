@@ -35,6 +35,7 @@ import org.irods.jargon.core.pub.io.IRODSFileOutputStream;
 import org.irods.jargon.core.pub.io.PackingIrodsInputStream;
 import org.irods.jargon.core.pub.io.PackingIrodsOutputStream;
 import org.irods.jargon.webdav.config.WebDavConfig;
+import org.irods.jargon.webdav.exception.FileSizeExceedsMaximumException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,8 +77,7 @@ public class IrodsFileContentService implements FileContentService {
 
 			if (webDavConfig.isUsePackingStreams()) {
 				log.info("use packing stream for transfer");
-				IRODSFileOutputStream outputStream = this
-						.getIrodsAccessObjectFactory()
+				IRODSFileOutputStream outputStream = getIrodsAccessObjectFactory()
 						.getIRODSFileFactory(irodsAccount)
 						.instanceIRODSFileOutputStream(dest);
 				PackingIrodsOutputStream ipos = new PackingIrodsOutputStream(
@@ -87,8 +87,8 @@ public class IrodsFileContentService implements FileContentService {
 				log.info("use normal stream for transfer");
 				stream2Stream.transferStreamToFileUsingIOStreams(in,
 						(File) dest, dest.length(), irodsAccessObjectFactory
-								.getJargonProperties()
-								.getInputToOutputCopyBufferByteSize());
+						.getJargonProperties()
+						.getInputToOutputCopyBufferByteSize());
 
 			}
 		} catch (JargonException e) {
@@ -117,6 +117,18 @@ public class IrodsFileContentService implements FileContentService {
 			throw new FileNotFoundException("file not found");
 		}
 
+		long maxLengthComputed = getWebDavConfig().getMaxDownloadInGb() * 1024 * 1024 * 1024;
+		log.info("maxLength:{}", maxLengthComputed);
+		log.info("fileLength:{}", file.length());
+
+		if (file.length() > maxLengthComputed) {
+			log.error("file length of:{} greater than configured max",
+					file.length());
+			log.error("configured max (computed) is:{}", maxLengthComputed);
+			throw new FileSizeExceedsMaximumException(
+					"File is too large to download");
+		}
+
 		try {
 			IRODSFileFactory factory = irodsAccessObjectFactory
 					.getIRODSFileFactory(irodsAccount);
@@ -124,7 +136,7 @@ public class IrodsFileContentService implements FileContentService {
 			IRODSFileInputStream inputStream = factory
 					.instanceIRODSFileInputStream(file.getAbsolutePath());
 
-			if (this.webDavConfig.isUsePackingStreams()) {
+			if (webDavConfig.isUsePackingStreams()) {
 				log.info("using packing stream");
 				return new PackingIrodsInputStream(inputStream);
 			} else {
@@ -159,7 +171,7 @@ public class IrodsFileContentService implements FileContentService {
 	 * @param webDavConfig
 	 *            the webDavConfig to set
 	 */
-	public void setWebDavConfig(WebDavConfig webDavConfig) {
+	public void setWebDavConfig(final WebDavConfig webDavConfig) {
 		this.webDavConfig = webDavConfig;
 	}
 }

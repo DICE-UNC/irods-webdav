@@ -50,7 +50,7 @@ public class IrodsSecurityManager implements SecurityManager {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * io.milton.http.SecurityManager#authenticate(io.milton.http.http11.auth
 	 * .DigestResponse)
@@ -62,7 +62,7 @@ public class IrodsSecurityManager implements SecurityManager {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.http.SecurityManager#authenticate(java.lang.String,
 	 * java.lang.String)
 	 */
@@ -90,7 +90,7 @@ public class IrodsSecurityManager implements SecurityManager {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.http.SecurityManager#authorise(io.milton.http.Request,
 	 * io.milton.http.Request.Method, io.milton.http.Auth,
 	 * io.milton.resource.Resource)
@@ -103,7 +103,7 @@ public class IrodsSecurityManager implements SecurityManager {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.http.SecurityManager#getRealm(java.lang.String)
 	 */
 	@Override
@@ -114,7 +114,7 @@ public class IrodsSecurityManager implements SecurityManager {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.http.SecurityManager#isDigestAllowed()
 	 */
 	@Override

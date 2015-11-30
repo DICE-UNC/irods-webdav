@@ -60,8 +60,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IrodsFileResource extends BaseResource implements
-		CopyableResource, DeletableResource, GetableResource, MoveableResource,
-		ReplaceableResource, PropFindableResource, LockableResource {
+CopyableResource, DeletableResource, GetableResource, MoveableResource,
+ReplaceableResource, PropFindableResource, LockableResource {
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileResource.class);
 
@@ -97,7 +97,7 @@ public class IrodsFileResource extends BaseResource implements
 	/**
 	 * Constructor takes a parameter that will provided cached values for
 	 * collection and data object listing entries
-	 * 
+	 *
 	 * @param host
 	 * @param factory
 	 * @param file
@@ -152,7 +152,7 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public void sendContent(final OutputStream out, final Range range,
 			final Map<String, String> params, final String contentType)
-			throws IOException, NotFoundException {
+					throws IOException, NotFoundException {
 		log.info("sendContent()");
 		InputStream in = null;
 		try {
@@ -252,7 +252,7 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException,
-			BadRequestException {
+	BadRequestException {
 
 		log.info("delete()");
 		getIrodsFile().delete();

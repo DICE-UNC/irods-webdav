@@ -17,6 +17,17 @@ public class WebDavConfig {
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
 	private String realm = "irods";
+
+	/**
+	 * Maximum upload size in Gb
+	 */
+	private long maxUploadInGb = 5;
+
+	/**
+	 * Maximum download size in Gb
+	 */
+	private long maxDownloadInGb = 5;
+
 	/**
 	 * Use an optimization to cache file data (length, etc) preventing requery
 	 * of file data, may cause stale data issues
@@ -123,7 +134,7 @@ public class WebDavConfig {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -131,49 +142,36 @@ public class WebDavConfig {
 		StringBuilder builder = new StringBuilder();
 		builder.append("WebDavConfig [");
 		if (host != null) {
-			builder.append("host=");
-			builder.append(host);
-			builder.append(", ");
+			builder.append("host=").append(host).append(", ");
 		}
 		if (zone != null) {
-			builder.append("zone=");
-			builder.append(zone);
-			builder.append(", ");
+			builder.append("zone=").append(zone).append(", ");
 		}
-		builder.append("port=");
-		builder.append(port);
-		builder.append(", ");
+		builder.append("port=").append(port).append(", ");
 		if (defaultStorageResource != null) {
-			builder.append("defaultStorageResource=");
-			builder.append(defaultStorageResource);
-			builder.append(", ");
+			builder.append("defaultStorageResource=")
+			.append(defaultStorageResource).append(", ");
 		}
 		if (authScheme != null) {
-			builder.append("authScheme=");
-			builder.append(authScheme);
-			builder.append(", ");
+			builder.append("authScheme=").append(authScheme).append(", ");
 		}
 		if (realm != null) {
-			builder.append("realm=");
-			builder.append(realm);
-			builder.append(", ");
+			builder.append("realm=").append(realm).append(", ");
 		}
-		builder.append("cacheFileDemographics=");
-		builder.append(cacheFileDemographics);
-		builder.append(", ");
+		builder.append("maxUploadInGb=").append(maxUploadInGb)
+		.append(", maxDownloadInGb=").append(maxDownloadInGb)
+		.append(", cacheFileDemographics=")
+		.append(cacheFileDemographics).append(", ");
 		if (defaultStartingLocationEnum != null) {
-			builder.append("defaultStartingLocationEnum=");
-			builder.append(defaultStartingLocationEnum);
-			builder.append(", ");
+			builder.append("defaultStartingLocationEnum=")
+			.append(defaultStartingLocationEnum).append(", ");
 		}
 		if (providedDefaultStartingLocation != null) {
-			builder.append("providedDefaultStartingLocation=");
-			builder.append(providedDefaultStartingLocation);
-			builder.append(", ");
+			builder.append("providedDefaultStartingLocation=")
+			.append(providedDefaultStartingLocation).append(", ");
 		}
-		builder.append("usePackingStreams=");
-		builder.append(usePackingStreams);
-		builder.append("]");
+		builder.append("usePackingStreams=").append(usePackingStreams)
+		.append("]");
 		return builder.toString();
 	}
 
@@ -250,8 +248,38 @@ public class WebDavConfig {
 	 * @param usePackingStreams
 	 *            the usePackingStreams to set
 	 */
-	public void setUsePackingStreams(boolean usePackingStreams) {
+	public void setUsePackingStreams(final boolean usePackingStreams) {
 		this.usePackingStreams = usePackingStreams;
+	}
+
+	/**
+	 * @return the maxUploadInGb
+	 */
+	public long getMaxUploadInGb() {
+		return maxUploadInGb;
+	}
+
+	/**
+	 * @param maxUploadInGb
+	 *            the maxUploadInGb to set
+	 */
+	public void setMaxUploadInGb(final long maxUploadInGb) {
+		this.maxUploadInGb = maxUploadInGb;
+	}
+
+	/**
+	 * @return the maxDownloadInGb
+	 */
+	public long getMaxDownloadInGb() {
+		return maxDownloadInGb;
+	}
+
+	/**
+	 * @param maxDownloadInGb
+	 *            the maxDownloadInGb to set
+	 */
+	public void setMaxDownloadInGb(final long maxDownloadInGb) {
+		this.maxDownloadInGb = maxDownloadInGb;
 	}
 
 }

@@ -75,7 +75,7 @@ public class SimpleLockManager implements LockManager {
 		String lockedBy = lock.lockedByUser;
 		Long secs = lock.token.timeout.getSeconds();
 		return id + "\n" + token + "\n" + tm + "\n" + lockedBy + "\n"
-		+ (secs != null ? secs : "");
+				+ (secs != null ? secs : "");
 	}
 
 	/**
