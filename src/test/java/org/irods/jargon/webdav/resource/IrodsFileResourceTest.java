@@ -1,5 +1,7 @@
 package org.irods.jargon.webdav.resource;
 
+import io.milton.http.LockManager;
+
 import java.io.File;
 import java.util.Properties;
 
@@ -78,6 +80,8 @@ public class IrodsFileResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -123,6 +127,8 @@ public class IrodsFileResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -168,6 +174,9 @@ public class IrodsFileResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -244,6 +253,8 @@ public class IrodsFileResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -296,6 +307,8 @@ public class IrodsFileResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		WebDavConfig config = new WebDavConfig();
 		factory.setWebDavConfig(config);
@@ -372,6 +385,8 @@ public class IrodsFileResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 

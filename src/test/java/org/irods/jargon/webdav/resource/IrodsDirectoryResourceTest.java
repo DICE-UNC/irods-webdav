@@ -1,5 +1,6 @@
 package org.irods.jargon.webdav.resource;
 
+import io.milton.http.LockManager;
 import io.milton.resource.Resource;
 
 import java.io.File;
@@ -91,6 +92,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -150,6 +153,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -222,6 +227,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -267,6 +274,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -338,6 +347,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -388,6 +399,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -450,7 +463,8 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
-
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 		factory.setWebDavConfig(config);
 
 		IrodsFileContentService service = new IrodsFileContentService();
@@ -516,6 +530,9 @@ public class IrodsDirectoryResourceTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
