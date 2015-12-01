@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.irods.jargon</groupId>
 	<artifactId>irods-webdav</artifactId>
-	<version>4.0.2.4-SNAPSHOT</version>
+	<version>4.0.2.5-RC1</version>
 	<name>irods-webav</name>
 	<packaging>war</packaging>
 	<description>Milton based WebDav interface to iRODS</description>

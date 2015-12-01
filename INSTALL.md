@@ -17,6 +17,8 @@ clients may not properly connect (such as Mac Finder or Windows Explorer).
 
 See the [compatability notes](http://milton.io/guide/compat/index.html) at Milton for tips
 
+The iRODS Consortium did a nice blog post on installing and configuring that can be accessed [here](http://irods.org/2015/04/how-to-drag-and-drop-access-to-irods-with-webdav/)
+
 
 
 
