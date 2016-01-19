@@ -48,14 +48,14 @@ public class IrodsAccountCacheManager {
 
     public IRODSAccount getIRODSAccount(String authId)
         throws IrodsAccountCacheManagerError  {
-        return irodsAccountCache.get("IRODSAccount" + authId);
+        return irodsAccountCache.get(authId);
     }
 
     public IRODSAccount putIRODSAccount(String username, String password, IRODSAccount account)
         throws IrodsAccountCacheManagerError  {
 
         try {
-            irodsAccountCache.put("IRODSAccount" + getAuthId(username,password), account);
+            irodsAccountCache.put(getAuthId(username,password), account);
         } catch (Exception e) {
             throw new IrodsAccountCacheManagerError("cache put failed.", e);
         }
@@ -73,7 +73,7 @@ public class IrodsAccountCacheManager {
             MessageDigest md = MessageDigest.getInstance("MD5");
             String data = username + ":" + password;
             md.update(data.getBytes("UTF-8"));
-            authId = new BigInteger(1, md.digest()).toString(16);
+            authId = username + ":" + new BigInteger(1, md.digest()).toString(16);
             log.debug("cache authId: {}", authId);
         } catch (Exception e) {
             throw new IrodsAccountCacheManagerError("cache authId generation failed.", e);
