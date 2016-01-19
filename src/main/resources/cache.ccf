@@ -5,11 +5,21 @@ jcs.default.cacheattributes=org.apache.commons.jcs.engine.CompositeCacheAttribut
 jcs.default.cacheattributes.MaxObjects=1000
 jcs.default.cacheattributes.MemoryCacheName=org.apache.commons.jcs.engine.memory.lru.LRUMemoryCache
 
-# REGION irods_account
+# REGION irods_account using "Remote" auxiliary
+jcs.region.irods_account=Remote
+jcs.region.irods_account.cacheattributes.MaxObjects=100
 jcs.region.irods_account.cacheattributes.UseMemoryShrinker=true
 jcs.region.irods_account.cacheattributes.MaxMemoryIdleTime=3600
 jcs.region.irods_account.cacheattributes.ShrinkerInterval=60
 jcs.region.irods_account.elementattributes=org.apache.commons.jcs.engine.ElementAttributes
-jcs.region.irods_account.elementattributes.IsEternal=false
 jcs.region.irods_account.elementattributes.MaxLife=7200
 jcs.region.irods_account.elementattributes.IdleTime=1800
+jcs.region.irods_account.elementattributes.IsEternal=false
+jcs.region.irods_account.elementattributes.IsRemote=true
+
+# Remote RMI Cache setup
+jcs.auxiliary.Remote=org.apache.commons.jcs.auxiliary.remote.RemoteCacheFactory
+jcs.auxiliary.Remote.attributes=org.apache.commons.jcs.auxiliary.remote.RemoteCacheAttributes
+jcs.auxiliary.Remote.attributes.FailoverServers=localhost:1101
+jcs.auxiliary.Remote.attributes.RemoveUponRemotePut=true
+jcs.auxiliary.Remote.attributes.GetOnly=false
