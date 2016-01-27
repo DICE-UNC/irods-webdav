@@ -11,10 +11,12 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.irods.jargon.core.connection.auth.AuthResponse;
+import org.irods.jargon.core.connection.IRODSAccount;
 import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.webdav.config.WebDavConfig;
@@ -86,11 +88,17 @@ public class BasicAuthFilter implements Filter {
 
 			log.debug("authResponse:{}", authResponse);
 			log.debug("success!");
+ 
+            IRODSAccount account = IrodsAccountCacheManager.getInstance().putIRODSAccount(userAndPassword.getUserId(),
+                                                                                          userAndPassword.getPassword(),
+                                                                                          authResponse.getAuthenticatedIRODSAccount());
+           
+            log.debug("authenticated account:{}", account);
 
 			chain.doFilter(httpRequest, httpResponse);
 			return;
 
-		} catch (JargonException e) {
+        } catch (JargonException|IrodsAccountCacheManagerError e) {
 			log.warn("auth exception", e);
 			sendAuthError(httpResponse);
 			return;

@@ -29,7 +29,8 @@ public class IrodsAuthService {
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
 
-	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
+	//private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
+	private static final ThreadLocal<String> authIdCache = new ThreadLocal<String>();
 
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsAuthService.class);
@@ -59,6 +60,7 @@ public class IrodsAuthService {
 			throw new IllegalArgumentException("null or empty password");
 		}
 
+        /*
 		log.debug("look in cache for cached login");
 		AuthResponse cached = authResponseCache.get();
 
@@ -71,19 +73,32 @@ public class IrodsAuthService {
 				return cached;
 			}
 		}
+        */
 
 		/*
 		 * Did not hit the thread local cache
 		 */
 		log.debug("login to irods and cache");
 
-		IRODSAccount irodsAccount;
-		try {
-			irodsAccount = getIrodsAccountFromAuthValues(userName, password);
-		} catch (JargonException e) {
-			log.error("jargon exception creating IRODSAccount", e);
-			throw new WebDavException("exception in auth", e);
-		}
+		IRODSAccount irodsAccount = null;
+
+
+        // Try to get authenticated IRODSAccount from the IrodsAccountCacheManager
+        try {
+            irodsAccount = IrodsAccountCacheManager.getInstance().getIRODSAccount(userName, password);
+            log.debug("authenticated IRODSAccount obtained from cache: {}", irodsAccount);
+		} catch (IrodsAccountCacheManagerError e) {
+            log.error("fail to retrieve cached IRODSAccount", e);
+        }
+
+        if ( irodsAccount == null ) {
+            try {
+	 	   	irodsAccount = getIrodsAccountFromAuthValues(userName, password);
+	 	   } catch (JargonException e) {
+	 	   	log.error("jargon exception creating IRODSAccount", e);
+	 	   	throw new WebDavException("exception in auth", e);
+	 	   }
+        }
 
 		if (irodsAccessObjectFactory == null) {
 			throw new ConfigurationRuntimeException(
@@ -94,9 +109,14 @@ public class IrodsAuthService {
 		try {
 			AuthResponse response = irodsAccessObjectFactory
 					.authenticateIRODSAccount(irodsAccount);
-			authResponseCache.set(response);
+            
+			authIdCache.set(IrodsAccountCacheManager.getAuthId(userName, password));
+			//authResponseCache.set(response);
 			return response;
-		} catch (AuthenticationException e) {
+		} catch (IrodsAccountCacheManagerError e) {
+			log.error("auth cache manager error", e);
+			throw new WebDavException("exception in auth", e);
+        } catch (AuthenticationException e) {
 			log.error("auth exception", e);
 			throw e;
 		} catch (JargonException je) {
@@ -187,11 +207,20 @@ public class IrodsAuthService {
 	 */
 	public static IRODSAccount retrieveCurrentIrodsAccount() {
 		log.debug("retrieveCurrentIrodsAccount()");
-		AuthResponse authResponse = authResponseCache.get();
-		if (authResponse == null) {
-			throw new WebDavRuntimeException("no authResponseCache value");
+		//AuthResponse authResponse = authResponseCache.get();
+		String authId = authIdCache.get();
+		if (authId == null) {
+			throw new WebDavRuntimeException("no authId in cache");
 		}
-		return retrieveIrodsAccountFromAuthResponse(authResponse);
+
+        IRODSAccount irodsAccount = null;
+        try {
+		    irodsAccount = IrodsAccountCacheManager.getInstance().getIRODSAccount(authId);
+        } catch (IrodsAccountCacheManagerError e) {
+			throw new WebDavRuntimeException(e);
+        }
+
+        return irodsAccount;
 	}
 
 	/**
