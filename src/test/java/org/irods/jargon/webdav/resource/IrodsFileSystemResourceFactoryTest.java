@@ -3,6 +3,8 @@
  */
 package org.irods.jargon.webdav.resource;
 
+import io.milton.http.LockManager;
+
 import java.util.Properties;
 
 import junit.framework.Assert;
@@ -20,6 +22,7 @@ import org.irods.jargon.webdav.config.WebDavConfig;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 /**
  * @author Mike Conway - DICE
@@ -84,6 +87,8 @@ public class IrodsFileSystemResourceFactoryTest {
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		IRODSFile pathFile = factory.resolvePath(myPath);
 		Assert.assertEquals("should have root", myPath,
@@ -127,6 +132,8 @@ public class IrodsFileSystemResourceFactoryTest {
 
 		IrodsFileSystemResourceFactory factory = new IrodsFileSystemResourceFactory(
 				manager);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.setWebDavConfig(config);
 
@@ -165,6 +172,8 @@ public class IrodsFileSystemResourceFactoryTest {
 				manager);
 
 		factory.setWebDavConfig(config);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
@@ -215,6 +224,8 @@ public class IrodsFileSystemResourceFactoryTest {
 				manager);
 
 		factory.setWebDavConfig(config);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
@@ -264,6 +275,8 @@ public class IrodsFileSystemResourceFactoryTest {
 				manager);
 
 		factory.setWebDavConfig(config);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());
@@ -315,6 +328,8 @@ public class IrodsFileSystemResourceFactoryTest {
 				manager);
 
 		factory.setWebDavConfig(config);
+		LockManager lockManager = Mockito.mock(LockManager.class);
+		factory.setLockManager(lockManager);
 
 		factory.getSecurityManager().authenticate(irodsAccount.getUserName(),
 				irodsAccount.getPassword());

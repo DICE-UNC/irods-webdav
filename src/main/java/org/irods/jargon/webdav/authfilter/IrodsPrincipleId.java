@@ -24,7 +24,7 @@ public class IrodsPrincipleId implements PrincipleId {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.principal.Principal.PrincipleId#getIdType()
 	 */
 	@Override
@@ -35,7 +35,7 @@ public class IrodsPrincipleId implements PrincipleId {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see io.milton.principal.Principal.PrincipleId#getValue()
 	 */
 	@Override

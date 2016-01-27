@@ -1,80 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.0.xsd http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-	<bean id="irodsFileContentService"
-		class="org.irods.jargon.webdav.resource.IrodsFileContentService">
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-		<property name="webDavConfig" ref="webDavConfig"/>
-	</bean>
-
-	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
-		<property name="host" value="dfc-test-irods1.edc.renci.org" />
-		<property name="zone" value="dfc1" />
-		<property name="port" value="1247" />
-		<property name="authScheme" value="STANDARD" />
-		<property name="defaultStorageResource" value="" />
-		<property name="defaultStartingLocationEnum" value="USER_HOME" />
-		<property name="providedDefaultStartingLocation" value="" />
-		<property name="cacheFileDemographics" value="true" />
-		<property name="usePackingStreams" value="true" />
-	</bean>
-
-	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-		<property name="webDavConfig" ref="webDavConfig" />
-		<property name="irodsAuthService" ref="irodsAuthService" />
-	</bean>
-
-	<bean id="irodsAuthService" class="org.irods.jargon.webdav.authfilter.IrodsAuthService">
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-		<property name="webDavConfig" ref="webDavConfig" />
-	</bean>
+	<context:property-placeholder  location="file:///etc/irods-ext/irods-webdav.properties" /> 
+	<beans:import resource="classpath:milton-beans.xml" />
 	
-	<bean id="lockManager" class="org.irods.jargon.webdav.resource.IrodsMemoryLockManager"></bean>
-
-	<bean id="resource.factory"
-		class="org.irods.jargon.webdav.resource.IrodsFileSystemResourceFactory">
-		<constructor-arg type="io.milton.http.SecurityManager"
-			ref="irodsSecurityManager" />
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-		<property name="webDavConfig" ref="webDavConfig" />
-		<property name="contextPath" value="irods-webdav" />
-		<property name="contentService" ref="irodsFileContentService" />
-		<property name="lockManager" ref="lockManager" />
-	</bean>
-
-	<bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
-		<property name="mainResourceFactory" ref="resource.factory" />
-		<property name="enableCompression" value="false" />
-		<property name="buffering" value="never" />
-		<property name="enableCookieAuth" value="false" />
-	</bean>
-
-	<bean id="irodsConnectionManager"
-		class="org.irods.jargon.core.connection.IRODSSimpleProtocolManager"
-		factory-method="instance" init-method="initialize" destroy-method="destroy" />
-
-	<bean id="irodsSession" class="org.irods.jargon.core.connection.IRODSSession"
-		factory-method="instance">
-		<constructor-arg
-			type="org.irods.jargon.core.connection.IRODSProtocolManager" ref="irodsConnectionManager" />
-	</bean>
-
-	<bean id="irodsAccessObjectFactory" class="org.irods.jargon.core.pub.IRODSAccessObjectFactoryImpl">
-		<constructor-arg ref="irodsSession" />
-	</bean>
-
-	<bean id="basicAuthFilter" class="org.irods.jargon.webdav.authfilter.BasicAuthFilter">
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-		<property name="webDavConfig" ref="webDavConfig" />
-		<property name="irodsAuthService" ref="irodsAuthService" />
-	</bean>
-	
-	<bean id="connectionClosingFilter" class="org.irods.jargon.webdav.authfilter.ConnectionClosingFilter">
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-	</bean>
-
-
-</beans>
+</beans:beans>

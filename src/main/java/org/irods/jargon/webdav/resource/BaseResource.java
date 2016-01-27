@@ -22,6 +22,7 @@ import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.pub.io.IRODSFileFactory;
 import org.irods.jargon.webdav.authfilter.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
+import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +91,15 @@ CopyableResource, LockableResource {
 			throw new IllegalArgumentException("null webDavConfig");
 		}
 
+		if (factory == null) {
+			throw new IllegalArgumentException("null factory");
+		}
+
+		if (factory.getLockManager() == null) {
+			throw new ConfigurationRuntimeException(
+					"no lock manager configured!");
+		}
+
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 		this.webDavConfig = webDavConfig;
 		this.factory = factory;
@@ -156,6 +166,9 @@ CopyableResource, LockableResource {
 
 	protected IRODSFile fileFromCollectionResource(
 			final CollectionResource collectionResource, final String name) {
+
+		log.info("fileFromCollectionResource()");
+
 		if (collectionResource == null) {
 			throw new IllegalArgumentException("null collectionResource");
 		}
@@ -167,6 +180,7 @@ CopyableResource, LockableResource {
 		IRODSFile dest;
 
 		if (collectionResource instanceof IrodsDirectoryResource) {
+			log.info("is a directory resource");
 			try {
 				IrodsDirectoryResource newFsParent = (IrodsDirectoryResource) collectionResource;
 

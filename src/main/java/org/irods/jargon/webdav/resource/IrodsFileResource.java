@@ -54,13 +54,14 @@ import org.irods.jargon.core.exception.JargonException;
 import org.irods.jargon.core.pub.DataTransferOperations;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
+import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class IrodsFileResource extends BaseResource implements
-		CopyableResource, DeletableResource, GetableResource, MoveableResource,
-		ReplaceableResource, PropFindableResource, LockableResource {
+CopyableResource, DeletableResource, GetableResource, MoveableResource,
+ReplaceableResource, PropFindableResource, LockableResource {
 	private static final Logger log = LoggerFactory
 			.getLogger(IrodsFileResource.class);
 
@@ -96,7 +97,7 @@ public class IrodsFileResource extends BaseResource implements
 	/**
 	 * Constructor takes a parameter that will provided cached values for
 	 * collection and data object listing entries
-	 * 
+	 *
 	 * @param host
 	 * @param factory
 	 * @param file
@@ -151,7 +152,7 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public void sendContent(final OutputStream out, final Range range,
 			final Map<String, String> params, final String contentType)
-			throws IOException, NotFoundException {
+					throws IOException, NotFoundException {
 		log.info("sendContent()");
 		InputStream in = null;
 		try {
@@ -185,6 +186,7 @@ public class IrodsFileResource extends BaseResource implements
 	 */
 	@Override
 	public Long getMaxAgeSeconds(final Auth auth) {
+		log.info("getMaxAgeSeconds()");
 		return getFactory().getMaxAgeSeconds();
 	}
 
@@ -250,7 +252,7 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	public void delete() throws NotAuthorizedException, ConflictException,
-			BadRequestException {
+	BadRequestException {
 
 		log.info("delete()");
 		getIrodsFile().delete();
@@ -260,6 +262,7 @@ public class IrodsFileResource extends BaseResource implements
 
 	@Override
 	protected void doCopy(final IRODSFile dest) {
+		log.info("doCopy()");
 		log.info("dest:{}", dest);
 
 		try {
@@ -297,22 +300,36 @@ public class IrodsFileResource extends BaseResource implements
 	@Override
 	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
 			throws NotAuthorizedException {
+		log.info("lock()");
+		if (getFactory().getLockManager() == null) {
+			log.error("unable to get lock manager from factory");
+			throw new ConfigurationRuntimeException(
+					"a lock manager was not configured");
+		}
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
 	@Override
 	public LockResult refreshLock(final String token)
 			throws NotAuthorizedException {
+		log.info("refreshLock()");
 		return getFactory().getLockManager().refresh(token, this);
 	}
 
 	@Override
 	public void unlock(final String tokenId) throws NotAuthorizedException {
+		log.info("unlock");
 		getFactory().getLockManager().unlock(tokenId, this);
 	}
 
 	@Override
 	public LockToken getCurrentLock() {
+		log.info("getCurrentLock()");
+		if (getFactory().getLockManager() == null) {
+			log.error("unable to get lock manager from factory");
+			throw new ConfigurationRuntimeException(
+					"a lock manager was not configured");
+		}
 		if (getFactory().getLockManager() != null) {
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {
