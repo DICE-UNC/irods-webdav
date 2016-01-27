@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A resource factory which provides access to files in a file system.
- * 
+ *
  * Using this with milton is equivalent to using the dav servlet in tomcat
- * 
+ *
  */
 public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
@@ -46,13 +46,13 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 * Creates and (optionally) initialises the factory. This looks for a
 	 * properties file FileSystemResourceFactory.properties in the classpath If
 	 * one is found it uses the root and realm properties to initialise
-	 * 
+	 *
 	 * If not found the factory is initialised with the defaults root: user.home
 	 * system property realm: milton-fs-test
-	 * 
+	 *
 	 * These initialised values are not final, and may be changed through the
 	 * setters or init method
-	 * 
+	 *
 	 */
 	public IrodsFileSystemResourceFactory() {
 		log.debug("setting default configuration...");
@@ -74,8 +74,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param securityManager
 	 */
 	public IrodsFileSystemResourceFactory(
@@ -85,8 +85,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	}
 
 	/**
-	 * 
-	 * 
+	 *
+	 *
 	 * @param securityManager
 	 * @param contextPath
 	 *            - this is the leading part of URL's to ignore. For example if
@@ -135,9 +135,45 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return r;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("IrodsFileSystemResourceFactory [irodsFileContentService=");
+		builder.append(irodsFileContentService);
+		builder.append(", securityManager=");
+		builder.append(securityManager);
+		builder.append(", lockManager=");
+		builder.append(lockManager);
+		builder.append(", maxAgeSeconds=");
+		builder.append(maxAgeSeconds);
+		builder.append(", contextPath=");
+		builder.append(contextPath);
+		builder.append(", allowDirectoryBrowsing=");
+		builder.append(allowDirectoryBrowsing);
+		builder.append(", defaultPage=");
+		builder.append(defaultPage);
+		builder.append(", digestAllowed=");
+		builder.append(digestAllowed);
+		builder.append(", ssoPrefix=");
+		builder.append(ssoPrefix);
+		builder.append(", irodsAccessObjectFactory=");
+		builder.append(irodsAccessObjectFactory);
+		builder.append(", irodsFileSystem=");
+		builder.append(irodsFileSystem);
+		builder.append(", webDavConfig=");
+		builder.append(webDavConfig);
+		builder.append("]");
+		return builder.toString();
+	}
+
 	/**
 	 * Find the right base path to use based on the provided configuration
-	 * 
+	 *
 	 * @return
 	 */
 	protected String getBasePathBasedOnConfig() {
@@ -176,13 +212,13 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		try {
 			IRODSFile f = getIrodsAccessObjectFactory().getIRODSFileFactory(
 					IrodsAuthService.retrieveCurrentIrodsAccount())
-					.instanceIRODSFile(this.getBasePathBasedOnConfig());
+					.instanceIRODSFile(getBasePathBasedOnConfig());
 
 			/*
 			 * the path will have any existing prefix trimmed off when requested
 			 * by the client, as the root was set elsewhere, and all paths are
 			 * expected to be under that prefix.
-			 * 
+			 *
 			 * So if my webDavConfig is set to base on user home, the
 			 * pathToResolve may be /zone/home/user/subdir/blah, and I want to
 			 * Just access /subdir/blah
@@ -221,13 +257,13 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		if (s == null) {
 			throw new NullPointerException(
 					"Got null realm from securityManager: " + securityManager
-							+ " for host=" + host);
+					+ " for host=" + host);
 		}
 		return s;
 	}
 
 	/**
-	 * 
+	 *
 	 * @return - the caching time for files
 	 */
 	public Long maxAgeSeconds(final FsResource resource) {
@@ -274,7 +310,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
 	/**
 	 * Whether to generate an index page.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean isAllowDirectoryBrowsing() {
@@ -288,7 +324,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	/**
 	 * if provided GET requests to a folder will redirect to a page of this name
 	 * within the folder
-	 * 
+	 *
 	 * @return - E.g. index.html
 	 */
 	public String getDefaultPage() {
@@ -348,7 +384,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	/**
 	 * @param irodsFileContentService
 	 *            if (webDavConfig.getDefaultStartingLocationEnum() != )
-	 * 
+	 *
 	 *            the irodsFileContentService to set
 	 */
 	public void setIrodsFileContentService(
