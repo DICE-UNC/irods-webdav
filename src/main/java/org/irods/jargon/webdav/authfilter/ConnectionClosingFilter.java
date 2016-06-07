@@ -47,9 +47,9 @@ public class ConnectionClosingFilter implements Filter {
 			throws IOException, ServletException {
 
 		log.info("closing iRODS connection after filter processing");
-		irodsAccessObjectFactory.closeSessionAndEatExceptions();
-
 		chain.doFilter(request, response);
+		irodsAccessObjectFactory.closeSessionAndEatExceptions();
+		return;
 	}
 
 	@Override

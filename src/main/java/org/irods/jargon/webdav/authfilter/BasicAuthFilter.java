@@ -88,6 +88,8 @@ public class BasicAuthFilter implements Filter {
 			log.debug("success!");
 
 			chain.doFilter(httpRequest, httpResponse);
+			log.info(">>>>> closing conn!");
+			this.getIrodsAccessObjectFactory().closeSessionAndEatExceptions();
 			return;
 
 		} catch (JargonException e) {

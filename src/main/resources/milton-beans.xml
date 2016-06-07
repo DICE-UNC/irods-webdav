@@ -90,10 +90,10 @@
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="irodsAuthService" ref="irodsAuthService" />
 	</bean>
-	
+	<!-- 
 	<bean id="connectionClosingFilter" class="org.irods.jargon.webdav.authfilter.ConnectionClosingFilter">
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-	</bean>
+	</bean>  -->
 
 
 </beans>
