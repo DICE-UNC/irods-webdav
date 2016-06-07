@@ -44,11 +44,12 @@ public class ConnectionClosingFilter implements Filter {
 	@Override
 	public void doFilter(final ServletRequest request,
 			final ServletResponse response, final FilterChain chain)
-					throws IOException, ServletException {
+			throws IOException, ServletException {
+
+		log.info("closing iRODS connection after filter processing");
+		irodsAccessObjectFactory.closeSessionAndEatExceptions();
 
 		chain.doFilter(request, response);
-		log.debug("closing iRODS connection after filter processing");
-		irodsAccessObjectFactory.closeSessionAndEatExceptions();
 	}
 
 	@Override
