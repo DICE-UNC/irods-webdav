@@ -1,7 +1,7 @@
 # Project: iRODS WebDav
 ## Date: 12/01/2015
-## Release Version: 4.0.2.5-RC1
-## Git tag: 4.0.2.5-RC1
+## Release Version: 4.0.2.6-RC1
+## Git tag: 4.0.2.6-RC1
 
 
 https://github.com/DICE-UNC/irods-webdav
@@ -31,3 +31,11 @@ This version does not enforce a cap on max file upload, that will be in the next
 #### Initial release
 
 This is the initial release of iRODS WebDav support using Milton, a lightweight WebDav library.  DFC and the iRODS Consortium, in collaboration, are providing a WebDav connector that includes the Milton 'enterprise' license keys in a pre-packaged deployment supporting WebDav level 2.
+
+####  Milton and filter chains #33 
+
+Fixed filter chain behavior to close connections properly in iRODS agent.  Milton filter was intercepting and not calling the shutdown filter in the chain
+
+####  delete of a file via finder doesn't seem to stick #27 
+
+Milton configuration and code to ensure that Dav2 support is configured in deployable
