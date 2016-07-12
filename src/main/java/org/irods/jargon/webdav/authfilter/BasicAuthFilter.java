@@ -79,7 +79,6 @@ public class BasicAuthFilter implements Filter {
 
 			UserAndPassword userAndPassword = WebDavAuthUtils
 					.getAccountFromBasicAuthValues(auth, webDavConfig);
-			log.debug("account for auth:{}", userAndPassword.getUserId());
 
 			authResponse = irodsAuthService.authenticate(
 					userAndPassword.getUserId(), userAndPassword.getPassword());

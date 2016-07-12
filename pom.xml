@@ -22,6 +22,10 @@
 			<id>ettrema-repo</id>
 			<url>http://milton.io/maven/</url>
 		</repository>
+		  <repository>
+            <id>milton-repo</id>
+            <url>http://dl.bintray.com/milton/Milton</url>
+        </repository>   
 		<repository>
 			<id>dice.repository snaps</id>
 			<name>dice.repository.snapshots</name>
