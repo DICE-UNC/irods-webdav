@@ -1,7 +1,7 @@
 # Project: iRODS WebDav
-## Date: 12/01/2015
-## Release Version: 4.0.2.6-RC1
-## Git tag: 4.0.2.6-RC1
+## Date: 07/13/2016
+## Release Verson: 4.0.2.6-RELEASE
+## Git tag: 4.0.2.6-RELEASE
 
 
 https://github.com/DICE-UNC/irods-webdav
@@ -13,8 +13,6 @@ See https://github.com/DICE-UNC/irods-webdav/issues for support and known issues
 See the INSTALL.md file in this repo for notes on install and configuration.
 
 ## NOTE: ##
-
-This is a release candidate, and thus has INFO level logging enabled, this will potentially generate a lot of data, and will be dialed back for release.
 
 This version does not enforce a cap on max file upload, that will be in the next release.  It does honor the max file download size.
 
