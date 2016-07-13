@@ -18,7 +18,7 @@ This version does not enforce a cap on max file upload, that will be in the next
 
 ### Requirements
 
-* Depends on Java 1.8+
+* Depends on Java 1.7+
 * Built using Apache Maven2, see POM for dependencies
 * Built using a Milton.io webdav enterprise version key
 
