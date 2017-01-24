@@ -4,18 +4,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.irods.jargon</groupId>
 	<artifactId>irods-webdav</artifactId>
-	<version>4.0.2.6-RELEASE</version>
+	<version>4.1.10.0-SNAPSHOT</version>
 	<name>irods-webav</name>
 	<packaging>war</packaging>
 	<description>Milton based WebDav interface to iRODS</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jargon.version>4.0.2.6-RELEASE</jargon.version>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
-		<milton.version>2.7.1.3</milton.version>
+		<jargon.version>4.1.10.0-SNAPSHOT</jargon.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<milton.version>2.7.2.1</milton.version>
 		<spring.version>3.2.13.RELEASE</spring.version>
-		<sl4j.level>1.6.6</sl4j.level>
+		<sl4j.version>1.6.6</sl4j.version> 
+		<log4j.version>1.2.16</log4j.version>
 	</properties>
 	<repositories>
 		<repository>
@@ -84,7 +85,7 @@
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.16</version>
+			<version>${log4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.irods.jargon</groupId>
@@ -99,12 +100,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>${sl4j.level}</version>
+			<version>${sl4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
-			<version>${sl4j.level}</version>
+			<version>${sl4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

@@ -95,5 +95,12 @@
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 	</bean>  -->
 
+ 	<bean id="startupConfigurator" class="org.irods.jargon.webdav.config.StartupConfigurator" init-method="init">
+    	<property name="irodsSession" ref="irodsSession" />
+    	<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
+         <property name="webDavConfig" ref="webDavConfig" />
+    </bean>
+
+
 
 </beans>

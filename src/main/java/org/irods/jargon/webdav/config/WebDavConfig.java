@@ -4,9 +4,12 @@
 package org.irods.jargon.webdav.config;
 
 import org.irods.jargon.core.connection.AuthScheme;
+import org.irods.jargon.core.connection.ClientServerNegotiationPolicy;
 
 /**
- * @author Mike Conway - DICE Config object wired by Spring
+ * @author Mike Conway - DICE
+ * 
+ *         Config object wired by Spring
  *
  */
 public class WebDavConfig {
@@ -17,6 +20,16 @@ public class WebDavConfig {
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
 	private String realm = "irods";
+	/**
+	 * sets ssl negotiation policy in jargon
+	 */
+	private String sslNegotiationPolicy = ClientServerNegotiationPolicy.SslNegotiationPolicy.CS_NEG_DONT_CARE
+			.toString();
+
+	/**
+	 * requests, if true, that a checksum be computed on upload
+	 */
+	private boolean computeChecksum = false;
 
 	/**
 	 * Maximum upload size in Gb
@@ -134,7 +147,7 @@ public class WebDavConfig {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
@@ -150,7 +163,7 @@ public class WebDavConfig {
 		builder.append("port=").append(port).append(", ");
 		if (defaultStorageResource != null) {
 			builder.append("defaultStorageResource=")
-			.append(defaultStorageResource).append(", ");
+					.append(defaultStorageResource).append(", ");
 		}
 		if (authScheme != null) {
 			builder.append("authScheme=").append(authScheme).append(", ");
@@ -158,20 +171,25 @@ public class WebDavConfig {
 		if (realm != null) {
 			builder.append("realm=").append(realm).append(", ");
 		}
-		builder.append("maxUploadInGb=").append(maxUploadInGb)
-		.append(", maxDownloadInGb=").append(maxDownloadInGb)
-		.append(", cacheFileDemographics=")
-		.append(cacheFileDemographics).append(", ");
+		if (sslNegotiationPolicy != null) {
+			builder.append("sslNegotiationPolicy=")
+					.append(sslNegotiationPolicy).append(", ");
+		}
+		builder.append("computeChecksum=").append(computeChecksum)
+				.append(", maxUploadInGb=").append(maxUploadInGb)
+				.append(", maxDownloadInGb=").append(maxDownloadInGb)
+				.append(", cacheFileDemographics=")
+				.append(cacheFileDemographics).append(", ");
 		if (defaultStartingLocationEnum != null) {
 			builder.append("defaultStartingLocationEnum=")
-			.append(defaultStartingLocationEnum).append(", ");
+					.append(defaultStartingLocationEnum).append(", ");
 		}
 		if (providedDefaultStartingLocation != null) {
 			builder.append("providedDefaultStartingLocation=")
-			.append(providedDefaultStartingLocation).append(", ");
+					.append(providedDefaultStartingLocation).append(", ");
 		}
 		builder.append("usePackingStreams=").append(usePackingStreams)
-		.append("]");
+				.append("]");
 		return builder.toString();
 	}
 
@@ -280,6 +298,36 @@ public class WebDavConfig {
 	 */
 	public void setMaxDownloadInGb(final long maxDownloadInGb) {
 		this.maxDownloadInGb = maxDownloadInGb;
+	}
+
+	/**
+	 * @return the sslNegotiationPolicy
+	 */
+	public String getSslNegotiationPolicy() {
+		return sslNegotiationPolicy;
+	}
+
+	/**
+	 * @param sslNegotiationPolicy
+	 *            the sslNegotiationPolicy to set
+	 */
+	public void setSslNegotiationPolicy(String sslNegotiationPolicy) {
+		this.sslNegotiationPolicy = sslNegotiationPolicy;
+	}
+
+	/**
+	 * @return the computeChecksum
+	 */
+	public boolean isComputeChecksum() {
+		return computeChecksum;
+	}
+
+	/**
+	 * @param computeChecksum
+	 *            the computeChecksum to set
+	 */
+	public void setComputeChecksum(boolean computeChecksum) {
+		this.computeChecksum = computeChecksum;
 	}
 
 }

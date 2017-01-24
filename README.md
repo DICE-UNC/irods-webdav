@@ -1,7 +1,7 @@
 # Project: iRODS WebDav
-## Date: 07/13/2016
-## Release Verson: 4.0.2.6-RELEASE
-## Git tag: 4.0.2.6-RELEASE
+## Date: 
+## Release Verson: 4.1.10-SNAPSHOT
+## Git tag: 
 
 
 https://github.com/DICE-UNC/irods-webdav
@@ -18,7 +18,7 @@ This version does not enforce a cap on max file upload, that will be in the next
 
 ### Requirements
 
-* Depends on Java 1.7+
+* Depends on Java 1.8+
 * Built using Apache Maven2, see POM for dependencies
 * Built using a Milton.io webdav enterprise version key
 
@@ -37,3 +37,7 @@ Fixed filter chain behavior to close connections properly in iRODS agent.  Milto
 ####  delete of a file via finder doesn't seem to stick #27 
 
 Milton configuration and code to ensure that Dav2 support is configured in deployable
+
+#### SSL integration #38
+
+Integrate SSL negotiation support.  Note that this requires an update to the /etc/irods-ext/irods-webdav.properties.  See the example for new fields (for checksum and SSL negotiation).
