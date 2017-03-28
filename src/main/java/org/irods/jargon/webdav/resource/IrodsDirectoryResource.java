@@ -1,5 +1,24 @@
 package org.irods.jargon.webdav.resource;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
+import org.irods.jargon.core.pub.DataTransferOperations;
+import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
+import org.irods.jargon.core.utils.MiscIRODSUtils;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -41,36 +60,15 @@ import io.milton.resource.PropFindableResource;
 import io.milton.resource.PutableResource;
 import io.milton.resource.Resource;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.irods.jargon.core.exception.JargonException;
-import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
-import org.irods.jargon.core.pub.DataTransferOperations;
-import org.irods.jargon.core.pub.io.IRODSFile;
-import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
-import org.irods.jargon.core.utils.MiscIRODSUtils;
-import org.irods.jargon.webdav.exception.WebDavRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Represents a directory in a physical file system.
  *
  */
-public class IrodsDirectoryResource extends BaseResource implements
-CollectionResource, MakeCollectionableResource, PutableResource,
-CopyableResource, DeletableResource, MoveableResource, GetableResource,
-PropFindableResource, LockingCollectionResource, LockableResource {
+public class IrodsDirectoryResource extends BaseResource
+		implements CollectionResource, MakeCollectionableResource, PutableResource, CopyableResource, DeletableResource,
+		MoveableResource, GetableResource, PropFindableResource, LockingCollectionResource, LockableResource {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(IrodsDirectoryResource.class);
+	private static final Logger log = LoggerFactory.getLogger(IrodsDirectoryResource.class);
 
 	private final IrodsFileContentService contentService;
 	private final String host;
@@ -82,20 +80,17 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	 */
 	private final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry;
 
-	public IrodsDirectoryResource(final String host,
-			final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
+	public IrodsDirectoryResource(final String host, final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
 			final IrodsFileContentService contentService) {
-		super(factory, factory.getIrodsAccessObjectFactory(), factory
-				.getWebDavConfig(), contentService);
+		super(factory, factory.getIrodsAccessObjectFactory(), factory.getWebDavConfig(), contentService);
 		this.contentService = contentService;
-		if (!dir.exists()) {
-			throw new IllegalArgumentException("Directory does not exist: "
-					+ dir.getAbsolutePath());
-		}
-		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("Is not a directory: "
-					+ dir.getAbsolutePath());
-		}
+		/*
+		 * mcc optimization if (!dir.exists()) { throw new
+		 * IllegalArgumentException("Directory does not exist: " +
+		 * dir.getAbsolutePath()); } if (!dir.isDirectory()) { throw new
+		 * IllegalArgumentException("Is not a directory: " +
+		 * dir.getAbsolutePath()); }
+		 */
 		setIrodsFile(dir);
 		this.host = host;
 		collectionAndDataObjectListingEntry = null;
@@ -113,23 +108,18 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	 * @param collectionAndDataObjectListingEntry
 	 * @param contentService
 	 */
-	public IrodsDirectoryResource(
-			final String host,
-			final IrodsFileSystemResourceFactory factory,
-			final IRODSFile dir,
+	public IrodsDirectoryResource(final String host, final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
 			final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry,
 			final IrodsFileContentService contentService) {
-		super(factory, factory.getIrodsAccessObjectFactory(), factory
-				.getWebDavConfig(), contentService);
+		super(factory, factory.getIrodsAccessObjectFactory(), factory.getWebDavConfig(), contentService);
 		this.contentService = contentService;
-		if (!dir.exists()) {
-			throw new IllegalArgumentException("Directory does not exist: "
-					+ dir.getAbsolutePath());
-		}
-		if (!dir.isDirectory()) {
-			throw new IllegalArgumentException("Is not a directory: "
-					+ dir.getAbsolutePath());
-		}
+		/*
+		 * mcc - optimization if (!dir.exists()) { throw new
+		 * IllegalArgumentException("Directory does not exist: " +
+		 * dir.getAbsolutePath()); } if (!dir.isDirectory()) { throw new
+		 * IllegalArgumentException("Is not a directory: " +
+		 * dir.getAbsolutePath()); }
+		 */
 		setIrodsFile(dir);
 		this.host = host;
 		this.collectionAndDataObjectListingEntry = collectionAndDataObjectListingEntry;
@@ -145,8 +135,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		log.info("name:{}", name);
 		IRODSFile fnew;
 		try {
-			fnew = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath(), name);
+			fnew = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath(), name);
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
 			throw new WebDavRuntimeException("unable to create file", e);
@@ -156,8 +145,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 			log.error("error creating collection:{}", fnew);
 			throw new WebDavRuntimeException("error creating directory");
 		}
-		return new IrodsDirectoryResource(host, getFactory(), fnew,
-				contentService);
+		return new IrodsDirectoryResource(host, getFactory(), fnew, contentService);
 	}
 
 	@Override
@@ -170,8 +158,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		log.info("name:{}", name);
 		IRODSFile fchild;
 		try {
-			fchild = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath(), name);
+			fchild = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath(), name);
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
 			throw new WebDavRuntimeException("unable to create file", e);
@@ -200,8 +187,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		log.info("getChildrenUtilizingCaching()");
 		try {
 			CollectionAndDataObjectListAndSearchAO collectionAndDataObjectListAndSearchAO = getIrodsAccessObjectFactory()
-					.getCollectionAndDataObjectListAndSearchAO(
-							retrieveIrodsAccount());
+					.getCollectionAndDataObjectListAndSearchAO(retrieveIrodsAccount());
 
 			log.info("getting collections");
 			List<CollectionAndDataObjectListingEntry> entries = null;
@@ -212,8 +198,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 				log.info("querying child collections starting at:{}", count);
 				log.info("under parent:{}", getIrodsFile().getAbsolutePath());
 				entries = collectionAndDataObjectListAndSearchAO
-						.listCollectionsUnderPath(getIrodsFile()
-								.getAbsolutePath(), count);
+						.listCollectionsUnderPath(getIrodsFile().getAbsolutePath(), count);
 
 				if (entries.isEmpty()) {
 					break;
@@ -222,9 +207,8 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 				for (CollectionAndDataObjectListingEntry entry : entries) {
 					IRODSFile childFile = instanceIrodsFileFactory()
 							.instanceIRODSFile(entry.getFormattedAbsolutePath());
-					IrodsDirectoryResource fileResource = new IrodsDirectoryResource(
-							host, getFactory(), childFile, entry,
-							contentService);
+					IrodsDirectoryResource fileResource = new IrodsDirectoryResource(host, getFactory(), childFile,
+							entry, contentService);
 					resources.add(fileResource);
 					if (entry.isLastResult()) {
 						more = false;
@@ -239,8 +223,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 				log.info("querying child files starting at:{}", count);
 				log.info("under parent:{}", getIrodsFile().getAbsolutePath());
 				entries = collectionAndDataObjectListAndSearchAO
-						.listDataObjectsUnderPath(getIrodsFile()
-								.getAbsolutePath(), count);
+						.listDataObjectsUnderPath(getIrodsFile().getAbsolutePath(), count);
 
 				if (entries.isEmpty()) {
 					break;
@@ -249,8 +232,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 				for (CollectionAndDataObjectListingEntry entry : entries) {
 					IRODSFile childFile = instanceIrodsFileFactory()
 							.instanceIRODSFile(entry.getFormattedAbsolutePath());
-					IrodsFileResource fileResource = new IrodsFileResource(
-							host, getFactory(), childFile, entry,
+					IrodsFileResource fileResource = new IrodsFileResource(host, getFactory(), childFile, entry,
 							contentService);
 					resources.add(fileResource);
 					if (entry.isLastResult()) {
@@ -265,8 +247,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 
 		} catch (JargonException e) {
 			log.error("error getting irods access object", e);
-			throw new WebDavRuntimeException(
-					"unable to get irods access object", e);
+			throw new WebDavRuntimeException("unable to get irods access object", e);
 		}
 
 	}
@@ -283,14 +264,12 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		File[] files = getIrodsFile().listFiles();
 		if (files != null) {
 			for (File fchild : files) {
-				BaseResource res = getFactory().resolveFile(host,
-						(IRODSFile) fchild);
+				BaseResource res = getFactory().resolveFile(host, (IRODSFile) fchild);
 				log.info("added as child:{}", res);
 				if (res != null) {
 					list.add(res);
 				} else {
-					log.error("Couldnt resolve file {}",
-							fchild.getAbsolutePath());
+					log.error("Couldnt resolve file {}", fchild.getAbsolutePath());
 				}
 			}
 		}
@@ -298,13 +277,12 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	}
 
 	@Override
-	public Resource createNew(final String name, final InputStream in,
-			final Long length, final String contentType) throws IOException {
+	public Resource createNew(final String name, final InputStream in, final Long length, final String contentType)
+			throws IOException {
 		log.info("createNew()");
 		IRODSFile dest;
 		try {
-			dest = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath(), name);
+			dest = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath(), name);
 			dest.createNewFile();
 		} catch (JargonException e) {
 			log.error("unable to create IRODSFile", e);
@@ -329,14 +307,12 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	 * @throws NotAuthorizedException
 	 */
 	@Override
-	public void sendContent(final OutputStream out, final Range range,
-			final Map<String, String> params, final String contentType)
-					throws IOException, NotAuthorizedException {
+	public void sendContent(final OutputStream out, final Range range, final Map<String, String> params,
+			final String contentType) throws IOException, NotAuthorizedException {
 
 		String subpath = getIrodsFile().getCanonicalPath();
 		if (getIrodsFile().getCanonicalPath().length() > 1) {
-			subpath = subpath.substring(getIrodsFile().getCanonicalPath()
-					.length());
+			subpath = subpath.substring(getIrodsFile().getCanonicalPath().length());
 		}
 		String uri = subpath.replace('\\', '/');
 
@@ -344,26 +320,18 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		XmlWriter w = new XmlWriter(out);
 		w.open("html");
 		w.open("head");
-		w.writeText(""
-				+ "<script type=\"text/javascript\" language=\"javascript1.1\">\n"
-				+ "    var fNewDoc = false;\n"
-				+ "  </script>\n"
-				+ "  <script LANGUAGE=\"VBSCRIPT\">\n"
-				+ "    On Error Resume Next\n"
+		w.writeText("" + "<script type=\"text/javascript\" language=\"javascript1.1\">\n" + "    var fNewDoc = false;\n"
+				+ "  </script>\n" + "  <script LANGUAGE=\"VBSCRIPT\">\n" + "    On Error Resume Next\n"
 				+ "    Set EditDocumentButton = CreateObject(\"SharePoint.OpenDocuments.3\")\n"
-				+ "    fNewDoc = IsObject(EditDocumentButton)\n"
-				+ "  </script>\n"
+				+ "    fNewDoc = IsObject(EditDocumentButton)\n" + "  </script>\n"
 				+ "  <script type=\"text/javascript\" language=\"javascript1.1\">\n"
 				+ "    var L_EditDocumentError_Text = \"The edit feature requires a SharePoint-compatible application and Microsoft Internet Explorer 4.0 or greater.\";\n"
 				+ "    var L_EditDocumentRuntimeError_Text = \"Sorry, couldnt open the document.\";\n"
 				+ "    function editDocument(strDocument) {\n"
-				+ "      strDocument = 'http://192.168.1.2:8080' + strDocument; "
-				+ "      if (fNewDoc) {\n"
+				+ "      strDocument = 'http://192.168.1.2:8080' + strDocument; " + "      if (fNewDoc) {\n"
 				+ "        if (!EditDocumentButton.EditDocument(strDocument)) {\n"
-				+ "          alert(L_EditDocumentRuntimeError_Text + ' - ' + strDocument); \n"
-				+ "        }\n"
-				+ "      } else { \n"
-				+ "        alert(L_EditDocumentError_Text + ' - ' + strDocument); \n"
+				+ "          alert(L_EditDocumentRuntimeError_Text + ' - ' + strDocument); \n" + "        }\n"
+				+ "      } else { \n" + "        alert(L_EditDocumentError_Text + ' - ' + strDocument); \n"
 				+ "      }\n" + "    }\n" + "  </script>\n");
 
 		w.close("head");
@@ -375,12 +343,10 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 
 			w.open("td");
 			String path = buildHref(uri, r.getName());
-			w.begin("a").writeAtt("href", path).open().writeText(r.getName())
-			.close();
+			w.begin("a").writeAtt("href", path).open().writeText(r.getName()).close();
 
-			w.begin("a").writeAtt("href", "#")
-			.writeAtt("onclick", "editDocument('" + path + "')").open()
-			.writeText("(edit with office)").close();
+			w.begin("a").writeAtt("href", "#").writeAtt("onclick", "editDocument('" + path + "')").open()
+					.writeText("(edit with office)").close();
 
 			w.close("td");
 
@@ -444,8 +410,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 
 			IRODSFile file;
 			try {
-				file = instanceIrodsFileFactory().instanceIRODSFile(
-						getIrodsFile().getAbsolutePath());
+				file = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath());
 				return new Date(file.lastModified());
 			} catch (JargonException e) {
 				log.error("unable to create IRODSFile", e);
@@ -457,14 +422,12 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	@Override
 	public String getName() {
 		if (collectionAndDataObjectListingEntry != null) {
-			return MiscIRODSUtils
-					.getLastPathComponentForGiveAbsolutePath(collectionAndDataObjectListingEntry
-							.getFormattedAbsolutePath());
+			return MiscIRODSUtils.getLastPathComponentForGiveAbsolutePath(
+					collectionAndDataObjectListingEntry.getFormattedAbsolutePath());
 		} else {
 			IRODSFile file;
 			try {
-				file = instanceIrodsFileFactory().instanceIRODSFile(
-						getIrodsFile().getAbsolutePath());
+				file = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath());
 				return file.getName();
 			} catch (JargonException e) {
 				log.error("unable to create IRODSFile", e);
@@ -476,14 +439,12 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	@Override
 	public String getUniqueId() {
 		if (collectionAndDataObjectListingEntry != null) {
-			return collectionAndDataObjectListingEntry
-					.getFormattedAbsolutePath();
+			return collectionAndDataObjectListingEntry.getFormattedAbsolutePath();
 		} else {
 
 			IRODSFile file;
 			try {
-				file = instanceIrodsFileFactory().instanceIRODSFile(
-						getIrodsFile().getAbsolutePath());
+				file = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath());
 				return file.toString();
 			} catch (JargonException e) {
 				log.error("unable to create IRODSFile", e);
@@ -493,9 +454,8 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	}
 
 	@Override
-	public void moveTo(final CollectionResource destinationPath,
-			final String newName) throws ConflictException,
-			NotAuthorizedException, BadRequestException {
+	public void moveTo(final CollectionResource destinationPath, final String newName)
+			throws ConflictException, NotAuthorizedException, BadRequestException {
 
 		log.info("moveTo()");
 		if (destinationPath == null) {
@@ -516,8 +476,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		// IRODSFile destFile;
 		try {
 
-			IRODSFile destFile = fileFromCollectionResource(destinationPath,
-					newName);
+			IRODSFile destFile = fileFromCollectionResource(destinationPath, newName);
 
 			log.info("dest file:{}", destFile);
 			// file.renameTo(destFile);
@@ -538,15 +497,13 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	}
 
 	@Override
-	public void delete() throws NotAuthorizedException, ConflictException,
-	BadRequestException {
+	public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
 
 		log.info("delete()");
 		log.info("of collection:{}", getIrodsFile());
 		IRODSFile file;
 		try {
-			file = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath());
 			file.delete();
 			log.info("delete successful");
 		} catch (JargonException e) {
@@ -567,8 +524,7 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 
 		IRODSFile file;
 		try {
-			file = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath());
+			file = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath());
 
 			DataTransferOperations dto = getIrodsAccessObjectFactory()
 					.getDataTransferOperations(retrieveIrodsAccount());
@@ -590,14 +546,12 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 	}
 
 	@Override
-	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
-			throws NotAuthorizedException {
+	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo) throws NotAuthorizedException {
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
 	@Override
-	public LockResult refreshLock(final String token)
-			throws NotAuthorizedException {
+	public LockResult refreshLock(final String token) throws NotAuthorizedException {
 		return getFactory().getLockManager().refresh(token, this);
 	}
 
@@ -611,30 +565,26 @@ PropFindableResource, LockingCollectionResource, LockableResource {
 		if (getFactory().getLockManager() != null) {
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {
-			log.warn("getCurrentLock called, but no lock manager: file: "
-					+ getIrodsFile().getAbsolutePath());
+			log.warn("getCurrentLock called, but no lock manager: file: " + getIrodsFile().getAbsolutePath());
 			return null;
 		}
 	}
 
 	@Override
-	public LockToken createAndLock(final String name,
-			final LockTimeout lockTimeout, final LockInfo lockInfo)
-					throws NotAuthorizedException {
+	public LockToken createAndLock(final String name, final LockTimeout lockTimeout, final LockInfo lockInfo)
+			throws NotAuthorizedException {
 		log.info("createAndLock()");
 		log.info("name:{}", name);
 		IRODSFile file;
 		try {
-			file = instanceIrodsFileFactory().instanceIRODSFile(
-					getIrodsFile().getAbsolutePath(), name);
+			file = instanceIrodsFileFactory().instanceIRODSFile(getIrodsFile().getAbsolutePath(), name);
 			// file.createNewFile();
 			log.info("new file created");
 		} catch (JargonException e) {
 			log.error("error in create file operation", e);
 			throw new WebDavRuntimeException("unable to create file", e);
 		}
-		IrodsFileResource newRes = new IrodsFileResource(host, getFactory(),
-				file, contentService);
+		IrodsFileResource newRes = new IrodsFileResource(host, getFactory(), file, contentService);
 		LockResult res = newRes.lock(lockTimeout, lockInfo);
 		return res.getLockToken();
 	}

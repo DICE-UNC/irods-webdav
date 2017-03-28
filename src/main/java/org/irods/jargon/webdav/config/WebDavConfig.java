@@ -20,6 +20,7 @@ public class WebDavConfig {
 	private String defaultStorageResource = "";
 	private String authScheme = AuthScheme.STANDARD.getTextValue();
 	private String realm = "irods";
+
 	/**
 	 * sets ssl negotiation policy in jargon
 	 */
@@ -162,8 +163,7 @@ public class WebDavConfig {
 		}
 		builder.append("port=").append(port).append(", ");
 		if (defaultStorageResource != null) {
-			builder.append("defaultStorageResource=")
-					.append(defaultStorageResource).append(", ");
+			builder.append("defaultStorageResource=").append(defaultStorageResource).append(", ");
 		}
 		if (authScheme != null) {
 			builder.append("authScheme=").append(authScheme).append(", ");
@@ -172,24 +172,18 @@ public class WebDavConfig {
 			builder.append("realm=").append(realm).append(", ");
 		}
 		if (sslNegotiationPolicy != null) {
-			builder.append("sslNegotiationPolicy=")
-					.append(sslNegotiationPolicy).append(", ");
+			builder.append("sslNegotiationPolicy=").append(sslNegotiationPolicy).append(", ");
 		}
-		builder.append("computeChecksum=").append(computeChecksum)
-				.append(", maxUploadInGb=").append(maxUploadInGb)
-				.append(", maxDownloadInGb=").append(maxDownloadInGb)
-				.append(", cacheFileDemographics=")
+		builder.append("computeChecksum=").append(computeChecksum).append(", maxUploadInGb=").append(maxUploadInGb)
+				.append(", maxDownloadInGb=").append(maxDownloadInGb).append(", cacheFileDemographics=")
 				.append(cacheFileDemographics).append(", ");
 		if (defaultStartingLocationEnum != null) {
-			builder.append("defaultStartingLocationEnum=")
-					.append(defaultStartingLocationEnum).append(", ");
+			builder.append("defaultStartingLocationEnum=").append(defaultStartingLocationEnum).append(", ");
 		}
 		if (providedDefaultStartingLocation != null) {
-			builder.append("providedDefaultStartingLocation=")
-					.append(providedDefaultStartingLocation).append(", ");
+			builder.append("providedDefaultStartingLocation=").append(providedDefaultStartingLocation).append(", ");
 		}
-		builder.append("usePackingStreams=").append(usePackingStreams)
-				.append("]");
+		builder.append("usePackingStreams=").append(usePackingStreams).append("]");
 		return builder.toString();
 	}
 
@@ -219,8 +213,7 @@ public class WebDavConfig {
 	 * @param defaultStartingLocationEnum
 	 *            the defaultStartingLocationEnum to set
 	 */
-	public void setDefaultStartingLocationEnum(
-			final DefaultStartingLocationEnum defaultStartingLocationEnum) {
+	public void setDefaultStartingLocationEnum(final DefaultStartingLocationEnum defaultStartingLocationEnum) {
 		this.defaultStartingLocationEnum = defaultStartingLocationEnum;
 	}
 
@@ -235,8 +228,7 @@ public class WebDavConfig {
 	 * @param providedDefaultStartingLocation
 	 *            the providedDefaultStartingLocation to set
 	 */
-	public void setProvidedDefaultStartingLocation(
-			final String providedDefaultStartingLocation) {
+	public void setProvidedDefaultStartingLocation(final String providedDefaultStartingLocation) {
 		this.providedDefaultStartingLocation = providedDefaultStartingLocation;
 	}
 

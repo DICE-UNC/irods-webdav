@@ -1,23 +1,27 @@
 package org.irods.jargon.webdav.resource;
 
-import io.milton.common.Path;
-import io.milton.http.LockManager;
-import io.milton.http.ResourceFactory;
-import io.milton.http.fs.FsResource;
-import io.milton.http.fs.NullSecurityManager;
-import io.milton.resource.Resource;
-
+import org.irods.jargon.core.exception.FileNotFoundException;
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
 import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
 import org.irods.jargon.core.pub.IRODSFileSystem;
 import org.irods.jargon.core.pub.IRODSFileSystemSingletonWrapper;
+import org.irods.jargon.core.pub.domain.ObjStat;
 import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
 import org.irods.jargon.core.utils.MiscIRODSUtils;
 import org.irods.jargon.webdav.authfilter.IrodsAuthService;
 import org.irods.jargon.webdav.config.WebDavConfig;
 import org.irods.jargon.webdav.exception.WebDavRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.milton.common.Path;
+import io.milton.http.LockManager;
+import io.milton.http.ResourceFactory;
+import io.milton.http.fs.FsResource;
+import io.milton.http.fs.NullSecurityManager;
+import io.milton.resource.Resource;
 
 /**
  * A resource factory which provides access to files in a file system.
@@ -27,8 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(IrodsFileSystemResourceFactory.class);
+	private static final Logger log = LoggerFactory.getLogger(IrodsFileSystemResourceFactory.class);
 	private IrodsFileContentService irodsFileContentService;
 	io.milton.http.SecurityManager securityManager;
 	LockManager lockManager;
@@ -64,12 +67,10 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		setSecurityManager(securityManager);
 		irodsFileSystem = IRODSFileSystemSingletonWrapper.instance();
 		try {
-			irodsAccessObjectFactory = irodsFileSystem
-					.getIRODSAccessObjectFactory();
+			irodsAccessObjectFactory = irodsFileSystem.getIRODSAccessObjectFactory();
 		} catch (JargonException e) {
 			log.error("error init() irodsAccessObjectFactory", e);
-			throw new WebDavRuntimeException(
-					"cannot create irodsAccessObjectFactory", e);
+			throw new WebDavRuntimeException("cannot create irodsAccessObjectFactory", e);
 		}
 	}
 
@@ -78,8 +79,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *
 	 * @param securityManager
 	 */
-	public IrodsFileSystemResourceFactory(
-			final io.milton.http.SecurityManager securityManager) {
+	public IrodsFileSystemResourceFactory(final io.milton.http.SecurityManager securityManager) {
 		setSecurityManager(securityManager);
 		init(securityManager);
 	}
@@ -94,8 +94,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *            http://localhost:8080/webdav-fs, the context path should be
 	 *            webdav-fs
 	 */
-	public IrodsFileSystemResourceFactory(
-			final io.milton.http.SecurityManager securityManager,
+	public IrodsFileSystemResourceFactory(final io.milton.http.SecurityManager securityManager,
 			final String contextPath) {
 		setSecurityManager(securityManager);
 		setContextPath(contextPath);
@@ -117,17 +116,36 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		log.info("host:{}", host);
 		log.info("file:{}", file);
 		BaseResource r;
-		if (!file.exists()) {
-			log.info("file not found, will return shell iRODS file: {}",
-					file.getAbsolutePath());
+		ObjStat objStat;
+		CollectionAndDataObjectListingEntry entry;
+		try {
+			CollectionAndDataObjectListAndSearchAO cao = this.getIrodsAccessObjectFactory()
+					.getCollectionAndDataObjectListAndSearchAO(IrodsAuthService.retrieveCurrentIrodsAccount());
+			objStat = cao.retrieveObjectStatForPath(file.getAbsolutePath());
+			entry = new CollectionAndDataObjectListingEntry();
+			entry.setCreatedAt(objStat.getCreatedAt());
+			entry.setDataSize(objStat.getObjSize());
+			entry.setModifiedAt(objStat.getModifiedAt());
+			entry.setObjectType(objStat.getObjectType());
+			entry.setOwnerName(objStat.getOwnerName());
+			entry.setOwnerZone(objStat.getOwnerZone());
+			entry.setParentPath(file.getParent());
+			entry.setPathOrName(file.getAbsolutePath());
+		} catch (FileNotFoundException fnf) {
+			log.info("file not found, will return shell iRODS file: {}", file.getAbsolutePath());
 			return null;
-		} else if (file.isDirectory()) {
+		} catch (JargonException e) {
+			log.error("unable to get collection list object", e);
+			throw new WebDavRuntimeException("cannot get objStat", e);
+
+		}
+
+		if (objStat.isSomeTypeOfCollection()) {
 			log.info("file is a dir");
-			r = new IrodsDirectoryResource(host, this, file,
-					irodsFileContentService);
+			r = new IrodsDirectoryResource(host, this, file, entry, irodsFileContentService);
 		} else {
 			log.info("file is a data object");
-			r = new IrodsFileResource(host, this, file, irodsFileContentService);
+			r = new IrodsFileResource(host, this, file, entry, irodsFileContentService);
 		}
 		if (r != null) {
 			r.setSsoPrefix(ssoPrefix);
@@ -188,8 +206,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			return "/";
 		case USER_HOME:
 			return MiscIRODSUtils
-					.buildIRODSUserHomeForAccountUsingDefaultScheme(IrodsAuthService
-							.retrieveCurrentIrodsAccount());
+					.buildIRODSUserHomeForAccountUsingDefaultScheme(IrodsAuthService.retrieveCurrentIrodsAccount());
 		case PROVIDED:
 			return webDavConfig.getProvidedDefaultStartingLocation();
 
@@ -210,8 +227,8 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		log.info("url:{}", pathToResolve);
 
 		try {
-			IRODSFile f = getIrodsAccessObjectFactory().getIRODSFileFactory(
-					IrodsAuthService.retrieveCurrentIrodsAccount())
+			IRODSFile f = getIrodsAccessObjectFactory()
+					.getIRODSFileFactory(IrodsAuthService.retrieveCurrentIrodsAccount())
 					.instanceIRODSFile(getBasePathBasedOnConfig());
 
 			/*
@@ -230,24 +247,21 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 			} else {
 				if (pathToResolve.startsWith(prefix)) {
 
-					path = Path.path(MiscIRODSUtils
-							.subtractPrefixFromGivenPath(f.getAbsolutePath(),
-									pathToResolve));
+					path = Path.path(MiscIRODSUtils.subtractPrefixFromGivenPath(f.getAbsolutePath(), pathToResolve));
 				} else {
 					path = Path.path(pathToResolve);
 				}
 
 				for (String s : path.getParts()) {
-					f = getIrodsAccessObjectFactory().getIRODSFileFactory(
-							IrodsAuthService.retrieveCurrentIrodsAccount())
+					f = getIrodsAccessObjectFactory()
+							.getIRODSFileFactory(IrodsAuthService.retrieveCurrentIrodsAccount())
 							.instanceIRODSFile(f.getAbsolutePath(), s);
 				}
 			}
 			log.info("resolved as:{}", f);
 			return f;
 		} catch (JargonException e) {
-			log.error("jargon exception resolving file path to an irods file",
-					e);
+			log.error("jargon exception resolving file path to an irods file", e);
 			throw new WebDavRuntimeException("exception resolving path", e);
 		}
 	}
@@ -256,8 +270,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		String s = securityManager.getRealm(host);
 		if (s == null) {
 			throw new NullPointerException(
-					"Got null realm from securityManager: " + securityManager
-					+ " for host=" + host);
+					"Got null realm from securityManager: " + securityManager + " for host=" + host);
 		}
 		return s;
 	}
@@ -270,8 +283,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 		return maxAgeSeconds;
 	}
 
-	public void setSecurityManager(
-			final io.milton.http.SecurityManager securityManager) {
+	public void setSecurityManager(final io.milton.http.SecurityManager securityManager) {
 		if (securityManager != null) {
 			log.debug("securityManager: " + securityManager.getClass());
 		} else {
@@ -346,8 +358,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	}
 
 	boolean isDigestAllowed() {
-		boolean b = digestAllowed && securityManager != null
-				&& securityManager.isDigestAllowed();
+		boolean b = digestAllowed && securityManager != null && securityManager.isDigestAllowed();
 		if (log.isTraceEnabled()) {
 			log.trace("isDigestAllowed: " + b);
 		}
@@ -387,8 +398,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 *
 	 *            the irodsFileContentService to set
 	 */
-	public void setIrodsFileContentService(
-			final IrodsFileContentService irodsFileContentService) {
+	public void setIrodsFileContentService(final IrodsFileContentService irodsFileContentService) {
 		this.irodsFileContentService = irodsFileContentService;
 	}
 
@@ -403,8 +413,7 @@ public final class IrodsFileSystemResourceFactory implements ResourceFactory {
 	 * @param irodsAccessObjectFactory
 	 *            the irodsAccessObjectFactory to set
 	 */
-	public void setIrodsAccessObjectFactory(
-			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
+	public void setIrodsAccessObjectFactory(final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 

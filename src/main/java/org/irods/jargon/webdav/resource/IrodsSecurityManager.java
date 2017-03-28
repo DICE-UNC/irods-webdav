@@ -3,22 +3,20 @@
  */
 package org.irods.jargon.webdav.resource;
 
+import org.irods.jargon.core.connection.auth.AuthResponse;
+import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
+import org.irods.jargon.webdav.authfilter.IrodsAuthService;
+import org.irods.jargon.webdav.config.WebDavConfig;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.milton.http.Auth;
 import io.milton.http.Request;
 import io.milton.http.Request.Method;
 import io.milton.http.SecurityManager;
 import io.milton.http.http11.auth.DigestResponse;
 import io.milton.resource.Resource;
-
-import org.irods.jargon.core.connection.auth.AuthResponse;
-import org.irods.jargon.core.exception.AuthenticationException;
-import org.irods.jargon.core.pub.IRODSAccessObjectFactory;
-import org.irods.jargon.webdav.authfilter.IrodsAuthService;
-import org.irods.jargon.webdav.config.WebDavConfig;
-import org.irods.jargon.webdav.exception.WebDavException;
-import org.irods.jargon.webdav.exception.WebDavRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Security manager implementation for iRODS
@@ -37,8 +35,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	private IRODSAccessObjectFactory irodsAccessObjectFactory;
 	private WebDavConfig webDavConfig;
 	private IrodsAuthService irodsAuthService;
-	private static final Logger log = LoggerFactory
-			.getLogger(IrodsSecurityManager.class);
+	private static final Logger log = LoggerFactory.getLogger(IrodsSecurityManager.class);
 
 	private static final ThreadLocal<AuthResponse> authResponseCache = new ThreadLocal<AuthResponse>();
 
@@ -69,23 +66,13 @@ public class IrodsSecurityManager implements SecurityManager {
 	@Override
 	public Object authenticate(final String userName, final String password) {
 		log.info("authenticate()");
-		clearThreadlocals();
+		// clearThreadlocals();
 
-		try {
-			AuthResponse authResponse = irodsAuthService.authenticate(userName,
-					password);
-			log.info("storing authResponse in threadlocal as authResponseCache");
-			authResponseCache.set(authResponse);
-			return authResponse;
-		} catch (AuthenticationException e) {
-			log.info("authentication failed", e);
-			// null indicates failure
-			return null;
-		} catch (WebDavException e) {
-			log.error("general exception in authenticate", e);
-			throw new WebDavRuntimeException(
-					"general error during authetication phase", e);
-		}
+		AuthResponse authResponse = irodsAuthService.getCached(userName, password);
+		// log.info("storing authResponse in threadlocal as
+		// authResponseCache");
+		// authResponseCache.set(authResponse);
+		return authResponse;
 	}
 
 	/*
@@ -96,8 +83,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	 * io.milton.resource.Resource)
 	 */
 	@Override
-	public boolean authorise(final Request arg0, final Method arg1,
-			final Auth arg2, final Resource arg3) {
+	public boolean authorise(final Request arg0, final Method arg1, final Auth arg2, final Resource arg3) {
 		return true;
 	}
 
@@ -133,8 +119,7 @@ public class IrodsSecurityManager implements SecurityManager {
 	 * @param irodsAccessObjectFactory
 	 *            the irodsAccessObjectFactory to set
 	 */
-	public void setIrodsAccessObjectFactory(
-			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
+	public void setIrodsAccessObjectFactory(final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 

@@ -57,11 +57,10 @@ public class BasicAuthFilter implements Filter {
 	 * javax.servlet.ServletResponse, javax.servlet.FilterChain)
 	 */
 	@Override
-	public void doFilter(final ServletRequest request,
-			final ServletResponse response, final FilterChain chain)
+	public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
 			throws IOException, ServletException {
 
-		log.debug("doFilter()");
+		log.info("doFilter()");
 
 		final HttpServletRequest httpRequest = (HttpServletRequest) request;
 		final HttpServletResponse httpResponse = (HttpServletResponse) response;
@@ -77,11 +76,9 @@ public class BasicAuthFilter implements Filter {
 		AuthResponse authResponse = null;
 		try {
 
-			UserAndPassword userAndPassword = WebDavAuthUtils
-					.getAccountFromBasicAuthValues(auth, webDavConfig);
+			UserAndPassword userAndPassword = WebDavAuthUtils.getAccountFromBasicAuthValues(auth, webDavConfig);
 
-			authResponse = irodsAuthService.authenticate(
-					userAndPassword.getUserId(), userAndPassword.getPassword());
+			authResponse = irodsAuthService.authenticate(userAndPassword.getUserId(), userAndPassword.getPassword());
 
 			log.debug("authResponse:{}", authResponse);
 			log.debug("success!");
@@ -99,10 +96,8 @@ public class BasicAuthFilter implements Filter {
 
 	}
 
-	private void sendAuthError(final HttpServletResponse httpResponse)
-			throws IOException {
-		httpResponse.setHeader("WWW-Authenticate", "Basic realm=\""
-				+ webDavConfig.getRealm() + "\"");
+	private void sendAuthError(final HttpServletResponse httpResponse) throws IOException {
+		httpResponse.setHeader("WWW-Authenticate", "Basic realm=\"" + webDavConfig.getRealm() + "\"");
 		httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 	}
 
@@ -127,8 +122,7 @@ public class BasicAuthFilter implements Filter {
 	 * @param irodsAccessObjectFactory
 	 *            the irodsAccessObjectFactory to set
 	 */
-	public void setIrodsAccessObjectFactory(
-			final IRODSAccessObjectFactory irodsAccessObjectFactory) {
+	public void setIrodsAccessObjectFactory(final IRODSAccessObjectFactory irodsAccessObjectFactory) {
 		this.irodsAccessObjectFactory = irodsAccessObjectFactory;
 	}
 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	
+
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<bean id="irodsFileContentService"
 		class="org.irods.jargon.webdav.resource.IrodsFileContentService">
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-		<property name="webDavConfig" ref="webDavConfig"/>
+		<property name="webDavConfig" ref="webDavConfig" />
 	</bean>
 
 	<bean id="webDavConfig" class="org.irods.jargon.webdav.config.WebDavConfig">
@@ -20,8 +20,9 @@
 		<property name="providedDefaultStartingLocation" value="${provided.starting.location.path}" />
 		<property name="cacheFileDemographics" value="${cache.file.demographics}" />
 		<property name="usePackingStreams" value="${utilize.packing.streams}" />
-		<property name="maxUploadInGb" value="${max.upload.in.gb}"/>
-		<property name="maxDownloadInGb" value="${max.download.in.gb}"/>
+		<property name="maxUploadInGb" value="${max.upload.in.gb}" />
+		<property name="maxDownloadInGb" value="${max.download.in.gb}" />
+		<property name="sslNegotiationPolicy" value="${ssl.negotiation.policy}" />
 	</bean>
 
 	<bean id="irodsSecurityManager" class="org.irods.jargon.webdav.resource.IrodsSecurityManager">
@@ -34,10 +35,9 @@
 		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
 		<property name="webDavConfig" ref="webDavConfig" />
 	</bean>
-	
-	<!-- 	<bean id="lockManager" class="org.irods.jargon.webdav.resource.IrodsMemoryLockManager"></bean>
-	 -->
-	
+
+	<!-- <bean id="lockManager" class="org.irods.jargon.webdav.resource.IrodsMemoryLockManager"></bean> -->
+
 	<bean id="lockManager" class="io.milton.http.fs.SimpleLockManager">
 		<constructor-arg type="io.milton.cache.CacheManager"
 			ref="cacheManager" />
@@ -53,15 +53,9 @@
 		<property name="contentService" ref="irodsFileContentService" />
 		<property name="lockManager" ref="lockManager" />
 	</bean>
-	
-	<bean id="cacheManager" class="io.milton.cache.LocalCacheManager"/>
 
-<!-- <bean id="milton.http.manager" class="io.milton.config.HttpManagerBuilder">
-		<property name="mainResourceFactory" ref="resource.factory" />
-		<property name="enableCompression" value="false" />
-		<property name="buffering" value="never" />
-		<property name="enableCookieAuth" value="false" />
-	</bean> -->
+	<bean id="cacheManager" class="io.milton.cache.LocalCacheManager" />
+
 
 	<bean id="milton.http.manager" class="io.milton.ent.config.HttpManagerBuilderEnt">
 		<property name="mainResourceFactory" ref="resource.factory" />
@@ -71,14 +65,34 @@
 		<property name="lockManager" ref="lockManager" />
 	</bean>
 
+	<bean id="jargonConnectionCache" class="org.irods.jargon.pool.conncache.JargonConnectionCache">
+		<constructor-arg index="0"
+			type="org.apache.commons.pool2.KeyedPooledObjectFactory" ref="jargonPooledObjectFactory" />
+		<constructor-arg index="1"
+			type="org.irods.jargon.pool.conncache.JargonKeyedPoolConfig" ref="jargonKeyedPoolConfig" />
+	</bean>
+
+	<bean id="jargonPooledObjectFactory"
+		class="org.irods.jargon.pool.conncache.JargonPooledObjectFactory">
+		<property name="irodsSimpleProtocolManager" ref="irodsConnectionManagerForPool" />
+		<property name="irodsSession" ref="irodsSession" />
+	</bean>
+
+	<bean id="jargonKeyedPoolConfig" class="org.irods.jargon.pool.conncache.JargonKeyedPoolConfig" />
+
 	<bean id="irodsConnectionManager"
+		class="org.irods.jargon.pool.conncache.CachedIrodsProtocolManager"
+		init-method="initialize" destroy-method="destroy">
+		<property name="jargonConnectionCache" ref="jargonConnectionCache" />
+	</bean>
+
+	<bean id="irodsConnectionManagerForPool"
 		class="org.irods.jargon.core.connection.IRODSSimpleProtocolManager"
 		factory-method="instance" init-method="initialize" destroy-method="destroy" />
 
-	<bean id="irodsSession" class="org.irods.jargon.core.connection.IRODSSession"
-		factory-method="instance">
-		<constructor-arg
-			type="org.irods.jargon.core.connection.IRODSProtocolManager" ref="irodsConnectionManager" />
+	<bean id="irodsSession" class="org.irods.jargon.core.connection.IRODSSession">
+		<property
+			name="irodsProtocolManager" ref="irodsConnectionManager" />
 	</bean>
 
 	<bean id="irodsAccessObjectFactory" class="org.irods.jargon.core.pub.IRODSAccessObjectFactoryImpl">
@@ -90,16 +104,16 @@
 		<property name="webDavConfig" ref="webDavConfig" />
 		<property name="irodsAuthService" ref="irodsAuthService" />
 	</bean>
-	<!-- 
-	<bean id="connectionClosingFilter" class="org.irods.jargon.webdav.authfilter.ConnectionClosingFilter">
-		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-	</bean>  -->
+	<!-- <bean id="connectionClosingFilter" class="org.irods.jargon.webdav.authfilter.ConnectionClosingFilter"> 
+		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" 
+		/> </bean> -->
 
- 	<bean id="startupConfigurator" class="org.irods.jargon.webdav.config.StartupConfigurator" init-method="init">
-    	<property name="irodsSession" ref="irodsSession" />
-    	<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
-         <property name="webDavConfig" ref="webDavConfig" />
-    </bean>
+	<bean id="startupConfigurator" class="org.irods.jargon.webdav.config.StartupConfigurator"
+		init-method="init">
+		<property name="irodsSession" ref="irodsSession" />
+		<property name="irodsAccessObjectFactory" ref="irodsAccessObjectFactory" />
+		<property name="webDavConfig" ref="webDavConfig" />
+	</bean>
 
 
 
