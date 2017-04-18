@@ -12,6 +12,7 @@ See https://github.com/DICE-UNC/irods-webdav/issues for support and known issues
 
 See the INSTALL.md file in this repo for notes on install and configuration.
 
+http://www.javaworld.com/article/2071834/build-ci-sdlc/pool-resources-using-apache-s-commons-pool-framework.html
 
 ### Requirements
 
