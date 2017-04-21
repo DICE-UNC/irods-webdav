@@ -38,11 +38,16 @@ public class IrodsAuthService {
 	 * 
 	 * @param userName
 	 * @param password
-	 * @return
+	 * @return {@link AuthResponse} or <code>null</code> if not cached
 	 */
 	public AuthResponse getCached(String userName, String password) {
 
 		AuthResponse cached = authResponseCache.get();
+
+		if (cached == null) {
+			return null;
+		}
+
 		if (cached.getAuthenticatingIRODSAccount().getUserName().equals(userName)
 				&& cached.getAuthenticatingIRODSAccount().getPassword().equals(password)) {
 			log.info("verified cache");

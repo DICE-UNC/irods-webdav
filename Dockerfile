@@ -13,4 +13,4 @@ CMD ["/runit.sh"]
 # docker run -d --rm -p 8080:8080 -v /etc/irods-ext:/etc/irods-ext  --add-host irods.data2discovery.org:152.54.2.71 diceunc/webdav:4.2.0.0-SNAPSHOT
 
 
-# run:  docker run -d --rm -p 8080:8080 -v /etc/irods-ext:/etc/irods-ext -v /home/mconway/webdavcert:/tmp/cert  --add-host irods420.irodslocal:172.16.250.101 diceunc/webdav:4.2.0.0-SNAPSHOT
+# run:  docker run -d --rm -p 8080:8080 -v /etc/irods-ext:/etc/irods-ext -v /home/mcc/webdavcert:/tmp/cert  --add-host irods420.irodslocal:172.16.250.101 diceunc/webdav:4.2.0.0-SNAPSHOT

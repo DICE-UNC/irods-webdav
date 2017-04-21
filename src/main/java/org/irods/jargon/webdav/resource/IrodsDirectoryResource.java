@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.CollectionAO;
 import org.irods.jargon.core.pub.CollectionAndDataObjectListAndSearchAO;
 import org.irods.jargon.core.pub.DataTransferOperations;
+import org.irods.jargon.core.pub.domain.UserFilePermission;
 import org.irods.jargon.core.pub.io.IRODSFile;
 import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
 import org.irods.jargon.core.utils.MiscIRODSUtils;
@@ -48,6 +50,9 @@ import io.milton.http.XmlWriter;
 import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
+import io.milton.http.values.HrefList;
+import io.milton.principal.Principal;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
@@ -64,11 +69,11 @@ import io.milton.resource.Resource;
  * Represents a directory in a physical file system.
  *
  */
-public class IrodsDirectoryResource extends BaseResource
-		implements CollectionResource, MakeCollectionableResource, PutableResource, CopyableResource, DeletableResource,
-		MoveableResource, GetableResource, PropFindableResource, LockingCollectionResource, LockableResource {
+public class IrodsDirectoryResource extends BaseResource implements CollectionResource, MakeCollectionableResource,
+		PutableResource, CopyableResource, DeletableResource, MoveableResource, GetableResource, PropFindableResource,
+		LockingCollectionResource, LockableResource, AccessControlledResource {
 
-	private static final Logger log = LoggerFactory.getLogger(IrodsDirectoryResource.class);
+	static final Logger log = LoggerFactory.getLogger(IrodsDirectoryResource.class);
 
 	private final IrodsFileContentService contentService;
 	private final String host;
@@ -78,7 +83,7 @@ public class IrodsDirectoryResource extends BaseResource
 	 * used to provide file data such as length without necessitating a new
 	 * query
 	 */
-	private final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry;
+	final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry;
 
 	public IrodsDirectoryResource(final String host, final IrodsFileSystemResourceFactory factory, final IRODSFile dir,
 			final IrodsFileContentService contentService) {
@@ -207,8 +212,8 @@ public class IrodsDirectoryResource extends BaseResource
 				for (CollectionAndDataObjectListingEntry entry : entries) {
 					IRODSFile childFile = instanceIrodsFileFactory()
 							.instanceIRODSFile(entry.getFormattedAbsolutePath());
-					IrodsDirectoryResource fileResource = new IrodsDirectoryResource(host, getFactory(), childFile,
-							entry, contentService);
+					BaseResource fileResource = new IrodsDirectoryResource(host, getFactory(), childFile, entry,
+							contentService);
 					resources.add(fileResource);
 					if (entry.isLastResult()) {
 						more = false;
@@ -587,6 +592,60 @@ public class IrodsDirectoryResource extends BaseResource
 		IrodsFileResource newRes = new IrodsFileResource(host, getFactory(), file, contentService);
 		LockResult res = newRes.lock(lockTimeout, lockInfo);
 		return res.getLockToken();
+	}
+
+	@Override
+	public Map<Principal, List<Priviledge>> getAccessControlList() {
+		log.info("getAccessControlList()");
+		try {
+			CollectionAO collectionAO = this.getIrodsAccessObjectFactory().getCollectionAO(retrieveIrodsAccount());
+			List<UserFilePermission> userFilePermissions = collectionAO
+					.listPermissionsForCollection(this.getIrodsFile().getAbsolutePath());
+
+			return irodsPermissionsToDavPermissions(userFilePermissions);
+
+		} catch (JargonException e) {
+			log.error("error in list acls", e);
+			throw new WebDavRuntimeException("error in list acls", e);
+		}
+
+	}
+
+	@Override
+	public HrefList getPrincipalCollectionHrefs() {
+		return new HrefList(); // right now is empty, consider a /users resource
+								// in a later impl
+	}
+
+	@Override
+	public String getPrincipalURL() {
+		log.info("getPrincipalUrl()");
+		return retriveOwnerAndGetPrincipal(collectionAndDataObjectListingEntry);
+
+	}
+
+	@Override
+	public List<Priviledge> getPriviledges(Auth auth) {
+		try {
+			CollectionAO collectionAO = this.getIrodsAccessObjectFactory().getCollectionAO(retrieveIrodsAccount());
+			UserFilePermission userFilePermissions = collectionAO.getPermissionForUserName(
+					this.getIrodsFile().getAbsolutePath(), this.retrieveIrodsAccount().getUserName());
+			List<Priviledge> priviledges = new ArrayList<Priviledge>();
+
+			priviledges.add(irodsPrivToWebdavPriv(userFilePermissions));
+			return priviledges;
+
+		} catch (JargonException e) {
+			log.error("error in list acls", e);
+			throw new WebDavRuntimeException("error in list acls", e);
+		}
+
+	}
+
+	@Override
+	public void setAccessControlList(Map<Principal, List<Priviledge>> arg0) {
+		log.warn("acl setting currently not supported");
+
 	}
 
 }

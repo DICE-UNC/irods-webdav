@@ -1,5 +1,26 @@
 package org.irods.jargon.webdav.resource;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.io.IOUtils;
+import org.irods.jargon.core.exception.JargonException;
+import org.irods.jargon.core.pub.DataObjectAO;
+import org.irods.jargon.core.pub.DataTransferOperations;
+import org.irods.jargon.core.pub.domain.UserFilePermission;
+import org.irods.jargon.core.pub.io.IRODSFile;
+import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
+import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
+import org.irods.jargon.webdav.exception.WebDavRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -33,6 +54,9 @@ import io.milton.http.exceptions.BadRequestException;
 import io.milton.http.exceptions.ConflictException;
 import io.milton.http.exceptions.NotAuthorizedException;
 import io.milton.http.exceptions.NotFoundException;
+import io.milton.http.values.HrefList;
+import io.milton.principal.Principal;
+import io.milton.resource.AccessControlledResource;
 import io.milton.resource.CollectionResource;
 import io.milton.resource.CopyableResource;
 import io.milton.resource.DeletableResource;
@@ -42,28 +66,9 @@ import io.milton.resource.MoveableResource;
 import io.milton.resource.PropFindableResource;
 import io.milton.resource.ReplaceableResource;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
-import org.irods.jargon.core.exception.JargonException;
-import org.irods.jargon.core.pub.DataTransferOperations;
-import org.irods.jargon.core.pub.io.IRODSFile;
-import org.irods.jargon.core.query.CollectionAndDataObjectListingEntry;
-import org.irods.jargon.webdav.exception.ConfigurationRuntimeException;
-import org.irods.jargon.webdav.exception.WebDavRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class IrodsFileResource extends BaseResource implements
-CopyableResource, DeletableResource, GetableResource, MoveableResource,
-ReplaceableResource, PropFindableResource, LockableResource {
-	private static final Logger log = LoggerFactory
-			.getLogger(IrodsFileResource.class);
+public class IrodsFileResource extends BaseResource implements CopyableResource, DeletableResource, GetableResource,
+		MoveableResource, ReplaceableResource, PropFindableResource, LockableResource, AccessControlledResource {
+	private static final Logger log = LoggerFactory.getLogger(IrodsFileResource.class);
 
 	/**
 	 * This field may be <code>null</code> and is only available when the milton
@@ -80,11 +85,9 @@ ReplaceableResource, PropFindableResource, LockableResource {
 	 * @param factory
 	 * @param file
 	 */
-	public IrodsFileResource(final String host,
-			final IrodsFileSystemResourceFactory factory, final IRODSFile file,
+	public IrodsFileResource(final String host, final IrodsFileSystemResourceFactory factory, final IRODSFile file,
 			final IrodsFileContentService contentService) {
-		super(factory, factory.getIrodsAccessObjectFactory(), factory
-				.getWebDavConfig(), contentService);
+		super(factory, factory.getIrodsAccessObjectFactory(), factory.getWebDavConfig(), contentService);
 
 		if (file == null) {
 			throw new IllegalArgumentException("null file");
@@ -104,15 +107,11 @@ ReplaceableResource, PropFindableResource, LockableResource {
 	 * @param collectionAndDataObjectListingEntry
 	 * @param contentService
 	 */
-	public IrodsFileResource(
-			final String host,
-			final IrodsFileSystemResourceFactory factory,
-			final IRODSFile file,
+	public IrodsFileResource(final String host, final IrodsFileSystemResourceFactory factory, final IRODSFile file,
 			final CollectionAndDataObjectListingEntry collectionAndDataObjectListingEntry,
 			final IrodsFileContentService contentService) {
 
-		super(factory, factory.getIrodsAccessObjectFactory(), factory
-				.getWebDavConfig(), contentService);
+		super(factory, factory.getIrodsAccessObjectFactory(), factory.getWebDavConfig(), contentService);
 
 		if (file == null) {
 			throw new IllegalArgumentException("null file");
@@ -137,36 +136,29 @@ ReplaceableResource, PropFindableResource, LockableResource {
 	@Override
 	public String getContentType(final String preferredList) {
 		log.info("getContentType()");
-		String mime = ContentTypeUtils.findContentTypes(getIrodsFile()
-				.getName());
-		String s = ContentTypeUtils.findAcceptableContentType(mime,
-				preferredList);
+		String mime = ContentTypeUtils.findContentTypes(getIrodsFile().getName());
+		String s = ContentTypeUtils.findAcceptableContentType(mime, preferredList);
 		if (log.isTraceEnabled()) {
-			log.trace("getContentType: preferred: {} mime: {} selected: {}",
-					new Object[] { preferredList, mime, s });
+			log.trace("getContentType: preferred: {} mime: {} selected: {}", new Object[] { preferredList, mime, s });
 		}
 		log.info("content type:{}", s);
 		return s;
 	}
 
 	@Override
-	public void sendContent(final OutputStream out, final Range range,
-			final Map<String, String> params, final String contentType)
-					throws IOException, NotFoundException {
+	public void sendContent(final OutputStream out, final Range range, final Map<String, String> params,
+			final String contentType) throws IOException, NotFoundException {
 		log.info("sendContent()");
 		InputStream in = null;
 		try {
 			log.debug("getting input stream...");
-			in = getContentService().getFileContent(getIrodsFile(),
-					retrieveIrodsAccount());
+			in = getContentService().getFileContent(getIrodsFile(), retrieveIrodsAccount());
 			log.debug("got input stream...");
 			if (range != null) {
-				log.debug("sendContent: ranged content: "
-						+ getIrodsFile().getAbsolutePath());
+				log.debug("sendContent: ranged content: " + getIrodsFile().getAbsolutePath());
 				RangeUtils.writeRange(in, range, out);
 			} else {
-				log.debug("sendContent: send whole file "
-						+ getIrodsFile().getAbsolutePath());
+				log.debug("sendContent: send whole file " + getIrodsFile().getAbsolutePath());
 				IOUtils.copy(in, out);
 			}
 			out.flush();
@@ -192,17 +184,14 @@ ReplaceableResource, PropFindableResource, LockableResource {
 
 	@Override
 	public void replaceContent(final InputStream in, final Long length)
-			throws BadRequestException, ConflictException,
-			NotAuthorizedException {
+			throws BadRequestException, ConflictException, NotAuthorizedException {
 
 		log.info("replaceContent()");
 
 		try {
-			getContentService().setFileContent(getIrodsFile(), in,
-					retrieveIrodsAccount());
+			getContentService().setFileContent(getIrodsFile(), in, retrieveIrodsAccount());
 		} catch (IOException ex) {
-			throw new BadRequestException("Couldnt write to: "
-					+ getIrodsFile().getAbsolutePath(), ex);
+			throw new BadRequestException("Couldnt write to: " + getIrodsFile().getAbsolutePath(), ex);
 		}
 	}
 
@@ -217,9 +206,8 @@ ReplaceableResource, PropFindableResource, LockableResource {
 	}
 
 	@Override
-	public void moveTo(final CollectionResource destinationPath,
-			final String newName) throws ConflictException,
-			NotAuthorizedException, BadRequestException {
+	public void moveTo(final CollectionResource destinationPath, final String newName)
+			throws ConflictException, NotAuthorizedException, BadRequestException {
 		log.info("moveTo()");
 		if (destinationPath == null) {
 			throw new IllegalArgumentException("null destinationPath");
@@ -251,8 +239,7 @@ ReplaceableResource, PropFindableResource, LockableResource {
 	}
 
 	@Override
-	public void delete() throws NotAuthorizedException, ConflictException,
-	BadRequestException {
+	public void delete() throws NotAuthorizedException, ConflictException, BadRequestException {
 
 		log.info("delete()");
 		getIrodsFile().delete();
@@ -298,20 +285,17 @@ ReplaceableResource, PropFindableResource, LockableResource {
 	}
 
 	@Override
-	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo)
-			throws NotAuthorizedException {
+	public LockResult lock(final LockTimeout timeout, final LockInfo lockInfo) throws NotAuthorizedException {
 		log.info("lock()");
 		if (getFactory().getLockManager() == null) {
 			log.error("unable to get lock manager from factory");
-			throw new ConfigurationRuntimeException(
-					"a lock manager was not configured");
+			throw new ConfigurationRuntimeException("a lock manager was not configured");
 		}
 		return getFactory().getLockManager().lock(timeout, lockInfo, this);
 	}
 
 	@Override
-	public LockResult refreshLock(final String token)
-			throws NotAuthorizedException {
+	public LockResult refreshLock(final String token) throws NotAuthorizedException {
 		log.info("refreshLock()");
 		return getFactory().getLockManager().refresh(token, this);
 	}
@@ -327,15 +311,67 @@ ReplaceableResource, PropFindableResource, LockableResource {
 		log.info("getCurrentLock()");
 		if (getFactory().getLockManager() == null) {
 			log.error("unable to get lock manager from factory");
-			throw new ConfigurationRuntimeException(
-					"a lock manager was not configured");
+			throw new ConfigurationRuntimeException("a lock manager was not configured");
 		}
 		if (getFactory().getLockManager() != null) {
 			return getFactory().getLockManager().getCurrentToken(this);
 		} else {
-			log.warn("getCurrentLock called, but no lock manager: file: "
-					+ getIrodsFile().getAbsolutePath());
+			log.warn("getCurrentLock called, but no lock manager: file: " + getIrodsFile().getAbsolutePath());
 			return null;
 		}
+	}
+
+	@Override
+	public Map<Principal, List<Priviledge>> getAccessControlList() {
+		log.info("getAccessControlList()");
+		try {
+			DataObjectAO dataObjectAO = this.getIrodsAccessObjectFactory().getDataObjectAO(retrieveIrodsAccount());
+			List<UserFilePermission> userFilePermissions = dataObjectAO
+					.listPermissionsForDataObject(this.getIrodsFile().getAbsolutePath());
+
+			return irodsPermissionsToDavPermissions(userFilePermissions);
+
+		} catch (JargonException e) {
+			log.error("error in list acls", e);
+			throw new WebDavRuntimeException("error in list acls", e);
+		}
+
+	}
+
+	@Override
+	public HrefList getPrincipalCollectionHrefs() {
+		return new HrefList(); // right now is empty, consider a /users resource
+		// in a later impl
+	}
+
+	@Override
+	public String getPrincipalURL() {
+		log.info("getPrincipalUrl()");
+		return retriveOwnerAndGetPrincipal(collectionAndDataObjectListingEntry);
+	}
+
+	@Override
+	public List<Priviledge> getPriviledges(Auth arg0) {
+		try {
+			DataObjectAO dataObjectAO = this.getIrodsAccessObjectFactory().getDataObjectAO(retrieveIrodsAccount());
+			UserFilePermission userFilePermissions = dataObjectAO.
+
+					getPermissionForDataObjectForUserName(this.getIrodsFile().getAbsolutePath(),
+							this.retrieveIrodsAccount().getUserName());
+			List<Priviledge> priviledges = new ArrayList<Priviledge>();
+
+			priviledges.add(irodsPrivToWebdavPriv(userFilePermissions));
+			return priviledges;
+
+		} catch (JargonException e) {
+			log.error("error in list acls", e);
+			throw new WebDavRuntimeException("error in list acls", e);
+		}
+	}
+
+	@Override
+	public void setAccessControlList(Map<Principal, List<Priviledge>> arg0) {
+		log.warn("acl setting currently not supported");
+
 	}
 }

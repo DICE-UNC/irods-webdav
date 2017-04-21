@@ -69,6 +69,10 @@ public class IrodsSecurityManager implements SecurityManager {
 		// clearThreadlocals();
 
 		AuthResponse authResponse = irodsAuthService.getCached(userName, password);
+
+		if (authResponse == null) {
+			throw new WebDavRuntimeException("no cached authentication!");
+		}
 		// log.info("storing authResponse in threadlocal as
 		// authResponseCache");
 		// authResponseCache.set(authResponse);
