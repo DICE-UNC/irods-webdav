@@ -10,7 +10,7 @@
 	<description>Milton based WebDav interface to iRODS</description>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<jargon.version>4.1.10.0-SNAPSHOT</jargon.version>
+		<jargon.version>4.2.0.1-SNAPSHOT</jargon.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<milton.version>2.7.2.1</milton.version>
