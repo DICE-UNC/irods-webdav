@@ -64,7 +64,7 @@
 		<property name="enableCookieAuth" value="false" />
 		<property name="lockManager" ref="lockManager" />
 	</bean>
-
+<!-- 
 	<bean id="jargonConnectionCache" class="org.irods.jargon.pool.conncache.JargonConnectionCache">
 		<constructor-arg index="0"
 			type="org.apache.commons.pool2.KeyedPooledObjectFactory" ref="jargonPooledObjectFactory" />
@@ -79,7 +79,7 @@
 	</bean>
 
 	<bean id="jargonKeyedPoolConfig" class="org.irods.jargon.pool.conncache.JargonKeyedPoolConfig" />
-
+ 
 	<bean id="irodsConnectionManager"
 		class="org.irods.jargon.pool.conncache.CachedIrodsProtocolManager"
 		init-method="initialize" destroy-method="destroy">
@@ -89,6 +89,12 @@
 	<bean id="irodsConnectionManagerForPool"
 		class="org.irods.jargon.core.connection.IRODSSimpleProtocolManager"
 		factory-method="instance" init-method="initialize" destroy-method="destroy" />
+-->
+
+<bean id="irodsConnectionManager"
+		class="org.irods.jargon.core.connection.IRODSSimpleProtocolManager"
+		factory-method="instance" init-method="initialize" destroy-method="destroy" />
+
 
 	<bean id="irodsSession" class="org.irods.jargon.core.connection.IRODSSession">
 		<property
